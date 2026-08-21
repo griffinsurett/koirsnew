@@ -1,0 +1,53 @@
+/* src/styles/menu.css */
+
+/* Menu hover behavior - works for infinite nesting */
+.menu-item:hover > .menu-dropdown {
+  display: block;
+}
+
+/* Arrow rotation on hover */
+.menu-item:hover > a .menu-arrow {
+  transform: rotate(180deg);
+}
+
+/* Dropdown animation */
+.menu-dropdown {
+  animation: menu-slide-down 0.2s ease-out;
+}
+
+/* Nested submenus (level 2+) fly out to the SIDE of their parent item rather
+   than stacking underneath it. The anchoring itself is set in
+   MenuDropdown.astro (top-0 left-full from level 2 on); this just swaps the
+   slide-down entrance for a sideways one. */
+.menu-dropdown .menu-dropdown {
+  animation: menu-slide-right 0.2s ease-out;
+}
+
+/* Flip a nested panel back to the parent's left edge when it would otherwise
+   run off the right side of the viewport. Applied by the menu script. */
+.menu-dropdown .menu-dropdown.flip-left {
+  left: auto !important;
+  right: 100%;
+}
+
+@keyframes menu-slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes menu-slide-right {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}

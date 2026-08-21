@@ -1,0 +1,264 @@
+---
+// src/layouts/Header.astro
+/**
+ * Site Header with Navigation
+ *
+ * Styling reproduces the 2025 site: the header is FIXED and TRANSPARENT so the
+ * front-page hero video runs full-bleed underneath it, then swaps to a solid
+ * light bar with a shadow once the page scrolls past 50px. The wordmark swaps
+ * between its dark and white versions on the same trigger, and the nav links /
+ * hamburger flip from light-on-video to dark-on-light.
+ *
+ * The menu itself is unchanged from the template: the data still comes from the
+ * menu-items collection via ContentRenderer + MenuVariant, which keeps the
+ * dropdowns, hierarchy, and hamburger drawer behavior. Only presentation is
+ * restyled — see the `header-navigation` rules in the style block below.
+ */
+import { Image } from "astro:assets";
+import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
+import { related } from "@/utils/query";
+import { siteData } from "@/content/siteData";
+import Button from "@/components/Button/Button";
+import Icon from "@/components/Icon";
+import { getPhoneContact } from "@/utils/contactLinks";
+import KoiLogoDefault from "@/assets/koi/logowwords.png";
+import KoiLogoWhite from "@/assets/koi/logowwords-whitebg.png";
+
+// Both wordmarks ship in the HTML and the scroll handler toggles `hidden`
+// between them, matching the legacy behavior. Sized to the legacy h-28/xl:h-32.
+const logoImgClass = "h-28 xl:h-32 w-auto object-contain";
+const phone = await getPhoneContact();
+---
+
+<header
+  id="site-header"
+  class="fixed top-0 w-full h-[14vh] xl:h-[17vh] py-6 xl:py-0 flex justify-center items-center bg-transparent z-[10000] transition-colors duration-300"
+>
+  <div class="w-38/40 h-full flex items-center justify-between gap-4">
+    {/* Logo — legacy put the wordmark after the hamburger on mobile
+        (order-2) and first from xl up. */}
+    <a
+      href="/"
+      class="order-2 xl:order-first flex items-center shrink-0"
+      aria-label={`${siteData.title} home`}
+    >
+      <Image
+        id="logo-default"
+        src={KoiLogoDefault}
+        alt={`${siteData.title} logo`}
+        class={logoImgClass}
+        widths={[240, 360]}
+        sizes="(max-width: 1280px) 240px, 360px"
+        loading="eager"
+        fetchpriority="high"
+      />
+      <Image
+        id="logo-white"
+        src={KoiLogoWhite}
+        alt={`${siteData.title} logo`}
+        class={`${logoImgClass} hidden`}
+        widths={[240, 360]}
+        sizes="(max-width: 1280px) 240px, 360px"
+        loading="eager"
+        fetchpriority="high"
+        aria-hidden="true"
+      />
+    </a>
+
+    <!-- Navigation Menu using query -->
+    <ContentRenderer
+      query={related("menu-items", "menu", "main-menu")}
+      variant="MenuVariant"
+      mode="responsive"
+      breakpoint="xl"
+      className="header-navigation order-1 xl:order-2"
+      hamburgerTransform={true}
+    />
+
+    {/* Phone CTA — matches the 2025 header exactly: on desktop a `secondary`
+        (amber) Button linking to /contact-us with a leading phone icon; below
+        xl it collapses to a bare tel: icon. Styling comes entirely from the
+        shared Button, no header overrides. */}
+    <div class="header-phone order-last flex items-center shrink-0">
+      {phone && (
+        <>
+          <Button
+            variant="secondary"
+            size="lg"
+            className="hidden xl:inline-flex text-base"
+            href="/contact-us/"
+            leftIcon="fa6:phone"
+            aria-label={`Call us at ${phone.displayValue}`}
+          >
+            {phone.displayValue}
+          </Button>
+
+          <a
+            href={phone.url}
+            aria-label="Our Phone Number"
+            class="flex xl:hidden text-accent"
+          >
+            <Icon icon="fa6:phone" className="h-[23px] w-auto" />
+          </a>
+        </>
+      )}
+    </div>
+  </div>
+</header>
+
+<style is:global>
+  /* Restyle the template's menu to the legacy look without touching its markup
+     or behavior: uppercase tracked links that go amber on hover/active, and a
+     light dropdown panel. Colors for the top-level links are driven by the
+     scroll state on #site-header (see the script), so they read against the
+     hero video at rest and against the light bar once scrolled. */
+  .header-navigation .menu-desktop > ul {
+    gap: var(--spacing-sm);
+  }
+
+  .header-navigation .menu-desktop > ul > li > a,
+  .header-navigation .menu-desktop > ul > li > button {
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    font-size: clamp(1.125rem, 1.15vw, 1.5rem);
+    white-space: nowrap;
+    background-color: transparent;
+    color: var(--color-bg);
+    padding: var(--spacing-md) var(--spacing-lg);
+    transition: color 200ms ease;
+  }
+
+  #site-header.is-scrolled .header-navigation .menu-desktop > ul > li > a,
+  #site-header.is-scrolled .header-navigation .menu-desktop > ul > li > button {
+    color: var(--color-primary);
+  }
+
+  .header-navigation .menu-desktop > ul > li > a:hover,
+  .header-navigation .menu-desktop > ul > li > button:hover,
+  #site-header.is-scrolled .header-navigation .menu-desktop > ul > li > a:hover,
+  #site-header.is-scrolled
+    .header-navigation
+    .menu-desktop
+    > ul
+    > li
+    > button:hover {
+    color: var(--color-accent);
+    background-color: transparent;
+  }
+
+  /* Current page — amber and bold, at rest and scrolled. */
+  .header-navigation .menu-desktop > ul > li > a[aria-current="page"],
+  #site-header.is-scrolled
+    .header-navigation
+    .menu-desktop
+    > ul
+    > li
+    > a[aria-current="page"] {
+    color: var(--color-accent);
+    font-weight: 700;
+    background-color: transparent;
+  }
+
+  /* Dropdown panels — legacy look: a wide flat light card, square corners, no
+     border, generous padding, and uppercase items like the top-level bar. */
+  .header-navigation .menu-desktop ul ul {
+    min-width: 22rem;
+    background-color: var(--color-bg);
+    border: 0;
+    border-radius: 0;
+    padding: 0;
+    box-shadow: 0 18px 40px -12px rgb(0 0 0 / 0.35);
+  }
+
+  .header-navigation .menu-desktop ul ul a,
+  .header-navigation .menu-desktop ul ul button {
+    color: var(--color-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    font-size: 1.125rem;
+    white-space: nowrap;
+    padding: var(--spacing-md) var(--spacing-lg);
+    background-color: transparent;
+    width: 100%;
+  }
+
+  .header-navigation .menu-desktop ul ul a:hover,
+  .header-navigation .menu-desktop ul ul button:hover {
+    color: var(--color-secondary);
+    background-color: transparent;
+  }
+
+  /* An open branch is tinted blue in the legacy design, not amber. */
+  .header-navigation .menu-desktop ul ul a[aria-current="page"],
+  .header-navigation .menu-desktop ul ul [aria-expanded="true"] {
+    color: var(--color-secondary);
+  }
+
+  /* Phone CTA styling lives entirely in the shared Button (variant + btn-base),
+     matching the 2025 site. Only nowrap is header-specific. */
+  .header-phone a {
+    white-space: nowrap;
+  }
+
+  /* Hamburger follows the same light→dark flip as the links. The control
+     renders as a <label> (checkbox-driven drawer), not a <button>, and ships
+     with `text-text` — override both element types. */
+  .header-navigation .menu-mobile button,
+  .header-navigation .menu-mobile label {
+    color: var(--color-bg);
+  }
+  #site-header.is-scrolled .header-navigation .menu-mobile button,
+  #site-header.is-scrolled .header-navigation .menu-mobile label {
+    color: var(--color-primary);
+  }
+  /* Its hover state also hardcodes a colour; keep it on the flip. */
+  .header-navigation .menu-mobile label:hover {
+    color: var(--color-accent);
+  }
+</style>
+
+<script is:inline>
+  (() => {
+    const header = document.getElementById("site-header");
+    if (!header) return;
+
+    const logoDefault = document.getElementById("logo-default");
+    const logoWhite = document.getElementById("logo-white");
+
+    // Legacy behavior: past 50px the bar becomes solid + shadowed and the
+    // wordmark swaps to its white-background version.
+    const onScroll = () => {
+      const scrolled = window.scrollY > 50;
+
+      header.classList.toggle("is-scrolled", scrolled);
+      header.classList.toggle("bg-bg", scrolled);
+      header.classList.toggle("shadow-md", scrolled);
+      header.classList.toggle("bg-transparent", !scrolled);
+
+      if (logoDefault && logoWhite) {
+        logoDefault.classList.toggle("hidden", scrolled);
+        logoWhite.classList.toggle("hidden", !scrolled);
+      }
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+
+    // Nested submenus fly out to the right (see menu.css / MenuDropdown).
+    // Near the right edge of the window that would overflow, so on hover we
+    // measure the panel and flip it to the parent's left side instead.
+    const nested = header.querySelectorAll(".menu-dropdown .menu-dropdown");
+    nested.forEach((panel) => {
+      const parentItem = panel.parentElement;
+      if (!parentItem) return;
+
+      parentItem.addEventListener("mouseenter", () => {
+        panel.classList.remove("flip-left");
+        const rect = panel.getBoundingClientRect();
+        if (rect.right > window.innerWidth - 8) {
+          panel.classList.add("flip-left");
+        }
+      });
+    });
+  })();
+</script>

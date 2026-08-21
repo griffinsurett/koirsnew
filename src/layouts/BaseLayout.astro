@@ -1,0 +1,75 @@
+---
+// src/layouts/BaseLayout.astro
+/**
+ * Base Layout - Root HTML Structure
+ * 
+ * The foundation layout for all pages in the application.
+ * Provides:
+ * - HTML document structure
+ * - Head section with meta tags, SEO, theme setup
+ * - Body with main content slot and footer
+ * - Global styles import
+ * 
+ * All other layouts should extend or use this as their base.
+ * Ensures consistent structure and metadata across the entire site.
+ */
+
+import "../styles/global.css";
+import HeadTags from "./HeadTags.astro";
+import SEO from "./SEO.astro";
+import Theme from "./Theme.astro";
+import BodyTags from "./BodyTags.astro";
+import Header from "./Header.astro"; 
+import Footer from "./Footer.astro";
+
+export interface Props {
+  [key: string]: any;  // Accept any props for SEO component
+}
+
+const { ...seoProps } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content={Astro.generator} />
+
+    {/* Theme setup (favicons, theme color) */}
+    <Theme />
+    
+    {/* SEO meta tags */}
+    <SEO title={seoProps.title} {...seoProps} />
+    
+    {/* Additional head tags (analytics scripts, etc.) */}
+    <HeadTags />
+
+    {/* Optional noindex for unpublished content */}
+    {seoProps.noindex && <meta name="robots" content="noindex,nofollow" />}
+  </head>
+
+  <body class="antialiased">
+    <Header />
+
+    {/* Body-level scripts and elements */}
+    <BodyTags />
+
+    {/* Main app container with flex column for sticky footer */}
+    <div id="app" class="min-h-screen flex flex-col">
+      {/* Page content goes here */}
+      <slot />
+      
+      {/* Footer at bottom - now contains both consent and accessibility */}
+      <Footer />
+    </div>
+
+    {/* Marquees (gallery, testimonial showcase/carousel) are CSS animations —
+        hold them until their band scrolls into view so each starts from its
+        first item rather than mid-cycle. */}
+    <script>
+      import { initMarqueeOnView } from "@/scripts/marqueeOnView";
+      initMarqueeOnView();
+    </script>
+  </body>
+</html>

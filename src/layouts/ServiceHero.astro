@@ -1,0 +1,112 @@
+---
+// src/layouts/ServiceHero.astro
+/**
+ * Service Hero — the two-column hero used by the roofing and solar pages.
+ *
+ * Ports the legacy `ServicesLayout` hero (2025 site): copy on the left, the
+ * quote form card on the right, over a brightness-50 banner photo tinted navy
+ * at 60%. On mobile the two columns stack and the copy centers, matching the
+ * legacy `text-center lg:text-left`.
+ *
+ * Distinct from SecondaryHero, which is the plain centered banner used by every
+ * other collection index / legal / blog page.
+ */
+import BackgroundMedia from "@/components/BackgroundMedia.astro";
+import SectionHeading from "@/components/SectionHeading.astro";
+import backgroundSvg from "@/assets/background.jpg";
+
+type Heading = string | { before?: string; text?: string; after?: string };
+
+export interface Props {
+  title: string;
+  /** Main H1 override. Falls back to `title`. Supports `{ before, text, after }`. */
+  heading?: Heading;
+  eyebrow?: string;
+  description?: string;
+  image?: any;
+  className?: string;
+  minHeight?: string;
+}
+
+const {
+  title,
+  heading,
+  eyebrow,
+  description,
+  image,
+  className = "",
+  minHeight = "100vh",
+} = Astro.props;
+
+const headingObj = heading && typeof heading === "object" ? heading : undefined;
+const headingStr =
+  typeof heading === "string" && heading.trim() ? heading : undefined;
+
+const backgroundMedia = {
+  image: {
+    src: image || backgroundSvg,
+    imageClass: "filter brightness-50 bg-cover bg-center",
+    aboveTheFold: true,
+  },
+  // Legacy service hero: navy at 60% over a brightness-50 photo.
+  overlayClass: "bg-primary opacity-60",
+};
+---
+
+<section class={`relative ${className}`}>
+  <div
+    class="relative flex items-start justify-center"
+    style={`min-height: ${minHeight}`}
+  >
+    {/* Clipped here rather than on the flex parent — an overflow on the parent
+        would disable position:sticky for the copy column. */}
+    <div class="absolute inset-0 overflow-hidden">
+      <BackgroundMedia backgroundMedia={backgroundMedia} />
+    </div>
+
+    <div class="relative container mx-auto px-4 my-24 md:py-24 z-10">
+      <div
+        class="flex flex-col lg:flex-row items-center lg:items-start justify-center lg:gap-[var(--spacing-xl)] lg:mt-[var(--spacing-2xl)] mx-auto text-center lg:text-left text-bg"
+      >
+        {/* Copy column — centered when stacked, left-aligned from lg up. */}
+        <div
+          class="w-9/10 lg:w-6/11 mx-auto lg:mx-0 sticky-section self-start flex flex-col items-center lg:items-stretch justify-center lg:justify-end py-[var(--spacing-sm)] lg:py-0 text-center lg:text-left"
+        >
+          <SectionHeading
+            headingTag="h1"
+            tone="dark"
+            align="responsive"
+            pretitle={eyebrow}
+            heading={headingObj ?? headingStr ?? title}
+            description={description}
+            class="!mb-0 !max-w-none"
+            pretitleClass="top-heading !text-accent !mb-0 py-[var(--spacing-sm)]"
+            headingClass="h1 !text-3xl md:!text-4xl lg:!text-5xl xl:!text-6xl !tracking-wider !text-bg py-[var(--spacing-sm)]"
+            descriptionClass="h4 !font-thin !text-text-light py-[var(--spacing-sm)]"
+          />
+
+          {/* The legacy hero's `belowDescription` slot — the Google review badge. */}
+          <slot name="belowDescription" />
+        </div>
+
+        {/* Form card — beside the copy on desktop, stacked underneath on
+            mobile. The negative bottom margin lets it overhang the hero, as
+            the legacy card did. */}
+        <div
+          class="hero-aside lg:w-3/7 w-[90vw] mt-10 lg:mt-[calc(var(--spacing-sm)+20px)] bg-bg text-text rounded-4xl shadow-lg py-[var(--spacing-2xl)] px-[var(--spacing-2xl)] mb-[-100px] xl:mb-[-200px]"
+        >
+          <slot name="aside" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <slot />
+</section>
+
+<style>
+  h1,
+  p {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  }
+</style>

@@ -1,0 +1,91 @@
+---
+// src/layouts/LegalLayout.astro
+/**
+ * Legal Layout - Base layout for legal documents
+ * 
+ * Extends BaseLayout and provides consistent structure for:
+ * - Privacy Policy
+ * - Cookie Policy
+ * - Terms of Service
+ * - Other legal documents
+ * 
+ * Features:
+ * - Consistent prose styling
+ * - Automatic date display (Last Updated + Effective Date)
+ * - Standardized max-width and padding
+ * - SEO optimized for legal content
+ * - Print-friendly styling
+ * - Easy to extend for future legal pages
+ * 
+ * Props:
+ * - title: Page title (passed to BaseLayout and displayed as H1)
+ * - description: Meta description (passed to BaseLayout)
+ * - lastUpdated: When the document was last modified (required)
+ * - effectiveDate: When the policy takes effect (optional, but recommended)
+ * - showDates: Whether to show dates (default: true)
+ * 
+ * Usage:
+ *   <LegalLayout 
+ *     title="Privacy Policy"
+ *     description="How we handle your data"
+ *     lastUpdated="November 14, 2025"
+ *     effectiveDate="December 14, 2025"
+ *   >
+ *     <!-- Your legal content here -->
+ *   </LegalLayout>
+ */
+
+import BaseLayout from "./BaseLayout.astro";
+import LastUpdated from "@/integrations/preferences/consent/ui/PrivacyPolicy/LastUpdated.astro";
+import SecondaryHero from "@/layouts/SecondaryHero.astro";
+import { siteData } from "@/content/siteData";
+
+interface Props {
+  title: string;
+  /** Main H1 override (falls back to `title`). String or `{ before, text, after }`. */
+  heading?: string | { before?: string; text?: string; after?: string };
+  description: string;
+  lastUpdated: string;
+  effectiveDate?: string;
+  showDates?: boolean;
+  [key: string]: any; // Allow additional props for BaseLayout
+}
+
+const {
+  title,
+  heading,
+  description,
+  lastUpdated,
+  effectiveDate,
+  showDates = true,
+  ...baseLayoutProps
+} = Astro.props;
+
+// Create full title with site name
+const fullTitle = `${title} — ${siteData.title}`;
+---
+
+<BaseLayout title={fullTitle} description={description} {...baseLayoutProps}>
+  <main class="flex-1">
+    <SecondaryHero
+      title={title}
+      heading={heading}
+      description={description}
+      minHeight="45vh"
+    />
+
+    <article class="legal-document prose prose-lg max-w-4xl mx-auto py-12 px-6">
+      {/* Dates Section */}
+      {showDates && (
+        <LastUpdated 
+          lastUpdated={lastUpdated} 
+          effectiveDate={effectiveDate} 
+          className="mb-8 opacity-80"
+        />
+      )}
+
+      {/* Legal Content */}
+      <slot />
+    </article>
+  </main>
+</BaseLayout>

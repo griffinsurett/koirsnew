@@ -1,0 +1,65 @@
+---
+// src/components/SplitMedia.astro
+/**
+ * Split Media — copy on one side, media on the other.
+ *
+ * Ports the legacy `imageCol` / `vidCol` section variants (4 usages: the homepage
+ * About band with the intro video, the About-us story bands, the landing-page
+ * intro). `reverse` swaps the columns, which is how the legacy site alternated
+ * bands down the page (`contentClass="md:flex-row-reverse"`).
+ *
+ * The media itself is slotted so the caller controls whether it's an <Image>,
+ * a <Video>, or anything else.
+ */
+import type { SectionButton } from "@/components/ContentRenderer/ContentRenderer.types";
+import SectionHeading from "@/components/SectionHeading.astro";
+import SectionButtons from "@/components/ContentRenderer/SectionButtons.astro";
+
+interface Props {
+  title?: string;
+  heading?: any;
+  description?: string;
+  className?: string;
+  buttons?: SectionButton[];
+  buttonsClassName?: string;
+  id?: string;
+  /** Put the media on the left (copy on the right). */
+  reverse?: boolean;
+}
+
+const {
+  title,
+  heading,
+  description,
+  className = "",
+  buttons = [],
+  buttonsClassName = "",
+  reverse = false,
+  id,
+} = Astro.props as Props;
+---
+
+<section id={id} class={`py-16 ${className}`}>
+  <div class="container mx-auto px-4">
+    <div
+      class:list={[
+        "flex flex-col gap-10 lg:gap-16 items-center",
+        reverse ? "lg:flex-row-reverse" : "lg:flex-row",
+      ]}
+    >
+      {/* Copy */}
+      <div class="w-full lg:w-1/2 text-center lg:text-left">
+        <SectionHeading heading={heading} title={title} description={description} />
+        <SectionButtons
+          buttons={buttons}
+          class={`lg:justify-start mt-[var(--spacing-md)] ${buttonsClassName}`}
+        />
+      </div>
+
+      {/* Media */}
+      <div class="w-full lg:w-1/2">
+        <slot />
+      </div>
+    </div>
+  </div>
+</section>

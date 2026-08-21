@@ -1,0 +1,57 @@
+---
+title: "About Us"
+heading: "Putting Homeowners First, Every Step of the Way"
+description: "Koi Roofing & Solar is a family-run, full-service contractor proudly serving New Jersey, Pennsylvania, and all five boroughs of New York City."
+hasPage: true
+itemsHasPage: false
+redirectFrom: ["/about", "/aboutus"]
+addToMenu:
+  - menu: "main-menu"
+    order: 400
+  - menu: "footer-menu"
+---
+
+import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
+import MediaBand from "@/components/MediaBand.astro";
+import { query, sortByOrder } from "@/utils/query";
+import { siteData } from "@/content/siteData";
+
+{/* The about-us entries' full prose. AccordionVariant is the ONLY starter
+    variant that renders item bodies (via ContentBridge) — so it's used here in
+    Phase 3.5 to get the real copy onto the page for the content diff. The UI
+    phase swaps in a prose/bands treatment. */}
+<ContentRenderer
+  query={query("about-us").orderBy(sortByOrder())}
+  variant="AccordionVariant"
+  faqSchema={false}
+/>
+
+{/* legacy: variant="media1" — the Our Vision band, above the values grid. */}
+<MediaBand
+  heading="Our Vision"
+  description={`"We believe the contractor world doesn't have to be cold, boring, or stuck in the past. At ${siteData.title}, we welcome creativity, passion, and progress. We don't judge based on age, background, or past experience. We hire the hungry, the passionate, and the people with something to prove."`}
+  video="/roofingandsolarvid-smaller.webm"
+  overlayClass="bg-primary opacity-80"
+/>
+
+{/* Koi's five core values — its own collection, rendered here (plan §4.2). */}
+<ContentRenderer
+  query={query("values").orderBy(sortByOrder())}
+  variant="GridVariant"
+  columns={3}
+/>
+
+{/* legacy: variant="media1" — the CEO quote band that set up the team grid. */}
+<MediaBand
+  heading={'"All I have is my words and my smile, and without that-I am nothing."'}
+  description="That quote defines our culture. We don't chase hype. We chase results, service, and the trust of our community."
+  video="/roofingandsolarvid-smaller.webm"
+  overlayClass="bg-primary opacity-80"
+/>
+
+{/* The team. */}
+<ContentRenderer
+  query={query("team").orderBy(sortByOrder())}
+  variant="GridVariant"
+  columns={3}
+/>

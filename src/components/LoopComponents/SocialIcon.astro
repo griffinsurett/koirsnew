@@ -1,0 +1,91 @@
+---
+// src/components/LoopComponents/SocialIcon.astro
+/**
+ * Social Icon Component
+ * 
+ * Individual social media icon with:
+ * - Bare, colour-inheriting glyph (Koi's style — no circular chip)
+ * - Hover scale effect
+ * - Size variants (sm, md, lg)
+ * - Optional link
+ * - Accessibility labels
+ * 
+ * Used in SocialMediaVariant for social media links.
+ */
+
+import Icon from '@/components/Icon';
+import FacebookIcon from '@/components/icons/Facebook.jsx';
+import InstagramIcon from '@/components/icons/Instagram.jsx';
+import TikTokIcon from '@/components/icons/TikTok.jsx';
+
+export interface Props {
+  title: string;              // Platform name (for aria-label)
+  link?: string;             // URL to social profile
+  url?: string;               // Alias for link (collection uses `link`)
+  icon?: any;                // Icon identifier
+  size?: 'sm' | 'md' | 'lg'; // Icon size
+  class?: string;            // Wrapper override — opts out of the chip
+  iconClass?: string;        // Glyph override (e.g. "text-current !h-8")
+}
+
+const {
+  title,
+  link,
+  url,
+  icon,
+  size = 'md',
+  class: className,
+  iconClass,
+} = Astro.props;
+
+const href = url ?? link;
+
+// The icon set in use (fa6-solid) carries no brand glyphs, so the brand marks
+// are local SVG components. Anything else falls through to the icon system.
+const brandIcons: Record<string, any> = {
+  facebook: FacebookIcon,
+  instagram: InstagramIcon,
+  tiktok: TikTokIcon,
+};
+const BrandIcon = typeof icon === 'string' ? brandIcons[icon] : undefined;
+
+// Default to globe icon if none specified
+const displayIcon = icon || 'lu:globe';
+
+const sizeMap = {
+  sm: 'h-5 w-auto',
+  md: 'h-6 w-auto',
+  lg: 'h-8 w-auto',
+};
+
+// Koi uses the bare, colour-inheriting glyph everywhere — horizontal or
+// vertical — never the circular chip that ships as the starter default. So the
+// bare treatment IS the default here; `class` overrides it entirely.
+const wrapperClass =
+  className ||
+  'inline-flex items-center justify-center transition-all duration-200 hover:scale-110';
+const resolvedIconClass = iconClass || `text-current ${sizeMap[size]}`;
+---
+
+{/* Render as link if URL provided */}
+{href ? (
+  <a
+    href={href}
+    target="_blank"
+    rel="noopener noreferrer"
+    class={wrapperClass}
+    aria-label={`Visit our ${title} page`}
+    title={title}
+  >
+    {BrandIcon
+      ? <BrandIcon className={resolvedIconClass} />
+      : <Icon icon={displayIcon} size={size} className={iconClass || `text-current ${sizeMap[size]}`} />}
+  </a>
+) : (
+  /* Otherwise just display icon */
+  <div class={wrapperClass} title={title}>
+    {BrandIcon
+      ? <BrandIcon className={resolvedIconClass} />
+      : <Icon icon={displayIcon} size={size} className={iconClass || `text-current ${sizeMap[size]}`} />}
+  </div>
+)}

@@ -1,0 +1,31 @@
+[
+  {
+    "id": "home",
+    "title": "Home",
+    "description": "Homepage link",
+    "url": "/",
+    "order": 0,
+    "openInNewTab": false,
+    "menu": ["main-menu", "links-menu", "footer-menu"]
+  },
+  {
+    "id": "monmouth-county",
+    "title": "Monmouth County Residents",
+    "description": "Roofing and solar services across Monmouth County, NJ",
+    "url": "/service-areas/monmouth-county",
+    "parent": "about-us-0",
+    "order": 200,
+    "openInNewTab": false,
+    "menu": "main-menu"
+  },
+  {
+    "id": "projects-nav",
+    "title": "Projects",
+    "description": "Before-and-after roofing and solar transformations",
+    "url": "/#projects",
+    "parent": "about-us-0",
+    "order": 300,
+    "openInNewTab": false,
+    "menu": "main-menu"
+  }
+]

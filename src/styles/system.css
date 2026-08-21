@@ -1,0 +1,16 @@
+/* system theme defaults */
+@theme {
+  /* ───── Semantic colors – only loaded when needed ───── */
+  --color-success: oklch(68% 0.24 145);   /* green */
+  --color-success-500: var(--color-success);
+  --color-success-600: oklch(from var(--color-success) calc(l - 0.10) c h);
+
+  --color-warning: oklch(78% 0.22 80);    /* amber */
+  --color-warning-500: var(--color-warning);
+  --color-warning-600: oklch(from var(--color-warning) calc(l - 0.12) c h);
+
+  --color-danger: oklch(65% 0.30 25);     /* red */
+  --color-danger-500: var(--color-danger);
+  --color-danger-600: oklch(from var(--color-danger) calc(l - 0.10) c h);
+  --color-danger-700: oklch(from var(--color-danger) calc(l - 0.20) c h);
+}

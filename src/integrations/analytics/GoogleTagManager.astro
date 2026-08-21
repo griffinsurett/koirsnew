@@ -1,0 +1,47 @@
+---
+// src/integrations/analytics/GoogleTagManager.astro
+/**
+ * Google Tag Manager — Koi configuration.
+ *
+ * ── WHY THIS DIVERGES FROM THE GREASTRO TEMPLATE ──────────────────────────
+ * The template shipped GTM as `<script type="text/plain" data-consent="…">`,
+ * relying on the consent script's scriptManager to rewrite it into a live
+ * script once "performance" consent was granted.
+ *
+ * Koi has the consent banner disabled (AGENTS.md): the legacy site shipped no
+ * banner and adding one would be a user-visible change. With no consent script
+ * running, a `text/plain` tag is NEVER unblocked — GTM would silently never
+ * fire, and every downstream tag with it. So the tag loads directly here, which
+ * is exactly how the legacy site loaded it.
+ *
+ * ── TWO CONTAINERS, BOTH PRESERVED ────────────────────────────────────────
+ * The legacy site ran two GTM containers and tracker parity is non-negotiable
+ * (AGENTS.md), so both are carried over verbatim:
+ *
+ *   PUBLIC_GTM_ID    — full container: head loader + <noscript> iframe
+ *   PUBLIC_GTM_ID_2  — <noscript> iframe ONLY, no head loader
+ *
+ * The second one having no loader is NOT an oversight to fix. Grepping the
+ * legacy source finds exactly one occurrence of that id, in the body noscript.
+ * Adding the missing loader would start sending data to a container that
+ * receives none today — a silent data change disguised as a bug fix.
+ *
+ * The <noscript> iframes live in IntBodyScripts (they must be inside <body>).
+ */
+
+const GTM_ID = import.meta.env.PUBLIC_GTM_ID;
+---
+
+{GTM_ID && (
+  <script
+    id="gtm-loader"
+    is:inline
+    set:html={`
+      (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+      new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+      j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+      'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+      })(window,document,'script','dataLayer','${GTM_ID}');
+    `}
+  />
+)}

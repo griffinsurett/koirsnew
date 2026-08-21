@@ -1,0 +1,117 @@
+---
+// src/components/ContentRenderer/variants/IconListVariant.astro
+/**
+ * Icon List Variant — items as icon + copy rows, in a responsive grid or a
+ * single stacked column.
+ *
+ * Ports the legacy `listSection` (2-up grid — the benefits/financing rows) and
+ * `listOfBoxes` (single stacked column with the icon trailing — the "what we
+ * look for" style lists). `layout="stacked"` selects the latter.
+ */
+import type { BaseVariantProps } from "../ContentRenderer.types";
+import SectionHeading from "@/components/SectionHeading.astro";
+import SectionButtons from "../SectionButtons.astro";
+import Icon from "@/components/Icon";
+
+interface Props extends BaseVariantProps {
+  columns?: 1 | 2 | 3;
+  /** "grid" = legacy listSection; "stacked" = legacy listOfBoxes. */
+  layout?: "grid" | "stacked";
+  /** Header alignment — 2025's vidCol header sat left beside the video. */
+  headingAlign?: "center" | "left" | "responsive";
+  /** Stack the icon over the text and centre each item on mobile (default).
+   *  Set false for icon-less bands that should stay left-aligned. */
+  centerOnMobile?: boolean;
+  /** Render bare (no <section> padding / container) for use as a slot inside
+   *  another layout such as VideoSection. */
+  bare?: boolean;
+}
+
+const {
+  items = [],
+  title,
+  heading,
+  description,
+  className = "",
+  buttons = [],
+  buttonsClassName = "",
+  columns = 2,
+  layout = "grid",
+  headingAlign = "center",
+  centerOnMobile = true,
+  bare = false,
+  showButtonSection = true,
+  showHeadingSection = true,
+  pretitle,
+  tagline,
+  gradient,
+  tone = "light",
+  id,
+} = Astro.props as Props;
+
+const safeItems = Array.isArray(items) ? items : [];
+
+const columnClasses = {
+  1: "grid-cols-1",
+  2: "grid-cols-1 sm:grid-cols-2",
+  3: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
+};
+
+const listClass =
+  layout === "stacked"
+    ? "flex flex-col w-full gap-[var(--spacing-xl)]"
+    : `grid gap-[var(--spacing-xl)] ${columnClasses[columns]}`;
+---
+
+<section id={id} class={`${bare ? "" : "py-16"} ${className}`}>
+  <div class={bare ? "" : "container mx-auto px-4"}>
+    {showHeadingSection && (
+      <SectionHeading
+        pretitle={pretitle}
+        heading={heading}
+        title={title}
+        tagline={tagline}
+        gradient={gradient}
+        tone={tone}
+        align={headingAlign}
+        class="mb-[var(--spacing-xl)]"
+      />
+    )}
+
+    {safeItems.length > 0 && (
+      <ul class={`list-none ${listClass}`}>
+        {safeItems.map((item: any) => (
+          <li
+            class:list={[
+              "flex gap-4",
+              centerOnMobile
+                ? "flex-col items-center text-center gap-3 md:flex-row md:items-start md:text-left md:gap-4"
+                : "items-start",
+              layout === "stacked" ? "md:flex-row-reverse md:text-right" : "",
+            ]}
+          >
+            {item.icon && (
+              <span class="shrink-0 text-accent [&_img]:w-[80px] [&_img]:h-auto [&_svg]:w-[80px] [&_svg]:h-auto">
+                <Icon icon={item.icon} size="3xl" className="text-accent" />
+              </span>
+            )}
+            <div>
+              {item.title && (
+                <h3 class="h3 text-primary mb-1">{item.title}</h3>
+              )}
+              {(item.description || item.content) && (
+                <p class="text-text text-lg lg:text-xl font-thin capitalize leading-relaxed">
+                  {item.description ?? item.content}
+                </p>
+              )}
+            </div>
+          </li>
+        ))}
+      </ul>
+    )}
+
+    {showButtonSection && (
+      <SectionButtons buttons={buttons} class={`mt-[var(--spacing-lg)] ${buttonsClassName}`} />
+    )}
+  </div>
+</section>

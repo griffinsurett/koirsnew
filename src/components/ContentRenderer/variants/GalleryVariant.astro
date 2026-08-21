@@ -1,0 +1,183 @@
+---
+// src/components/ContentRenderer/variants/GalleryVariant.astro
+/**
+ * Gallery Variant — a continuous auto-scrolling row of gallery photos over the
+ * legacy dark video band.
+ *
+ * Marquee mechanics are johns-pro-roofing's GalleryMarquee: a duplicated track
+ * sliding to -50% in an infinite loop, paused on hover, disabled under
+ * reduced-motion, with tiles rendered at a fixed size so multi-megapixel source
+ * photos aren't shipped twice at full resolution.
+ *
+ * The section shell is Koi's legacy `gallery` variant: the site video behind a
+ * bg-primary/70 tint, centered white heading, and the service CTAs beneath.
+ */
+import type { BaseVariantProps, SectionButton } from "../ContentRenderer.types";
+import { Image } from "astro:assets";
+import { resolveImageMetadata } from "@/utils/images";
+import BackgroundMedia from "@/components/BackgroundMedia.astro";
+import SectionHeading from "@/components/SectionHeading.astro";
+import SectionButtons from "../SectionButtons.astro";
+
+interface Props extends BaseVariantProps {
+  buttons?: SectionButton[];
+  buttonsClassName?: string;
+  /** Background video behind the band (public path). */
+  video?: string;
+  /** Background image, when no video is given. */
+  image?: any;
+  overlayClass?: string;
+  /** Seconds for one full loop (lower = faster). */
+  speed?: number;
+}
+
+const {
+  items = [],
+  title,
+  heading,
+  pretitle,
+  className = "",
+  buttons = [],
+  buttonsClassName = "",
+  video,
+  image,
+  overlayClass = "bg-primary/70",
+  speed = 110,
+  id,
+} = Astro.props as Props;
+
+const safeItems = Array.isArray(items) ? items : [];
+
+// Tiles render in a fixed 340px-wide 4:3 box, so they're resolved to
+// ImageMetadata and sized by <Image> — the source photos are multi-megapixel
+// and would otherwise ship at full resolution (twice, via the loop duplicate).
+const tiles = safeItems
+  .map((item: any) => {
+    const featured = item.data?.featuredImage ?? item.featuredImage;
+    return {
+      meta: resolveImageMetadata(featured),
+      src: typeof featured === "string" ? featured : "",
+      alt: item.data?.title ?? item.title ?? "",
+    };
+  })
+  .filter((t: any) => t.meta || t.src);
+
+// Duplicate the set so the marquee can loop seamlessly (translateX -50%).
+const loopTiles = [...tiles, ...tiles];
+
+const backgroundMedia = (image || video)
+  ? {
+      ...(image ? { image: { src: image, imageClass: "object-cover" } } : {}),
+      ...(video ? { video: { src: video, preload: "metadata" } } : {}),
+      overlayClass,
+    }
+  : null;
+---
+
+<section id={id} class={`gallery-band relative overflow-hidden py-16 md:py-24 ${className}`}>
+  {backgroundMedia && <BackgroundMedia backgroundMedia={backgroundMedia} />}
+
+  <div class="relative z-10">
+    <div class="container mx-auto px-4">
+      <SectionHeading
+        pretitle={pretitle}
+        heading={heading}
+        title={title}
+        tone="dark"
+        headingClass="py-[var(--spacing-sm)]"
+      />
+    </div>
+
+    {tiles.length > 0 && (
+      <div
+        class="gallery-marquee"
+        style={`--gallery-marquee-speed:${speed}s;`}
+        aria-label="Project and job-site photos"
+      >
+        <ul class="gallery-marquee-track">
+          {loopTiles.map((tile: any, i: number) => (
+            <li class="gallery-marquee-item" aria-hidden={i >= tiles.length ? "true" : undefined}>
+              {tile.meta ? (
+                <Image
+                  src={tile.meta}
+                  alt={tile.alt}
+                  width={340}
+                  height={255}
+                  widths={[340, 680]}
+                  sizes="(max-width: 425px) 80vw, 340px"
+                  format="webp"
+                  quality={70}
+                  loading="lazy"
+                  class="w-full h-full object-cover"
+                />
+              ) : (
+                <img src={tile.src} alt={tile.alt} loading="lazy" class="w-full h-full object-cover" />
+              )}
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
+
+    {buttons.length > 0 && (
+      <div class="container mx-auto px-4">
+        <SectionButtons
+          buttons={buttons}
+          class={`flex flex-col lg:flex-row justify-center items-center gap-[var(--spacing-md)] py-[var(--spacing-lg)] lg:py-[var(--spacing-xl)] ${buttonsClassName}`}
+        />
+      </div>
+    )}
+  </div>
+</section>
+
+<style>
+  .gallery-marquee {
+    width: 100%;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  }
+
+  .gallery-marquee-track {
+    display: flex;
+    align-items: stretch;
+    width: max-content;
+    gap: 24px;
+    padding: 4px 12px;
+    margin: 0;
+    list-style: none;
+    animation: gallery-marquee-scroll var(--gallery-marquee-speed, 45s) linear infinite;
+  }
+
+  .gallery-marquee:hover .gallery-marquee-track {
+    animation-play-state: paused;
+  }
+
+  .gallery-marquee-item {
+    flex: 0 0 auto;
+    width: 340px;
+    max-width: 80vw;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    box-shadow: var(--shadow-md, 0 10px 20px rgba(0, 0, 0, 0.08));
+  }
+
+  @keyframes gallery-marquee-scroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .gallery-marquee-track {
+      animation: none;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+  }
+
+  /* Held until the band scrolls into view (see scripts/marqueeOnView.ts) so it
+     starts from its first item instead of mid-cycle. */
+  .gallery-marquee-track.marquee-paused {
+    animation-play-state: paused;
+  }
+</style>

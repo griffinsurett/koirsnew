@@ -1,0 +1,44 @@
+---
+// src/integrations/IntHeadScripts.astro
+/**
+ * Integration Head Scripts Bundle
+ *
+ * Consolidates all integration scripts that need to be in the <head>.
+ * Import this single component in your BaseLayout head section.
+ *
+ * Includes:
+ * - Google Tag Manager (with Consent Mode v2)
+ * - OneSignal Web Push (consent-gated; active only when env IDs are set)
+ * - Consent Script (marks consent existence)
+ * - Accessibility Script (applies saved preferences before render)
+ * - Language Detection Script (detects browser language)
+ *
+ * Usage in BaseLayout.astro:
+ *   <head>
+ *     <IntHeadScripts />
+ *   </head>
+ */
+
+import GoogleTagManager from "@/integrations/analytics/GoogleTagManager.astro";
+import KoiTrackers from "@/integrations/analytics/KoiTrackers.astro";
+import OneSignalPush from "@/integrations/onesignal/OneSignalPush.astro";
+// import ConsentScript from "@/integrations/preferences/consent/core/scripts/ConsentScript.astro";
+// import AccessibilityScript from "@/integrations/preferences/accessibility/core/scripts/AccessibilityScript.astro";
+// import LanguageDetectionScript from "@/integrations/preferences/language/core/scripts/LanguageDetectionScript.astro";
+---
+
+<!-- Analytics: Google Tag Manager with Consent Mode v2 -->
+<GoogleTagManager />
+
+<!-- GA4 x2, Meta Pixel x2, Clarity, Search Console verification -->
+<KoiTrackers />
+<OneSignalPush />
+
+<!-- Preference scripts disabled (AGENTS.md) — no dead inline JS in <head>. -->
+{/* <ConsentScript /> */}
+
+<!-- Accessibility: Apply saved preferences before content renders (prevents FOUC) -->
+{/* <AccessibilityScript /> */}
+
+<!-- Language: Detect browser language and set preference -->
+{/* <LanguageDetectionScript /> */}

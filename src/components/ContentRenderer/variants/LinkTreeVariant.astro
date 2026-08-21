@@ -1,0 +1,103 @@
+---
+// src/components/ContentRenderer/variants/LinkTreeVariant.astro
+/**
+ * LinkTree Variant - Mobile-first link tree layout
+ * Features: Single column, full-width cards, external link icons
+ */
+
+import Button from "@/components/Button/Button";
+import type { BaseVariantProps } from "../ContentRenderer.types";
+
+interface Props extends BaseVariantProps {
+  showIcons?: boolean;
+}
+
+const {
+  items = [],
+  title,
+  description,
+  className = "",
+  id,
+  showIcons = true,
+} = Astro.props as Props;
+
+// Type guard to check if item has openInNewTab property
+const isExternalLink = (item: any): boolean => {
+  return (
+    item.openInNewTab === true || (item.url && item.url.startsWith("http"))
+  );
+};
+---
+
+<section id={id} class={`min-h-screen py-8 sm:py-12 lg:py-16 ${className}`}>
+  <div class="max-w-[680px] mx-auto px-4 sm:px-8">
+    {
+      (title || description) && (
+        <header class="text-center mb-8 sm:mb-12">
+          {title && (
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold mb-2 text-heading">
+              {title}
+            </h1>
+          )}
+          {description && (
+            <p class="text-base sm:text-lg text-text">{description}</p>
+          )}
+        </header>
+      )
+    }
+
+    {
+      items.length > 0 && (
+        <nav class="flex flex-col gap-4" aria-label="Links menu">
+          {items.map((item) => {
+            const isExternal = isExternalLink(item);
+            return (
+              <a
+                href={item.url || "#"}
+                class="flex items-center justify-between text-center gap-4 p-5 sm:p-6 min-h-[72px] bg-bg rounded-xl text-heading no-underline transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:border-primary focus-visible:-translate-y-0.5 focus-visible:shadow-lg focus-visible:border-primary focus-visible:outline-none active:translate-y-0"
+                target={isExternal ? "_blank" : undefined}
+                rel={isExternal ? "noopener noreferrer" : undefined}
+              >
+                {showIcons && (item as any).icon && (
+                  <span
+                    class="text-4xl flex-shrink-0 w-12 h-12 flex items-center justify-center"
+                    aria-hidden="true"
+                  >
+                    {(item as any).icon}
+                  </span>
+                )}
+                <div class="flex-1 min-w-0">
+                  <h2 class="text-lg font-semibold mb-1 text-heading">
+                    {item.title}
+                  </h2>
+                  {item.description && (
+                    <p class="text-sm text-text m-0">{item.description}</p>
+                  )}
+                </div>
+                {isExternal && (
+                  <svg
+                    class="flex-shrink-0 opacity-50 transition-opacity duration-200 group-hover:opacity-100"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                    <polyline points="15 3 21 3 21 9" />
+                    <line x1="10" y1="14" x2="21" y2="3" />
+                  </svg>
+                )}
+              </a>
+            );
+          })}
+        </nav>
+      )
+    }
+  </div>
+</section>

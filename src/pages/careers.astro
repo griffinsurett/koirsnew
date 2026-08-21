@@ -1,0 +1,82 @@
+---
+// src/pages/careers.astro
+/**
+ * Careers — a single page with bespoke narrative structure and its own hiring
+ * form, so it stays a page rather than becoming a collection of one entry
+ * (see KOI-REBUILD-PLAN.md §9.3).
+ *
+ * ── STATUS: Phase 3.5 stub ────────────────────────────────────────────────
+ * Real copy, no styling. Its repeated content (role lists, benefit lists) moves
+ * into collections during the design phase; the hiring form is wired when the
+ * Formspree ids land.
+ */
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import HiringForm from "@/components/Form/forms/HiringForm.astro";
+import { siteData, businessData } from "@/content/siteData";
+
+const title = "Careers at KOI";
+const description =
+  "Join the KOI Roofing & Solar team. We're hiring sales reps, roofers, solar installers, and more across NJ, NY, and PA. Competitive pay, growth opportunities, and a family-style culture.";
+---
+
+<BaseLayout title={title} description={description}>
+  <main class="flex-1">
+    <h1>{title}</h1>
+    <p>
+      KOI is growing fast, and we're looking for motivated individuals to join
+      our team. Whether you're experienced or just starting out, we have
+      opportunities for you.
+    </p>
+    <p>
+      {siteData.title} is a {businessData.ownership} company built on{" "}
+      {businessData.experience}.
+    </p>
+
+    <p>Join the KOI Roofing & Solar team. We're hiring sales reps, roofers, solar installers, and more across NJ, NY, and PA. Competitive pay, growth opportunities, and a family-style culture.</p>
+    <h2>Build Your Career With Us</h2>
+    <p>KOI is growing fast, and we're looking for motivated individuals to join our team. Whether you're experienced or just starting out, we have opportunities for you.</p>
+    <h2>Why Work at KOI?</h2>
+    <h2>Join Our Growing Team</h2>
+    <h2>Benefits & Perks</h2>
+    <h2>What We Look For</h2>
+    <h2>Ready to Apply?</h2>
+    <h2>Tell us about yourself and the position you're interested in.</h2>
+
+    <p>At KOI Roofing & Solar, we're not just building roofs and installing solar panels—we're building careers. Our team members are the heart of our company, and we invest in their success.</p>
+    <p>Ready to join a team that values hard work, rewards performance, and treats everyone like family?</p>
+    <ul>
+      <li>veteran-owned company with over 20 years of industry experience.</li>
+      <li>Opportunities across sales, installation, and management.</li>
+      <li>We promote from within—your growth is our priority.</li>
+      <li>Serving NJ, NY, and PA with plans for continued expansion.</li>
+    </ul>
+    <h3>Sales Representative</h3>
+    <p>Build relationships with homeowners and close deals on roofing and solar projects.</p>
+    <h3>Roofing Installer</h3>
+    <p>Hands-on roof installation, repair, and replacement work across residential and commercial properties.</p>
+    <h3>Solar Installer</h3>
+    <p>Install solar panel systems on rooftops, ensuring quality and safety standards.</p>
+    <h3>Project Manager</h3>
+    <p>Oversee roofing and solar projects from start to finish, coordinating crews and customer communication.</p>
+    <h3>Competitive Pay</h3>
+    <p>We offer industry-leading compensation with performance bonuses and commission structures.</p>
+    <h3>Growth Opportunities</h3>
+    <p>We promote from within. Many of our leaders started in entry-level positions.</p>
+    <h3>Training & Development</h3>
+    <p>Ongoing training programs to sharpen your skills and advance your career.</p>
+    <h3>Team Culture</h3>
+    <p>Join a family-style company where your contributions are valued and celebrated.</p>
+    <h3>Benefits Package</h3>
+    <p>Health insurance, paid time off, and flexible scheduling for full-time employees.</p>
+    <h3>Strong Work Ethic</h3>
+    <p>We value dedication, reliability, and a willingness to go the extra mile.</p>
+    <h3>Team Player</h3>
+    <p>Collaboration is key to our success. We work together to deliver exceptional results.</p>
+    <h3>Customer Focus</h3>
+    <p>Every interaction matters. We treat customers like family.</p>
+    <h3>Growth Mindset</h3>
+    <p>We're looking for people who want to learn, improve, and advance.</p>
+
+    <HiringForm />
+  </main>
+</BaseLayout>

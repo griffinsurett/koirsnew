@@ -1,0 +1,171 @@
+---
+// src/pages/index.astro
+/**
+ * Homepage — the one hand-composed page (everything else generates from
+ * collections).
+ *
+ * ── STATUS: Phase 3.5 ─────────────────────────────────────────────────────
+ * Wired with EXISTING starter variants only (GridVariant, ListVariant,
+ * AccordionVariant, TestimonialVariant, ContactVariant, BlogVariant) so the
+ * content-parity diff against the legacy site can run before any styling.
+ * Deliberately unstyled — real variants and the brand skin land in the UI
+ * phases.
+ *
+ * Band order below reproduces the legacy homepage exactly (KOI-REBUILD-PLAN
+ * §3). Each band names its legacy variant so the mapping stays traceable when
+ * the real variants get built.
+ *
+ * Four content types have no starter variant that can display them
+ * (testimonial video, project before/after, gallery tiles, icons) — they're
+ * asserted present via query here and get their real display in the UI phases.
+ */
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import Video from "@/components/Video/Video.astro";
+import MediaBand from "@/components/MediaBand.astro";
+import SplitMedia from "@/components/SplitMedia.astro";
+import VideoSection from "@/layouts/VideoSection.astro";
+import SectionHeading from "@/components/SectionHeading.astro";
+import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
+import FrontPageHero from "@/layouts/FrontPageHero.astro";
+import { serviceBtns, siteData, businessData, ctaData } from "@/content/siteData";
+import { query, sortByOrder, sortByDate } from "@/utils/query";
+
+import SpanishSection from "@/components/SpanishSection.astro";
+import SectionButtons from "@/components/ContentRenderer/SectionButtons.astro";
+import GoogleRating from "@/components/GoogleRating.astro";
+import HeroPoster from "@/assets/koi/roofingandsolarvid-poster.jpg";
+---
+
+<BaseLayout
+  title={`${siteData.title} | Top-Quality Roofing & Solar Solutions for Your Home`}
+  description="Full-service contractor serving NJ, PA & NYC. 20+ years of roofing & solar expertise—$0 down financing, 50-year warranties, stress-free installs. Serving Residential, Commercial, and Industrial."
+>
+  <main class="flex-1">
+    {/* 1 — Hero (legacy: variant="primaryHero") */}
+    <FrontPageHero
+      eyebrow={siteData.title}
+      title="Top-Quality Roofing & Solar Solutions for Your Home"
+      description="Full-service contractor serving NJ, PA & NYC. 20+ years of roofing & solar expertise—$0 down financing, 50-year warranties, stress-free installs. Serving Residential, Commercial, and Industrial."
+      image={HeroPoster}
+      video={{ src: "/roofingandsolarvid-smaller.webm", preload: "metadata" }}
+      primaryCTA={{ text: "Roofing", link: "/roofing" }}
+      secondaryCTA={{ text: "Solar", link: "/solar" }}
+    >
+      {/* Google review badge under the hero CTAs — the legacy site's main
+          trust signal, and the only place the review count appears above the
+          fold. "50+" is the legacy's own copy (deliberately approximate). */}
+      <GoogleRating slot="belowButtons" count="50+" tone="dark" class="mt-6" />
+    </FrontPageHero>
+
+    {/* 2 — About: the Koi intro video on the left, copy on the right. */}
+    <VideoSection video="/koirands-intro.mp4">
+      <SectionHeading
+        align="responsive"
+        title={`About ${siteData.title}`}
+        tagline='"Some start at the bottom we go to the top"'
+        description={[
+          `${siteData.title} is a proud ${businessData.ownership} company based in New Jersey, built on ${businessData.experience}. We combine expert craftsmanship with genuine care, treating every home like our own and every client like family.`,
+          `Our mission is to change the way people experience contractors—making home upgrades smooth, honest, and even enjoyable. We specialize in residential roof replacements and solar energy systems, including flat roofs that few in New Jersey confidently handle or warranty. Whether it's storm damage, an aging roof, or high electric bills, we offer full-service solutions with ${businessData.financing}.`,
+        ]}
+        class="space-y-6"
+        />
+      <SectionButtons
+        buttons={[
+          { text: "Get Started", link: "/contact-us/", variant: "primary" },
+          { text: "Learn More", link: "/about-us/", variant: "secondary" },
+        ]}
+        class="lg:justify-start mt-[var(--spacing-md)]"
+      />
+
+      {/* Who we serve — the legacy listSection2 band. Spans the full width
+          beneath the copy AND the video, sharing the About band's light
+          background rather than sitting in the copy column. */}
+      <ContentRenderer
+        slot="below"
+        query={query("service-tiers").orderBy(sortByOrder())}
+        variant="IconListVariant"
+        centerOnMobile={false}
+        columns={3}
+        showHeadingSection={false}
+        className="!py-0"
+      />
+    </VideoSection>
+
+
+
+    {/* 4 — Mission statement (legacy: variant="media1" — copy over the
+        roofing/solar video with a primary tint). */}
+    <MediaBand
+      heading="Our goal is simple:"
+      description={'"Make Roofing and Solar an enjoyable, trustworthy, and inspiring experience for everyone."'}
+      video="/roofingandsolarvid-smaller.webm"
+      overlayClass="bg-primary opacity-80"
+    />
+
+    {/* 5 — Benefits / "Why Choose Us" (legacy: variant="vidCol" — the icon
+        list beside the Koi video, with a Request Estimate CTA). */}
+    <VideoSection video="/notlikekoi.mp4" reverse={true}>
+      <ContentRenderer
+        query={query("benefits").orderBy(sortByOrder())}
+        variant="IconListVariant"
+        columns={1}
+        pretitle="Why Choose Us?"
+        heading="Benefits of Choosing Koi Roofing and Solar!"
+        headingAlign="responsive"
+        description=""
+        buttons={[
+          { text: "Request Estimate", link: "/contact-us/", variant: "secondary" },
+        ]}
+        showButtonSection={false}
+        bare={true}
+      />
+    </VideoSection>
+
+    {/* 6 — Spanish CTA band (legacy: <SpanishSection />) */}
+    <SpanishSection />
+
+    {/* 7 — Testimonials (legacy: collection="testimonials").
+        One band, one video-card tall: portrait video clips interleaved with
+        text reviews stacked two-high, scrolling as a marquee. */}
+    <ContentRenderer
+      query={query("testimonials").orderBy(sortByOrder())}
+      variant="TestimonialShowcaseVariant"
+      pretitle="Testimonials"
+      heading="Hear It Straight from Homeowners"
+    />
+
+    {/* 9 — Projects (legacy: collection="projects", before/after slider)
+        NOTE: no starter variant reads beforeImage/afterImage — GridVariant
+        shows title/description only until BeforeAfterVariant lands. */}
+      <ContentRenderer
+        query={query("projects").orderBy(sortByOrder())}
+        variant="BeforeAfterVariant"
+        columns={3}
+        title={`Discover ${siteData.title}'s Rooftop Masterpieces`}
+      />
+
+    {/* 10 — FAQ (legacy: collection="faq" query="getAll")
+        The legacy homepage showed all 14 of the original FAQs. Those all carry
+        serviceLines (roofing and/or solar), so filter to THOSE rather than to
+        "unscoped" — the 112 added later are scoped to a landing page or blog
+        post and belong only on those pages, where their FAQPage schema is
+        emitted alongside the content it describes. */}
+    <ContentRenderer
+      query={query("faq")
+        .where((entry: any) =>
+          !entry.data.monmouthPage && !entry.data.post
+        )
+        .orderBy(sortByOrder())}
+      variant="AccordionVariant"
+    />
+
+    {/* 11 — Gallery (legacy: collection="gallery", marquee + service buttons) */}
+    <ContentRenderer
+      query={query("gallery").orderBy(sortByOrder())}
+      variant="GalleryVariant"
+      title="Whether you need a new roof or want to go solar with NO MONEY DOWN, we make it easy!"
+      video="/roofingandsolarvid-smaller.webm"
+      buttons={serviceBtns}
+    />
+  </main>
+</BaseLayout>

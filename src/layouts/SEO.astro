@@ -1,0 +1,206 @@
+---
+// src/layouts/SEO.astro
+/**
+ * SEO Component - Meta Tag Generator
+ * 
+ * Comprehensive SEO meta tag generation for all pages.
+ * Handles:
+ * - Basic meta tags (title, description)
+ * - Open Graph tags (Facebook, LinkedIn)
+ * - Twitter Card tags
+ * - JSON-LD structured data (Schema.org)
+ * - Canonical URLs
+ * - Author and publisher information
+ * 
+ * Uses fallback chain: SEO overrides → Base props → Site defaults
+ * Generates absolute URLs for social sharing.
+ */
+
+import { writeFileSync, mkdirSync } from 'node:fs';
+import { join } from 'node:path';
+// Brand logo drives the schema.org `logo` + the default OG/Twitter share image.
+// whitebg variant is deliberate: social scrapers and Google's logo slot both
+// composite on white, so a transparent PNG renders as a dark-on-dark smear.
+import siteLogo from "@/assets/koi/logowwords-whitebg.png";
+import defaultOGImage from "@/assets/koi/roofingandsolarvid-poster.jpg";
+import { siteData } from "@/content/siteData";
+import { getImageUrl } from "@/utils/images";
+import { buildBusinessSchema } from "@/utils/schema/businessSchema";
+import { buildBreadcrumbSchema } from "@/utils/schema/breadcrumbSchema";
+import JsonLd from "@/components/JsonLd.astro";
+import type { ImageInput, SEOData } from "@/content/schema";
+
+export interface Props {
+  title?: string;              // Page title
+  description?: string;        // Page description
+  image?: ImageInput;          // Featured image
+  author?: string;            // Author name
+  publishDate?: Date | string; // Publication date (for articles)
+  seo?: SEOData;              // SEO overrides
+  siteName?: string;          // Site name override
+  robots?: string;             // Shorthand robots directive
+  addToLLMs?: boolean;         // Whether this page appears in llms.txt (default: true)
+}
+
+const {
+  title,
+  description,
+  image,
+  author,
+  publishDate,
+  seo = {},
+  siteName = siteData.title,
+  robots,
+  addToLLMs,
+} = Astro.props;
+
+// Base values from props
+const baseTitle = title || "Page";
+const baseDescription = description || siteData.description;
+const baseImageUrl = getImageUrl(image, defaultOGImage.src);
+
+// Meta tag values (with SEO overrides)
+const finalMetaTitle = seo?.metaTitle || `${baseTitle} | ${siteData.title}`;
+const finalMetaDescription = seo?.metaDescription || baseDescription;
+
+// Open Graph values (with fallbacks)
+const finalOgTitle = seo?.ogTitle || seo?.metaTitle || baseTitle;
+const finalOgDescription = seo?.ogDescription || seo?.metaDescription || baseDescription;
+const finalOgImageUrl = getImageUrl(seo?.ogImage, baseImageUrl);
+const finalOgType = seo?.ogType || "website";
+
+// Twitter Card values (with fallbacks to OG values)
+const finalTwitterTitle = seo?.twitterTitle || seo?.ogTitle || finalOgTitle;
+const finalTwitterDescription = seo?.twitterDescription || seo?.ogDescription || finalOgDescription;
+const finalTwitterImageUrl = getImageUrl(seo?.twitterImage || seo?.ogImage, finalOgImageUrl);
+const finalTwitterCard = seo?.twitterCard || "summary_large_image";
+
+// Additional SEO fields
+const finalKeywords = seo?.keywords || siteData.keywords || [];
+const canonicalPath = Astro.url.pathname === '/' ? '/' : Astro.url.pathname.replace(/\/$/, '');
+const finalCanonicalUrl = seo?.canonicalUrl || `${siteData.url}${canonicalPath}`;
+const effectiveRobots = seo?.robots || robots || "index, follow";
+
+// Author and publisher
+const authorName = author || siteData.title;
+const publisherName = siteData.legalName || siteData.title;
+
+/**
+ * Convert relative URLs to absolute for social sharing
+ * Social platforms require absolute URLs for images
+ */
+const makeAbsolute = (url: string): string => {
+  if (url.startsWith('http')) return url;
+  if (url.startsWith('/')) return `${siteData.url}${url}`;
+  return `${siteData.url}/${url}`;
+};
+
+const absoluteOgImage = makeAbsolute(finalOgImageUrl);
+const absoluteTwitterImage = makeAbsolute(finalTwitterImageUrl);
+
+// Determine schema type based on content
+const schemaType = !publishDate ? "WebSite" : "Article";
+
+/**
+ * Structured data for search engines (JSON-LD)
+ * Provides rich snippets in search results
+ */
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": schemaType,
+  "name": finalOgTitle,
+  "headline": finalOgTitle,
+  "description": finalOgDescription,
+  "image": absoluteOgImage,
+  "url": finalCanonicalUrl,
+  "publisher": {
+    "@type": "Organization",
+    "name": publisherName,
+    "url": siteData.url,
+    "logo": {
+      "@type": "ImageObject",
+      "url": makeAbsolute(siteLogo.src),
+      "width": 60,
+      "height": 60
+    }
+  },
+  "author": {
+    "@type": publishDate ? "Person" : "Organization",
+    "name": authorName,
+  },
+  // Article-specific fields
+  ...(publishDate && {
+    "datePublished": new Date(publishDate).toISOString(),
+    "dateModified": new Date(publishDate).toISOString(),
+  }),
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": finalCanonicalUrl
+  }
+};
+
+// Site-wide schema — the business entity (from siteData.businessType) and
+// breadcrumbs. Built by shared builders in @/utils/schema so a new site changes
+// behavior in one place. Content-specific schema (FAQ, reviews, service) lives
+// on the variants/layouts that render that content.
+const businessSchema = await buildBusinessSchema({ logoUrl: makeAbsolute(siteLogo.src) });
+const breadcrumbSchema = buildBreadcrumbSchema(canonicalPath);
+
+// Combine everything into a single JSON-LD @graph.
+const jsonLdGraph = {
+  "@context": "https://schema.org",
+  "@graph": [
+    structuredData,
+    businessSchema,
+    ...(breadcrumbSchema ? [breadcrumbSchema] : []),
+  ],
+};
+
+if (import.meta.env.MODE !== 'development') {
+  try {
+    const outDir = join(process.cwd(), 'dist', '__seo');
+    mkdirSync(outDir, { recursive: true });
+    const slug = canonicalPath === '/' ? '_index' : canonicalPath.replace(/^\//, '').replace(/\//g, '__');
+    const entry = {
+      path: canonicalPath,
+      title: finalMetaTitle,
+      description: finalMetaDescription,
+      robots: effectiveRobots,
+      addToLLMs: addToLLMs !== false,
+    };
+    writeFileSync(join(outDir, `${slug}.json`), JSON.stringify(entry), 'utf8');
+  } catch (_) {}
+}
+---
+
+<!-- Primary Meta Tags -->
+<title>{finalMetaTitle}</title>
+<meta name="title" content={finalMetaTitle} />
+<meta name="description" content={finalMetaDescription} />
+<meta name="author" content={authorName} />
+<meta name="publisher" content={publisherName} />
+<meta name="keywords" content={finalKeywords.join(", ")} />
+<link rel="canonical" href={finalCanonicalUrl} />
+<meta name="robots" content={effectiveRobots} />
+
+<!-- Open Graph / Facebook / LinkedIn -->
+<meta property="og:title" content={finalOgTitle} />
+<meta property="og:description" content={finalOgDescription} />
+<meta property="og:image" content={absoluteOgImage} />
+<meta property="og:type" content={finalOgType} />
+<meta property="og:url" content={finalCanonicalUrl} />
+<meta property="og:site_name" content={siteName} />
+{publishDate && <meta property="article:published_time" content={new Date(publishDate).toISOString()} />}
+<meta property="article:author" content={authorName} />
+<meta property="article:publisher" content={publisherName} />
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content={finalTwitterCard} />
+<meta name="twitter:title" content={finalTwitterTitle} />
+<meta name="twitter:description" content={finalTwitterDescription} />
+<meta name="twitter:image" content={absoluteTwitterImage} />
+<meta name="twitter:site" content={publisherName} />
+<meta name="twitter:creator" content={authorName} />
+
+<!-- JSON-LD Structured Data -->
+<JsonLd schema={jsonLdGraph} />

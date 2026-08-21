@@ -1,0 +1,224 @@
+/* src/styles/accessibility.css */
+
+/* ============================================================================
+   CSS VARIABLES - Applied via JavaScript
+   ============================================================================ */
+:root {
+  --a11y-font-size: 100%;
+  --a11y-line-height: 1.5;
+  --a11y-letter-spacing: 0;
+  --a11y-word-spacing: 0;
+  --a11y-font-family: inherit;
+  --a11y-animation-duration: 0.3s;
+  --cursor-x: 50%;
+  --cursor-y: 50%;
+}
+
+/* ============================================================================
+   TEXT & TYPOGRAPHY
+   ============================================================================ */
+body {
+  font-size: var(--a11y-font-size);
+  line-height: var(--a11y-line-height);
+  letter-spacing: var(--a11y-letter-spacing);
+  word-spacing: var(--a11y-word-spacing);
+  font-family: var(--a11y-font-family);
+}
+
+/* Dyslexia Font */
+@font-face {
+  font-family: 'OpenDyslexic';
+  src: url('/fonts/OpenDyslexic-Regular.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+[data-a11y-font="dyslexia"] {
+  --a11y-font-family: 'OpenDyslexic', sans-serif;
+}
+
+[data-a11y-font="readable"] {
+  --a11y-font-family: 'Verdana', 'Arial', sans-serif;
+}
+
+/* ============================================================================
+   VISUAL ENHANCEMENTS
+   ============================================================================ */
+
+/* Link Highlighting */
+[data-a11y-links="true"] a {
+  background-color: rgba(255, 255, 0, 0.25);
+  padding: 2px 4px;
+  border-radius: 2px;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+}
+
+/* Title Highlighting */
+[data-a11y-titles="true"] h1,
+[data-a11y-titles="true"] h2,
+[data-a11y-titles="true"] h3,
+[data-a11y-titles="true"] h4,
+[data-a11y-titles="true"] h5,
+[data-a11y-titles="true"] h6 {
+  background-color: rgba(255, 255, 0, 0.15);
+  padding: 0.25em 0.5em;
+  border-left: 4px solid #4CAF50;
+  margin-bottom: 0.5em;
+}
+
+/* Contrast Boost */
+[data-a11y-contrast="boost"] {
+  filter: contrast(1.15);
+}
+
+/* Saturation Controls */
+[data-a11y-saturation="low"] {
+  filter: saturate(0.5);
+}
+
+[data-a11y-saturation="high"] {
+  filter: saturate(1.5);
+}
+
+[data-a11y-saturation="monochrome"] {
+  filter: grayscale(100%);
+}
+
+/* ============================================================================
+   READING AIDS
+   ============================================================================ */
+
+/* Reading Mask */
+[data-a11y-mask="true"]::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+    circle 400px at var(--cursor-x) var(--cursor-y),
+    transparent 0%,
+    rgba(0, 0, 0, 0.7) 100%
+  );
+  pointer-events: none;
+  z-index: 9998;
+  transition: background 0.05s ease;
+}
+
+/* Focus Highlighting */
+[data-a11y-focus="true"] *:focus {
+  outline: 3px solid #4CAF50 !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.3) !important;
+}
+
+[data-a11y-focus="true"] *:focus-visible {
+  outline: 3px solid #4CAF50 !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.3) !important;
+}
+
+/* Big Cursor */
+[data-a11y-cursor="big"] {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48"><circle cx="24" cy="24" r="16" fill="white" stroke="black" stroke-width="3"/><circle cx="24" cy="24" r="8" fill="black"/></svg>') 24 24, auto;
+}
+
+[data-a11y-cursor="big"] a,
+[data-a11y-cursor="big"] button,
+[data-a11y-cursor="big"] [role="button"] {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48"><circle cx="24" cy="24" r="16" fill="white" stroke="blue" stroke-width="3"/><circle cx="24" cy="24" r="8" fill="blue"/></svg>') 24 24, pointer;
+}
+
+/* ============================================================================
+   CONTENT SIMPLIFICATION
+   ============================================================================ */
+
+/* Hide Images */
+[data-a11y-images="hide"] img:not([alt=""]) {
+  position: relative;
+  width: 100%;
+  height: auto;
+  min-height: 100px;
+}
+
+[data-a11y-images="hide"] img:not([alt=""])::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #f0f0f0;
+  border: 2px dashed #999;
+}
+
+[data-a11y-images="hide"] img:not([alt=""])::after {
+  content: '📷 ' attr(alt);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 1em;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-style: italic;
+  color: #666;
+  text-align: center;
+  max-width: 90%;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Mute Sounds */
+[data-a11y-sounds="mute"] video,
+[data-a11y-sounds="mute"] audio,
+[data-a11y-sounds="mute"] iframe[src*="youtube"],
+[data-a11y-sounds="mute"] iframe[src*="vimeo"] {
+  display: none !important;
+}
+
+/* Pause/Reduce Animations */
+[data-a11y-motion="reduced"] *,
+[data-a11y-motion="reduced"] *::before,
+[data-a11y-motion="reduced"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Also respect system preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ============================================================================
+   UTILITIES
+   ============================================================================ */
+
+/* Controlled animations */
+* {
+  animation-duration: var(--a11y-animation-duration);
+  transition-duration: calc(var(--a11y-animation-duration) * 0.5);
+}
+
+/* Prevent layout shift */
+[data-a11y-links="true"] a,
+[data-a11y-titles="true"] h1,
+[data-a11y-titles="true"] h2,
+[data-a11y-titles="true"] h3,
+[data-a11y-titles="true"] h4,
+[data-a11y-titles="true"] h5,
+[data-a11y-titles="true"] h6 {
+  box-sizing: border-box;
+}

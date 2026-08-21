@@ -1,0 +1,124 @@
+---
+title: "Roofing"
+description: "Need a New Roof? We Got You Covered. We install strong, good-looking roofs that last for years. Whether your home needs regular shingles or something tougher like metal or slate, we do it all. Got a flat roof? We got special options for that too."
+# Legacy URL. The old site nested both lines of business under /services/;
+# the split gives each its own top-level page, so the old path must 301.
+redirectFrom: "/services/roofing"
+# Legacy hero copy: the H1 the old service pages used.
+heading: "Top-Quality Roofing Solutions for Your Home"
+# Hero banner behind the service hero — the legacy site's own image.
+bannerImage: "../../assets/koi/shingleroofing.jpg"
+# Line-of-business page: two-column hero with quote form + the legacy
+# band sequence. Other collection indexes use the default layout.
+indexLayout: "@/layouts/collections/ServiceIndexLayout.astro"
+hasPage: true
+heroForm: "roofing"
+itemsHasPage: false
+itemsRootPath: false
+addToMenu:
+  - menu: "main-menu"
+    order: 1
+  - menu: "footer-menu"
+seo:
+  keywords:
+    - "roofing services"
+    - "roof replacement"
+    - "roof repair"
+    - "residential roofing"
+    - "commercial roofing"
+    - "asphalt shingle roofing"
+    - "metal roofing"
+    - "flat roof contractor"
+    - "roof inspection"
+    - "emergency roof repair"
+    - "licensed roofers New Jersey"
+    - "roofing contractor NJ"
+    - "roofing company New Jersey"
+    - "roofing services Pennsylvania"
+    - "roofing services New York City"
+---
+
+import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
+import SpanishSection from "@/components/SpanishSection.astro";
+import VideoSection from "@/layouts/VideoSection.astro";
+import KoiRoofers from "@/assets/koi/roof-work-koi.jpg";
+import { query, sortByOrder } from "@/utils/query";
+import { related } from "@/utils/query/snippets";
+
+{/* Legacy order (2025 ServicesLayout): hero+form → benefits → Spanish →
+    testimonials → projects → child services → types → FAQ. */}
+
+{/* Financing and warranty points — the legacy page led with these right
+    under the hero. */}
+<VideoSection video="/notlikekoi.mp4" reverse={true}>
+  <ContentRenderer
+    query={query("benefits").orderBy(sortByOrder())}
+    variant="IconListVariant"
+    columns={1}
+    pretitle="Why Choose Us?"
+    heading="Benefits of Choosing Koi Roofing!"
+    headingAlign="left"
+    buttons={[
+      { text: "Request Estimate", link: "/contact-us/", variant: "secondary" },
+    ]}
+    showButtonSection={false}
+    bare={true}
+  />
+</VideoSection>
+
+<SpanishSection />
+
+{/* Reviews from roofing customers. */}
+<ContentRenderer
+  query={query("testimonials").orderBy(sortByOrder())}
+  variant="TestimonialShowcaseVariant"
+  pretitle="Testimonials"
+  heading="Hear It Straight from Homeowners"
+/>
+
+{/* Before/after portfolio. */}
+<ContentRenderer
+  query={query("projects").orderBy(sortByOrder())}
+  variant="BeforeAfterVariant"
+  columns={3}
+  pretitle="Recent Projects"
+  title="Our Roofing Work"
+/>
+
+{/* The individual roofing services. */}
+<ContentRenderer
+  query={query("roofing").orderBy(sortByOrder())}
+  variant="ServiceListVariant"
+  title="Explore Our Roofing Services"
+  image={KoiRoofers}
+  imageAlt="Koi Roofing and Solar crew on a job site"
+/>
+
+{/* Materials/systems for this line of business. */}
+<ContentRenderer
+  query={related("types", "serviceLines", "roofing").orderBy(sortByOrder())}
+  variant="ImageCardVariant"
+  columns={3}
+  title="Types of Roofing We Offer"
+/>
+
+{/* FAQ — the legacy service pages closed on this. Scoped to this line of
+    business: the collection also holds per-blog-post and per-landing-page
+    FAQs, which must not leak onto the service pages. */}
+<ContentRenderer
+  query={query("faq")
+    .where((entry) => {
+      const lines = entry.data.serviceLines || [];
+      return lines.some((l) => (l?.id ?? l) === "roofing");
+    })
+    .orderBy(sortByOrder())}
+  variant="AccordionVariant"
+/>
+
+  {/* 11 — Gallery (legacy: collection="gallery", marquee + service buttons) */}
+    <ContentRenderer
+      query={query("gallery").orderBy(sortByOrder())}
+      variant="GalleryVariant"
+      title="Whether you need a new roof or want to go solar with NO MONEY DOWN, we make it easy!"
+      video="/roofingandsolarvid-smaller.webm"
+    />

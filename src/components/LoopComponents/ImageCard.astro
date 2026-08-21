@@ -1,0 +1,82 @@
+---
+// src/components/LoopComponents/ImageCard.astro
+/**
+ * Image Card — image-forward tile: prominent rounded image on top, centered
+ * title / description / link below. Consumes a prepared collection item
+ * (title, description, resolved `url`, `featuredImage`). Tailwind inline.
+ */
+import { Image } from "astro:assets";
+import Icon from "@/components/Icon";
+import { resolveImageMetadata } from "@/utils/images";
+
+export interface Props {
+  title: string;
+  description?: string;
+  url?: string;
+  featuredImage?: any;
+  ctaText?: string;
+}
+
+const {
+  title,
+  description,
+  url,
+  featuredImage,
+  ctaText = "Learn More",
+} = Astro.props as Props;
+
+// Resolve to ImageMetadata so <Image> can emit a responsive srcset. A plain
+// string (external/public path) can't be optimized, so it falls back to <img>.
+const imgMeta = resolveImageMetadata(featuredImage);
+const imgSrc = typeof featuredImage === "string" ? featuredImage : "";
+
+const Tag = url ? "a" : "div";
+---
+
+<Tag href={url} class="group flex flex-col text-center">
+  {
+    (imgMeta || imgSrc) && (
+      <div class="relative overflow-hidden rounded-2xl aspect-[4/3] shadow-[var(--shadow-md)] transition-shadow duration-300 group-hover:shadow-[var(--shadow-lg)]">
+        {imgMeta ? (
+          <Image
+            src={imgMeta}
+            alt={title}
+            class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
+            widths={[380, 480, 620]}
+            sizes="(max-width: 768px) 92vw, (max-width: 1024px) 46vw, 31vw"
+            format="webp"
+            quality={66}
+            loading="lazy"
+          />
+        ) : (
+          <img
+            src={imgSrc}
+            alt={title}
+            class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
+            loading="lazy"
+          />
+        )}
+      </div>
+    )
+  }
+  <div class="flex flex-col items-center gap-3 pt-6">
+    <h3 class="h4 text-heading">
+      {title}
+    </h3>
+    {
+      description && (
+        <p class="text-text text-base leading-relaxed max-w-[360px]">
+          {description}
+        </p>
+      )
+    }
+    {
+      url && (
+        <span class="inline-flex items-center gap-1.5 font-[family-name:var(--font-headings)] text-sm font-bold uppercase tracking-wide text-primary transition-colors duration-200 group-hover:text-accent">
+          {ctaText}
+          <Icon icon="fa6:arrow-right-long" size="sm" className="transition-transform duration-300 group-hover:translate-x-1" />
+        </span>
+      )
+    }
+  </div>
+</Tag>

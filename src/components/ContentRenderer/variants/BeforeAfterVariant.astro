@@ -1,0 +1,213 @@
+---
+// src/components/ContentRenderer/variants/BeforeAfterVariant.astro
+/**
+ * Before/After Variant — grid of stacked before/after project cards.
+ * Loops queried projects through BeforeAfterCard (Koi-style stacked design).
+ */
+import type { BaseVariantProps } from "../ContentRenderer.types";
+import BeforeAfterCard from "@/components/LoopComponents/BeforeAfterCard.astro";
+import Button from "@/components/Button/Button";
+import Icon from "@/components/Icon";
+import { shouldShowCollectionCTA } from "../utils/helpers";
+import SectionHeading from "@/components/SectionHeading.astro";
+
+interface Props extends BaseVariantProps {
+  columns?: 1 | 2 | 3 | 4;
+  pretitle?: string;
+  accentTitle?: string; // italic accent second line
+  dark?: boolean;
+  /** Force a static grid of every item instead of the >2-item carousel.
+   *  Use on index pages that want the full gallery laid out at once. */
+  grid?: boolean;
+}
+
+const {
+  items = [],
+  title,
+  heading,
+  description,
+  className = "",
+  columns = 3,
+  collectionUrl,
+  collectionTitle,
+  showButtonSection = true,
+  pretitle = "Recent Projects",
+  accentTitle,
+  dark = false,
+  grid = false,
+  id,
+} = Astro.props as Props;
+
+const safeItems = Array.isArray(items) ? items : [];
+
+const columnClasses = {
+  1: "grid-cols-1",
+  2: "grid-cols-1 md:grid-cols-2",
+  3: "grid-cols-1 md:grid-cols-2 lg:grid-cols-3",
+  4: "grid-cols-1 md:grid-cols-2 lg:grid-cols-4",
+};
+
+// More than two projects → carousel with prev/next arrows; otherwise a static
+// grid. Pass `grid` to always lay every item out in the static grid (no
+// carousel), e.g. on the projects index page. `columns` sets the grid width.
+const isCarousel = !grid && safeItems.length > 2;
+const carouselCols = Math.min(columns, 3) as 1 | 2 | 3;
+const itemBasis = {
+  1: "basis-full",
+  2: "basis-full md:basis-[calc(50%-15px)]",
+  3: "basis-full md:basis-[calc(50%-15px)] lg:basis-[calc(33.333%-20px)]",
+}[carouselCols];
+---
+
+<section id={id} class={`py-16 md:py-24 bg-bg ${className}`}>
+  <div class="container">
+    {(heading || title || description) && (
+      <SectionHeading heading={heading}
+        pretitle={pretitle}
+        title={title}
+        accentTitle={accentTitle}
+        pretitleClass={dark ? "!text-bg" : ""}
+        headingClass={dark ? "!text-bg" : ""}
+        class="py-8"
+      />
+    )}
+
+    {safeItems.length > 0 && !isCarousel && (
+      <ul class={`grid ${columnClasses[columns]} gap-[30px] list-none`}>
+        {safeItems.map((item) => (
+          <li>
+            <BeforeAfterCard {...item} />
+          </li>
+        ))}
+      </ul>
+    )}
+
+    {isCarousel && (
+      <div class="ba-carousel relative" data-ba-carousel>
+        {/* Prev / Next arrows */}
+        <button
+          type="button"
+          class="ba-arrow ba-arrow--prev"
+          data-ba-prev
+          aria-label="Previous projects"
+        >
+          <Icon icon="lu:chevron-left" size="md" />
+        </button>
+        <button
+          type="button"
+          class="ba-arrow ba-arrow--next"
+          data-ba-next
+          aria-label="Next projects"
+        >
+          <Icon icon="lu:chevron-right" size="md" />
+        </button>
+
+        <ul class="ba-track flex gap-[30px] list-none overflow-x-auto scroll-smooth snap-x snap-mandatory" data-ba-track>
+          {safeItems.map((item) => (
+            <li class={`ba-slide snap-start shrink-0 ${itemBasis}`}>
+              <BeforeAfterCard {...item} />
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
+
+    {showButtonSection && shouldShowCollectionCTA(collectionUrl, safeItems.length) && (
+      <div class="flex justify-center mt-12">
+        <Button variant="primary" size="lg" href={collectionUrl} rightIcon="lu:arrow-right">
+          {`View All ${collectionTitle || "Projects"}`.trim()}
+        </Button>
+      </div>
+    )}
+  </div>
+</section>
+
+<style>
+  /* Hide the native scrollbar; navigation is via the arrows. */
+  .ba-track {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding-bottom: 4px;
+  }
+  .ba-track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ba-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 9999px;
+    background: var(--color-bg, #fff);
+    color: var(--color-heading, #0a2540);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+    transition: background 0.2s, color 0.2s, opacity 0.2s, transform 0.2s;
+  }
+  .ba-arrow:hover {
+    background: var(--color-accent, #c8102e);
+    color: #fff;
+  }
+  .ba-arrow--prev {
+    left: -8px;
+  }
+  .ba-arrow--next {
+    right: -8px;
+  }
+  @media (min-width: 1024px) {
+    .ba-arrow--prev {
+      left: -24px;
+    }
+    .ba-arrow--next {
+      right: -24px;
+    }
+  }
+
+  /* Disabled at a scroll end. */
+  .ba-arrow[disabled] {
+    opacity: 0;
+    pointer-events: none;
+  }
+</style>
+
+<script>
+  function initBeforeAfterCarousels() {
+    const carousels = document.querySelectorAll<HTMLElement>("[data-ba-carousel]");
+    carousels.forEach((root) => {
+      if (root.dataset.baReady) return;
+      root.dataset.baReady = "true";
+
+      const track = root.querySelector<HTMLElement>("[data-ba-track]");
+      const prev = root.querySelector<HTMLButtonElement>("[data-ba-prev]");
+      const next = root.querySelector<HTMLButtonElement>("[data-ba-next]");
+      if (!track || !prev || !next) return;
+
+      // Scroll by one card (slide width + gap).
+      const step = () => {
+        const slide = track.querySelector<HTMLElement>(".ba-slide");
+        const gap = parseInt(getComputedStyle(track).columnGap || "30", 10) || 30;
+        return slide ? slide.offsetWidth + gap : track.clientWidth;
+      };
+
+      const update = () => {
+        const maxScroll = track.scrollWidth - track.clientWidth - 1;
+        prev.disabled = track.scrollLeft <= 0;
+        next.disabled = track.scrollLeft >= maxScroll;
+      };
+
+      prev.addEventListener("click", () => track.scrollBy({ left: -step(), behavior: "smooth" }));
+      next.addEventListener("click", () => track.scrollBy({ left: step(), behavior: "smooth" }));
+      track.addEventListener("scroll", update, { passive: true });
+      window.addEventListener("resize", update);
+      update();
+    });
+  }
+
+  initBeforeAfterCarousels();
+  document.addEventListener("astro:page-load", initBeforeAfterCarousels);
+</script>

@@ -1,0 +1,86 @@
+---
+// src/layouts/collections/ServiceIndexLayout.astro
+/**
+ * Service Index Layout — the roofing / solar line-of-business pages.
+ *
+ * These two differ from every other collection index: they open with the
+ * two-column hero (copy + quote form) from the legacy ServicesLayout, and then
+ * run the legacy band sequence — benefits → testimonials → projects → child
+ * services → Spanish CTA → types → FAQ.
+ *
+ * Split out of CollectionIndexLayout so that layout can stay the plain
+ * greastro default (hero + grid) for everything else.
+ */
+import type { CollectionKey } from "astro:content";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
+import ServiceHero from "@/layouts/ServiceHero.astro";
+import VideoSection from "@/layouts/VideoSection.astro";
+import RoofingForm from "@/components/Form/forms/RoofingForm.astro";
+import SolarForm from "@/components/Form/forms/SolarForm.astro";
+import QuoteForm from "@/components/Form/forms/QuoteForm.astro";
+import { query, sortByOrder } from "@/utils/query";
+import { related } from "@/utils/query/snippets";
+import { humanizeSlug } from "@/utils/string";
+import GoogleRating from "@/components/GoogleRating.astro";
+import SpanishSection from "@/components/SpanishSection.astro";
+
+export interface Props {
+  Content?: any;
+  collectionName: CollectionKey;
+  collectionMeta: any;
+  seoProps: any;
+  hasContent?: boolean;
+  [key: string]: any;
+}
+
+const {
+  Content,
+  collectionName,
+  collectionMeta,
+  seoProps,
+  hasContent = false,
+} = Astro.props;
+
+const { title: pageTitle, description: pageDescription } = seoProps;
+
+// Hero banner: `bannerImage` is the dedicated hero field (the legacy service
+// pages set their own hero photo), falling back to featuredImage.
+const heroImage = collectionMeta.bannerImage ?? collectionMeta.featuredImage;
+
+// `heroForm` in _meta.mdx selects which quote form sits beside the hero copy.
+const HERO_FORMS: Record<string, any> = {
+  roofing: RoofingForm,
+  solar: SolarForm,
+  quote: QuoteForm,
+};
+const HeroForm = HERO_FORMS[collectionMeta.heroForm] ?? QuoteForm;
+---
+
+<BaseLayout {...seoProps}>
+  <main class="flex-1">
+    {/* Two-column hero: copy + quote form, matching the legacy ServicesLayout. */}
+    <ServiceHero
+      eyebrow={`Koi ${humanizeSlug(collectionName)}`}
+      title={pageTitle}
+      heading={collectionMeta.heading}
+      description={pageDescription}
+      image={heroImage}
+    >
+      <GoogleRating
+        slot="belowDescription"
+        count="50+"
+        tone="dark"
+        class="justify-center lg:justify-start"
+      />
+      <HeroForm slot="aside" />
+    </ServiceHero>
+
+    {/* Custom MDX body from _meta.mdx, when present. */}
+    {hasContent && Content && <Content />}
+
+    {/* The section stack lives in each collection's _meta.mdx body (rendered
+        above), so the sections stay editable as content rather than being
+        hardcoded here. */}
+  </main>
+</BaseLayout>

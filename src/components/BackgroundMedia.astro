@@ -1,0 +1,124 @@
+---
+// src/components/BackgroundMedia.astro
+import { getImage } from "astro:assets";
+
+export interface Props {
+  backgroundMedia: {
+    image?: {
+      src: any;
+      imageClass?: string;
+      // Convenience prop for automatic optimization
+      aboveTheFold?: boolean; // Auto-sets priority, quality, eager loading
+      // Manual overrides (if needed)
+      priority?: boolean;
+      quality?: number;
+      loading?: 'eager' | 'lazy';
+    };
+    video?: {
+      src: string;
+      autoPlay?: boolean;
+      muted?: boolean;
+      loop?: boolean;
+      playsInline?: boolean;
+      controls?: boolean;
+      preload?: string;
+      videoClass?: string;
+    };
+    overlayClass?: string;
+  };
+}
+
+const { backgroundMedia } = Astro.props;
+
+// Automatic optimization based on position
+const aboveTheFold = backgroundMedia?.image?.aboveTheFold ?? false;
+
+// Defaults with smart overrides
+const priority = backgroundMedia?.image?.priority ?? aboveTheFold;
+const loading = backgroundMedia?.image?.loading ?? (aboveTheFold ? 'eager' : 'lazy');
+
+// Quality settings based on position
+// Above-the-fold: Lower quality (50-60%) - LCP optimization critical
+// Below-the-fold: Higher quality (65-75%) - User is scrolling to see it
+const qualitySettings = aboveTheFold
+  ? { mobile: 50, tablet: 55, desktop: 60 }
+  : { mobile: 65, tablet: 70, desktop: 75 };
+
+// Allow manual quality override
+const customQuality = backgroundMedia?.image?.quality;
+
+// Generate responsive images
+let responsiveImages = null;
+
+if (backgroundMedia?.image?.src) {
+  const rawSrc = backgroundMedia.image.src;
+  const isProcessedImage =
+    typeof rawSrc === 'object' &&
+    rawSrc !== null &&
+    typeof rawSrc.src === 'string';
+
+  if (!isProcessedImage && typeof rawSrc !== 'string') {
+    try {
+      const [mobile, tablet, desktop] = await Promise.all([
+        getImage({ src: rawSrc, format: "webp", quality: customQuality ?? qualitySettings.mobile, width: 640 }),
+        getImage({ src: rawSrc, format: "webp", quality: customQuality ?? qualitySettings.tablet, width: 1024 }),
+        getImage({ src: rawSrc, format: "webp", quality: customQuality ?? qualitySettings.desktop, width: 1920 }),
+      ]);
+      responsiveImages = { mobile, tablet, desktop };
+    } catch (error) {
+      console.error('Failed to optimize background image:', error);
+    }
+  } else {
+    const src = isProcessedImage ? rawSrc.src : rawSrc;
+    responsiveImages = { mobile: { src }, tablet: { src }, desktop: { src } };
+  }
+}
+---
+
+{backgroundMedia?.video?.src ? (
+  <video
+    class={`absolute inset-0 z-0 w-full h-full object-cover ${backgroundMedia.video.videoClass || ""}`}
+    autoplay={backgroundMedia.video.autoPlay !== false}
+    muted={backgroundMedia.video.muted !== false}
+    loop={backgroundMedia.video.loop !== false}
+    playsinline={backgroundMedia.video.playsInline !== false}
+    controls={backgroundMedia.video.controls || false}
+    preload={backgroundMedia.video.preload || "metadata"}
+    poster={responsiveImages?.mobile?.src || ""}
+    aria-hidden="true"
+  >
+    <source src={backgroundMedia.video.src} type="video/mp4" />
+    Your browser does not support the video tag.
+  </video>
+) : responsiveImages ? (
+  <picture class="absolute inset-0 z-0">
+    <source
+      media="(max-width: 640px)"
+      srcset={responsiveImages.mobile.src}
+      type="image/webp"
+    />
+    <source
+      media="(min-width: 641px) and (max-width: 1024px)"
+      srcset={responsiveImages.tablet.src}
+      type="image/webp"
+    />
+    <source
+      media="(min-width: 1025px)"
+      srcset={responsiveImages.desktop.src}
+      type="image/webp"
+    />
+    <img
+      src={responsiveImages.desktop.src}
+      alt=""
+      class={`w-full h-full object-cover ${backgroundMedia?.image?.imageClass || ""}`}
+      loading={loading}
+      fetchpriority={priority ? "high" : "auto"}
+      decoding={priority ? "sync" : "async"}
+      aria-hidden="true"
+    />
+  </picture>
+) : null}
+
+{backgroundMedia?.overlayClass && (
+  <div class={`absolute inset-0 z-0 ${backgroundMedia.overlayClass}`} aria-hidden="true"></div>
+)}

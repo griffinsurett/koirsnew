@@ -1,0 +1,16 @@
+---
+title: "Monmouth County"
+description: "Roofing and solar services for homeowners and businesses across Monmouth County, New Jersey."
+# No collection index — /monmouth-county was never a page on the legacy site.
+hasPage: false
+# Each entry IS a page, at its legacy top-level URL (e.g.
+# /roofing-monmouth-county) rather than /monmouth-county/roofing — these are
+# the site's established local-SEO landing pages and their URLs must not move.
+itemsHasPage: true
+itemsRootPath: true
+itemsLayout: "@/layouts/collections/MonmouthCountyLayout.astro"
+# Nav placement is declared per-page via `addToMenu` (not itemsAddToMenu here),
+# because each page needs its own short nav label — the legacy menu used
+# "Roofing Services", "Metal Roofing", etc. rather than the long SEO titles.
+# The URL-less "Monmouth County" parent lives in menu-items.json.
+---

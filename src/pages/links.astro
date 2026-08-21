@@ -1,0 +1,25 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import ContentRenderer from '@/components/ContentRenderer/ContentRenderer.astro';
+import { query, sortBy } from '@/utils/query';
+
+// Filter for links-menu
+const filterByLinksMenu = (entry: any) => {
+  const menus = entry.data.menu;
+  if (Array.isArray(menus)) {
+    return menus.some((m) => m.id === "links-menu");
+  }
+  return menus?.id === "links-menu";
+};
+---
+
+<BaseLayout title="Links" description="All my important links in one place" addToLLMs={false}>
+  <ContentRenderer
+    query={query("menu-items")
+      .where(filterByLinksMenu)
+      .orderBy(sortBy("order", "desc"))}
+    variant="LinkTreeVariant"
+    title="Links"
+    description="All my important links in one place"
+  />
+</BaseLayout>

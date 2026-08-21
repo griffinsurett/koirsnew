@@ -1,0 +1,186 @@
+---
+// src/layouts/SecondaryHero.astro
+/**
+ * Secondary Hero Layout
+ *
+ * Full-width hero with optimized background media support.
+ * The plain centered banner used by collection index, legal and blog pages.
+ * The two-column service hero (copy + quote form) lives in ServiceHero.astro.
+ *
+ * Features:
+ * - Responsive background images (mobile/tablet/desktop)
+ * - Automatic LCP optimization with aboveTheFold
+ * - Gradient overlay for text readability
+ * - Optional metadata display (date, author, reading time)
+ */
+
+import { getAuthorName } from "@/layouts/collections/helpers/layoutHelpers";
+import BackgroundMedia from "@/components/BackgroundMedia.astro";
+import SectionHeading from "@/components/SectionHeading.astro";
+import backgroundSvg from "@/assets/background.jpg";
+
+type Heading = string | { before?: string; text?: string; after?: string };
+
+export interface Props {
+  title: string;
+  /** Main H1 override (the sought-after heading). Falls back to `title`.
+   *  Supports a segmented form `{ before, text, after }` where `text` is the
+   *  emphasized segment. */
+  heading?: Heading;
+  eyebrow?: string;
+  description?: string;
+  image?: any; // Astro image asset or public path
+  publishDate?: Date | string;
+  author?: string | { collection: string; id: string };
+  readingTime?: number;
+  className?: string;
+  minHeight?: string;
+}
+
+const {
+  title,
+  heading,
+  eyebrow,
+  description,
+  image,
+  publishDate,
+  author,
+  readingTime,
+  className = "",
+  minHeight = "50vh",
+} = Astro.props;
+
+// The H1 prefers `heading` (string or segmented), falling back to `title`.
+const headingObj =
+  heading && typeof heading === "object" ? heading : undefined;
+const headingStr =
+  typeof heading === "string" && heading.trim() ? heading : undefined;
+
+// Prepare optimized background media
+const backgroundMedia = {
+  image: {
+    src: image || backgroundSvg,
+    imageClass: "filter brightness-50 bg-cover bg-center",
+    aboveTheFold: true, // Automatic LCP optimization
+  },
+  // Legacy service hero: navy at 60% over a brightness-50 photo.
+  overlayClass: "bg-primary opacity-60",
+};
+---
+
+<section class={`relative ${className}`}>
+  <div
+    class="relative flex items-center justify-center overflow-hidden shadow-lg"
+    style={`min-height: ${minHeight}`}
+  >
+    {/* Optimized background with overlay. Clipped here rather than on the
+        flex parent — an overflow on the parent would disable position:sticky
+        for the copy column. */}
+    <div class="absolute inset-0 overflow-hidden">
+      <BackgroundMedia backgroundMedia={backgroundMedia} />
+    </div>
+
+    {/* Hero content */}
+    <div class="relative container mx-auto px-4 py-16 md:py-24 z-10">
+      <div class="max-w-4xl mx-auto text-center text-bg">
+      <div>
+        <SectionHeading
+          headingTag="h1"
+          tone="dark"
+          align="center"
+          pretitle={eyebrow}
+          heading={headingObj ?? headingStr ?? title}
+          description={description}
+          class="!mb-0 !max-w-none"
+          pretitleClass="top-heading !text-accent !mb-0 py-[var(--spacing-sm)]"
+          headingClass="h1 !text-3xl md:!text-4xl lg:!text-5xl xl:!text-6xl !tracking-wider !text-bg py-[var(--spacing-sm)]"
+          descriptionClass="h4 !font-thin !text-text-light py-[var(--spacing-sm)]"
+        />
+
+        {/* Below the description, inside the copy column — the legacy service
+            hero's `belowDescription` slot, used for the Google review badge. */}
+        <slot name="belowDescription" />
+
+        {/* Metadata row with icons */}
+        {
+          (publishDate || author || readingTime) && (
+            <div class="flex flex-wrap justify-center gap-4 md:gap-6 text-sm md:text-base text-bg/90">
+              {publishDate && (
+                <time
+                  datetime={new Date(publishDate).toISOString()}
+                  class="flex items-center gap-2"
+                >
+                  <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                  {new Date(publishDate).toLocaleDateString()}
+                </time>
+              )}
+
+              {author && (
+                <span class="flex items-center gap-2">
+                  <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
+                  </svg>
+                  By {getAuthorName(author)}
+                </span>
+              )}
+
+              {readingTime && (
+                <span class="flex items-center gap-2">
+                  <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  {readingTime} min read
+                </span>
+              )}
+            </div>
+          )
+        }
+      </div>
+
+      </div>
+    </div>
+  </div>
+
+  {/* Optional slot for additional content below hero */}
+  <slot />
+</section>
+
+<style>
+  /* Ensure text is readable on all backgrounds */
+  h1,
+  p {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  }
+</style>

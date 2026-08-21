@@ -1,0 +1,26 @@
+---
+// src/components/LoopTemplates/Menu/MenuList.astro
+/**
+ * Menu List Component
+ *
+ * Renders <ul> wrapper for menu items.
+ * Handles styling for different nesting levels.
+ */
+import MenuItem from "@/components/LoopComponents/Menu/MenuItem.astro";
+
+export interface Props {
+  items: any[];
+  level?: number;
+}
+
+const { items = [], level = 0 } = Astro.props;
+const isTopLevel = level === 0;
+---
+
+<ul
+  class={isTopLevel
+    ? "flex items-center gap-2"
+    : "absolute left-0 top-full min-w-[200px] bg-bg shadow-lg rounded-lg py-2 z-50 border border-surface"}
+>
+  {items.map((item) => <MenuItem {...item} level={level} />)}
+</ul>

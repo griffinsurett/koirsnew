@@ -1,0 +1,78 @@
+---
+// src/components/ContentRenderer/variants/SocialMediaVariant.astro
+/**
+ * Social Media Variant - Social icon list
+ * Features: Horizontal/vertical layout, size variants, left/center/right alignment
+ */
+
+import type { BaseVariantProps } from "../ContentRenderer.types";
+import SocialIcon from "@/components/LoopComponents/SocialIcon.astro";
+
+interface Props extends BaseVariantProps {
+  size?: "sm" | "md" | "lg";
+  layout?: "horizontal" | "vertical";
+  alignment?: "left" | "center" | "right";
+  /** Per-icon wrapper override — passing this drops the chip background. */
+  itemClass?: string;
+  /** Per-glyph override, e.g. "text-current !h-8 !w-auto". */
+  iconClass?: string;
+}
+
+const {
+  items = [],
+  title,
+  description,
+  className = "",
+  size = "md",
+  layout = "horizontal",
+  alignment = "center",
+  itemClass,
+  iconClass,
+  id,
+} = Astro.props as Props;
+
+const alignmentClasses = {
+  left: "justify-start",
+  center: "justify-center",
+  right: "justify-end",
+};
+
+const layoutClasses = {
+  horizontal: "flex-row",
+  vertical: "flex-col",
+};
+---
+
+<div id={id} class={`${className}`}>
+  {
+    (title || description) && (
+      <div class={`mb-6`}>
+        {title && (
+          <h3 class="text-2xl text-heading text-left font-bold">
+            {title}
+          </h3>
+        )}
+        {description && <p class="text-text">{description}</p>}
+      </div>
+    )
+  }
+
+  {
+    items.length > 0 && (
+      <ul
+        class={`flex ${layoutClasses[layout]} ${alignmentClasses[alignment]} items-center gap-2 sm:gap-4 list-none flex-wrap m-0 p-0`}
+      >
+        {items.map((item) => (
+          <li>
+            <SocialIcon
+              {...item}
+              size={size}
+              class={itemClass}
+              iconClass={iconClass}
+            />
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</div>

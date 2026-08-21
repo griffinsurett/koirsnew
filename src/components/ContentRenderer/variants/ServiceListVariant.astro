@@ -1,0 +1,106 @@
+---
+// src/components/ContentRenderer/variants/ServiceListVariant.astro
+/**
+ * Service List Variant — the "Explore Our {line} Services" band from the 2025
+ * site: a photo on the left with a two-column list of titled services beside
+ * it, on the light background.
+ *
+ * Ported from the legacy `listSection` variant + its wrapper Section in
+ * ServicesLayout. The legacy values, kept verbatim:
+ *   • band        — light bg, centered container, `section-md` rhythm
+ *   • heading     — `.h2 text-primary uppercase`, small vertical padding
+ *   • image       — `lg:w-1/3`, rounded, lazy, low fetch priority
+ *   • list        — `lg:w-2/3`, `grid-cols-1 sm:grid-cols-2`, xl gap
+ *   • item        — `.h4 text-primary` title over `text-lg` copy, left aligned
+ *
+ * Items render title + description (the legacy ListItem), NOT icons — the
+ * titles are the point of this band.
+ */
+import type { BaseVariantProps } from "../ContentRenderer.types";
+import { Image } from "astro:assets";
+import SectionHeading from "@/components/SectionHeading.astro";
+import { resolveImageMetadata } from "@/utils/images";
+
+interface Props extends BaseVariantProps {
+  /** Photo beside the list. Astro asset or public path. */
+  image?: any;
+  imageAlt?: string;
+  /** Put the image on the right instead of the left. */
+  reverse?: boolean;
+}
+
+const {
+  items = [],
+  title,
+  heading,
+  pretitle,
+  description,
+  className = "",
+  image,
+  imageAlt = "",
+  reverse = false,
+  id,
+} = Astro.props as Props;
+
+const safeItems = Array.isArray(items) ? items : [];
+const media = resolveImageMetadata(image);
+---
+
+<section
+  id={id}
+  class={`bg-bg w-full flex flex-col justify-center items-center py-[var(--spacing-2xl)] ${className}`}
+>
+  <div class="container mx-auto px-4 flex flex-col justify-center items-center text-center lg:gap-[var(--spacing-xl)]">
+    {/* Legacy heading: uppercase primary, tight vertical padding. */}
+    <SectionHeading
+      pretitle={pretitle}
+      heading={heading}
+      title={title}
+      gradient={false}
+      headingClass="!text-primary uppercase py-[var(--spacing-xs)]"
+    />
+
+    <div
+      class:list={[
+        "w-full flex justify-center items-start gap-[var(--spacing-xl)]",
+        reverse ? "flex-col-reverse lg:flex-row-reverse" : "flex-col lg:flex-row",
+      ]}
+    >
+      {media && (
+        <Image
+          src={media}
+          alt={imageAlt}
+          class="w-full lg:w-1/3 sticky-section h-auto object-cover border-radius"
+          loading="lazy"
+          decoding="async"
+          quality="mid"
+          fetchpriority="low"
+        />
+      )}
+
+      {safeItems.length > 0 && (
+        <ul
+          class:list={[
+            "list-none w-full grid grid-cols-1 sm:grid-cols-2 gap-[var(--spacing-xl)] py-[var(--spacing-md)]",
+            media ? "lg:w-2/3" : "",
+          ]}
+        >
+          {safeItems.map((item: any) => (
+            <li>
+              <article class="flex flex-col items-start justify-start">
+                <h3 class="h4 text-left text-primary m-0">
+                  {item.title ?? item.data?.title}
+                </h3>
+                {(item.description ?? item.data?.description) && (
+                  <p class="text-text text-left text-lg m-0">
+                    {item.description ?? item.data?.description}
+                  </p>
+                )}
+              </article>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  </div>
+</section>

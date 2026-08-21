@@ -1,0 +1,222 @@
+---
+// src/layouts/collections/BlogIndexLayout.astro
+/**
+ * Blog Index Layout
+ *
+ * Template blog index with reusable query-param pagination.
+ * Supports URLs like: /blog?page=2
+ */
+
+import { type CollectionKey } from "astro:content";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import SecondaryHero from "@/layouts/SecondaryHero.astro";
+import QueryParamPagination from "@/components/Pagination/QueryParamPagination.astro";
+import { prepareCollectionEntries } from "@/utils/collections";
+import { find, query, sortByDate } from "@/utils/query";
+import { humanizeSlug, normalizeRef } from "@/utils/string";
+import { getImageSrc } from "./helpers/layoutHelpers";
+
+export interface Props {
+  Content?: any;
+  collectionName: CollectionKey;
+  collectionMeta: any;
+  seoProps: any;
+  hasContent?: boolean;
+  [key: string]: any;
+}
+
+const {
+  Content,
+  collectionName,
+  collectionMeta,
+  seoProps,
+  hasContent = false,
+} = Astro.props as Props;
+
+const { title: pageTitle, description: pageDescription } = seoProps;
+const heroImage = collectionMeta.featuredImage;
+
+const authorNameCache = new Map<string, string>();
+async function getAuthorName(authorRef: unknown): Promise<string | null> {
+  const authorId = normalizeRef(authorRef);
+  if (!authorId || authorId === "[object Object]") return null;
+  if (authorNameCache.has(authorId)) return authorNameCache.get(authorId) ?? null;
+
+  let label = authorId;
+  try {
+    const authorEntry = await find("authors", authorId);
+    if (authorEntry?.data?.title) label = String(authorEntry.data.title);
+  } catch {}
+
+  authorNameCache.set(authorId, label);
+  return label;
+}
+
+const blogEntries = (
+  await query(collectionName)
+    .orderBy(sortByDate("publishDate", "desc"))
+    .get()
+).entries;
+
+const preparedEntries = await prepareCollectionEntries(
+  blogEntries,
+  collectionName,
+  collectionMeta
+);
+
+const feedPosts = await Promise.all(
+  preparedEntries.map(async (item) => {
+    const authorRefs = item.author
+      ? Array.isArray(item.author)
+        ? item.author
+        : [item.author]
+      : [];
+
+    const authorNames = (
+      await Promise.all(authorRefs.map((authorRef) => getAuthorName(authorRef)))
+    ).filter((authorName): authorName is string => Boolean(authorName));
+
+    return {
+      id: item.id,
+      url: item.url || `/blog/${item.id}`,
+      title: String(item.title ?? ""),
+      description: item.description ? String(item.description) : "",
+      publishDate: item.publishDate as Date | string | undefined,
+      featuredImageSrc: getImageSrc(item.featuredImage),
+      featuredImageAlt: item.featuredImage?.alt || item.title || "Blog post image",
+      tags: Array.isArray(item.tags) ? item.tags : [],
+      authorNames,
+    };
+  })
+);
+
+const recentPosts = feedPosts.slice(0, 6);
+const blogPaginationId = "blog-index-feed";
+const pageSize = 10;
+const totalPosts = feedPosts.length;
+---
+
+<BaseLayout {...seoProps}>
+  <main class="flex-1">
+    <SecondaryHero
+      eyebrow={humanizeSlug(collectionName)}
+      title={pageTitle}
+      heading={collectionMeta.heading}
+      description={pageDescription}
+      image={heroImage}
+      minHeight="50vh"
+    />
+
+    <div class="container mx-auto px-4 pb-16 pt-10">
+      {hasContent && Content ? <div class="mb-10"><Content /></div> : null}
+
+      <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,2fr)_320px] gap-10">
+        <section aria-label="Blog posts" class="space-y-8">
+          <h2 class="text-3xl md:text-4xl font-bold text-heading">Recent Posts</h2>
+
+          {feedPosts.length > 0 ? (
+            <div
+              class="space-y-6"
+              data-pagination-feed={blogPaginationId}
+              data-page-size={pageSize}
+            >
+              {feedPosts.map((post) => (
+                <article
+                  data-pagination-item
+                  class="bg-bg border border-surface rounded-xl overflow-hidden shadow-sm"
+                >
+                  {post.featuredImageSrc && (
+                    <a href={post.url} class="block">
+                      <img
+                        src={post.featuredImageSrc}
+                        alt={post.featuredImageAlt}
+                        class="w-full h-56 object-cover"
+                        loading="lazy"
+                      />
+                    </a>
+                  )}
+
+                  <div class="p-6">
+                    <h3 class="text-2xl font-bold text-heading leading-tight">
+                      <a href={post.url} class="hover:text-primary transition-colors">
+                        {post.title}
+                      </a>
+                    </h3>
+
+                    <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-text">
+                      {post.publishDate && (
+                        <time datetime={new Date(post.publishDate).toISOString()}>
+                          {new Date(post.publishDate).toLocaleDateString("en-US", {
+                            month: "long",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
+                        </time>
+                      )}
+
+                      {post.authorNames.length > 0 && (
+                        <span>By {post.authorNames.slice(0, 1).join(", ")}</span>
+                      )}
+
+                      {post.tags.length > 0 && (
+                        <span>{post.tags.slice(0, 2).join(", ")}</span>
+                      )}
+                    </div>
+
+                    {post.description && (
+                      <p class="mt-4 text-text leading-relaxed">{post.description}</p>
+                    )}
+
+                    <div class="mt-6">
+                      <a
+                        href={post.url}
+                        class="inline-flex items-center justify-center px-5 py-2.5 rounded-md bg-primary text-white font-semibold hover:opacity-90 transition-opacity"
+                      >
+                        Read More
+                      </a>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <p class="text-text">No posts found.</p>
+          )}
+
+          <QueryParamPagination
+            totalItems={totalPosts}
+            pageSize={pageSize}
+            paginationId={blogPaginationId}
+            queryParam="page"
+            ariaLabel="Blog pagination"
+          />
+        </section>
+
+        <aside aria-label="Recent blog posts" class="space-y-4 lg:sticky lg:top-28 h-max">
+          <div class="bg-bg border border-surface rounded-xl p-5">
+            <h3 class="text-2xl font-bold text-heading mb-4">Recent Posts</h3>
+
+            {recentPosts.length > 0 ? (
+              <ul class="space-y-4">
+                {recentPosts.map((post) => (
+                  <li class="pb-3 border-b border-surface last:border-b-0 last:pb-0">
+                    <a href={post.url} class="text-heading hover:text-primary transition-colors">
+                      {post.title}
+                    </a>
+                    {post.publishDate && (
+                      <p class="text-sm text-text mt-1">
+                        {new Date(post.publishDate).toLocaleDateString("en-US")}
+                      </p>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p class="text-text">No recent posts yet.</p>
+            )}
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+</BaseLayout>

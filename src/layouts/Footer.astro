@@ -1,0 +1,112 @@
+---
+// src/layouts/Footer.astro
+/**
+ * Footer Component
+ *
+ * Site-wide footer with:
+ * - Copyright notice
+ * - Social media links
+ * - Legal links (Privacy Policy, Cookie Policy)
+ * - Cookie preferences button (client-side)
+ * - Reading preferences button (client-side)
+ */
+import { siteData } from "@/content/siteData";
+import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
+import { query, related, roots } from "@/utils/query";
+import PreferencesLayout from "./PreferencesLayout.astro";
+// Cookie preferences UI is disabled site-wide (AGENTS.md) — the legacy site
+// shipped no consent banner, so there is nothing to manage.
+// import CookiePreferencesButton from "@/integrations/preferences/consent/ui/CookiePreferencesButton";
+import { businessHours } from "@/content/siteData";
+import { getContactLinks } from "@/utils/contactLinks";
+import { Image } from "astro:assets";
+import KoiLogo from "@/assets/koi/logowwords.png";
+
+const contactLinks = await getContactLinks();
+---
+
+<footer class="bg-text text-bg mt-auto">
+  <div class="mx-auto">
+    {/* Brand, contact facts and business hours — the legacy footer's first
+        column. Hours come from siteData.businessHours (the same array the
+        business schema reads), so the two can't drift. */}
+    <div class="grid gap-8 py-10 px-6 md:grid-cols-3 max-w-6xl mx-auto w-full">
+      <div class="flex flex-col gap-4">
+        <Image
+          src={KoiLogo}
+          alt={`${siteData.title} logo`}
+          class="h-20 w-auto object-contain"
+          widths={[240]}
+          loading="lazy"
+        />
+        <p class="text-base opacity-90">{siteData.description}</p>
+      </div>
+
+      <div class="flex flex-col gap-2 text-sm">
+        <h2 class="font-semibold mb-1">Contact</h2>
+        {contactLinks.map((c) => (
+          <a href={c.href} class="hover:underline opacity-90">
+            {c.displayValue ?? c.value}
+          </a>
+        ))}
+      </div>
+
+      <div class="flex flex-col gap-2 text-sm">
+        <h2 class="font-semibold mb-1">Business Hours</h2>
+        {businessHours.map((h) => (
+          <p class="opacity-90 mb-0">{h.days}: {h.hours}</p>
+        ))}
+      </div>
+    </div>
+
+    {/* Service Areas — the legacy footer listed the top-level regions here,
+        the entry point into the 577-entry service-areas tree. */}
+    <div class="w-full text-center py-4">
+      <h2 class="font-semibold mb-1">Service Areas</h2>
+      <ContentRenderer
+        query={roots("service-areas")}
+        variant="ListVariant"
+        className="text-bg flex flex-wrap justify-center gap-4 text-sm"
+      />
+    </div>
+
+    <div class="flex flex-col justify-between items-center gap-6 py-4 w-full">
+      {/* Footer navigation links */}
+      <div class="flex flex-wrap items-center justify-center gap-4 text-sm">
+        <ContentRenderer
+          query={related("menu-items", "menu", "footer-menu")}
+          variant="ListVariant"
+          className="text-bg flex"
+        />
+      </div>
+
+      {/* Legal & privacy links — with the cookie-preferences control rendered
+          inline as part of the legal links (not a separate preferences bar). */}
+      <div class="flex flex-wrap items-center justify-center gap-4 text-sm">
+        <ContentRenderer
+          query={query("legal")}
+          variant="ListVariant"
+          className="text-bg flex"
+        />
+        {/* Scripts + cookie banner only — the visible cookie-preferences control
+            lives in the legal links above. */}
+        <PreferencesLayout showButtons={false} />
+      </div>
+
+      {/* Social media icons */}
+      <ContentRenderer
+        query={query("social-media")}
+        variant="SocialMediaVariant"
+        size="md"
+        alignment="left"
+        className="text-bg"
+      />
+
+      {/* Copyright notice */}
+      <p class="text-bg text-base">
+        &copy; {new Date().getFullYear()}
+        {siteData.legalName}. All rights reserved.
+      </p>
+    </div>
+  </div>
+</footer>

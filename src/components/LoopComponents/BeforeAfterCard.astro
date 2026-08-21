@@ -1,0 +1,72 @@
+---
+// src/components/LoopComponents/BeforeAfterCard.astro
+/**
+ * BeforeAfterCard — stacked before/after project card (ported from
+ * KoiRoofandSolar's ClientBeforeAfterCard, rebuilt as a native Astro loop
+ * component for GReAstro).
+ *
+ * Renders BEFORE stacked above AFTER (each half-height, full-cover), with
+ * corner badges. Falls back to a single featuredImage when before/after
+ * aren't both present. Links to the item page when it has one.
+ */
+import { Image } from "astro:assets";
+
+const { title, beforeImage, afterImage, featuredImage, url, hasPage } =
+  Astro.props as Record<string, any>;
+
+const unwrap = (img: any) =>
+  !img ? null : typeof img === "string" ? null : img.src ? img : null;
+
+const before = unwrap(beforeImage);
+const after = unwrap(afterImage);
+const featured = unwrap(featuredImage);
+const hasBoth = before && after;
+
+const isLink = Boolean(hasPage && url);
+const Tag = isLink ? "a" : "div";
+const linkProps = isLink ? { href: url } : {};
+---
+
+<article class="before-after-card group relative overflow-hidden rounded shadow hover:shadow-lg transition-shadow flex flex-col h-96">
+  <Tag class="flex flex-col h-full w-full" {...linkProps}>
+    {hasBoth ? (
+      <>
+        <div class="relative flex-1 overflow-hidden">
+          <Image
+            src={before}
+            alt={`${title} — Before`}
+            class="w-full h-full object-cover"
+            widths={[640, 960]}
+            sizes="(max-width: 768px) 95vw, 45vw"
+          />
+          <span class="absolute top-2 left-2 bg-secondary text-bg text-sm uppercase px-2 py-1 rounded">
+            Before
+          </span>
+        </div>
+        <div class="relative flex-1 overflow-hidden">
+          <Image
+            src={after}
+            alt={`${title} — After`}
+            class="w-full h-full object-cover"
+            widths={[640, 960]}
+            sizes="(max-width: 768px) 95vw, 45vw"
+          />
+          <span class="absolute bottom-2 right-2 bg-secondary text-bg text-sm uppercase px-2 py-1 rounded">
+            After
+          </span>
+        </div>
+      </>
+    ) : featured ? (
+      <div class="relative flex-1 overflow-hidden">
+        <Image
+          src={featured}
+          alt={title}
+          class="w-full h-full object-cover"
+          widths={[640, 960]}
+          sizes="(max-width: 768px) 95vw, 45vw"
+        />
+      </div>
+    ) : null}
+  </Tag>
+</article>
+

@@ -1,0 +1,43 @@
+---
+// src/integrations/preferences/ui/consent/components/PrivacyPolicy/LastUpdated.astro
+/**
+ * Last Updated Component
+ *
+ * Displays the effective date and/or last updated date for legal documents.
+ * Can show either a single date or both dates for maximum legal safety.
+ *
+ * Props:
+ * - lastUpdated: The date the document was last modified (required)
+ * - effectiveDate: The date the policy takes effect (optional)
+ * - className: Optional additional CSS classes
+ *
+ * Usage:
+ *   // Single date (simpler approach)
+ *   <LastUpdated lastUpdated="January 14, 2025" />
+ *
+ *   // Both dates (safest legal approach)
+ *   <LastUpdated
+ *     lastUpdated="November 14, 2025"
+ *     effectiveDate="December 14, 2025"
+ *   />
+ */
+
+interface Props {
+  lastUpdated: string;
+  effectiveDate?: string;
+  className?: string;
+}
+
+const { lastUpdated, effectiveDate, className = "" } = Astro.props;
+---
+
+<div class={`text-sm text-text space-y-1 ${className}`}>
+  <p><em>Last Updated:</em> {lastUpdated}</p>
+  {
+    effectiveDate && (
+      <p>
+        <em>Effective Date:</em> {effectiveDate}
+      </p>
+    )
+  }
+</div>

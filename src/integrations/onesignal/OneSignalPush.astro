@@ -1,0 +1,53 @@
+---
+// src/integrations/onesignal/OneSignalPush.astro
+/**
+ * OneSignal Web Push integration (available by default, disabled by default).
+ *
+ * It only runs when BOTH IDs are provided:
+ * - PUBLIC_ONESIGNAL_APP_ID
+ * - PUBLIC_ONESIGNAL_SAFARI_WEB_ID
+ *
+ * Integration is consent-gated with data-consent="targeting".
+ */
+
+const ONESIGNAL_APP_ID = import.meta.env.PUBLIC_ONESIGNAL_APP_ID?.trim();
+const ONESIGNAL_SAFARI_WEB_ID =
+  import.meta.env.PUBLIC_ONESIGNAL_SAFARI_WEB_ID?.trim();
+const ONESIGNAL_NOTIFY_BUTTON =
+  (import.meta.env.PUBLIC_ONESIGNAL_NOTIFY_BUTTON ?? "true") !== "false";
+
+const hasOneSignalConfig = Boolean(ONESIGNAL_APP_ID && ONESIGNAL_SAFARI_WEB_ID);
+---
+
+{hasOneSignalConfig && (
+  <>
+    <script
+      type="text/plain"
+      data-consent="targeting"
+      src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js"
+      defer
+    />
+
+    <script
+      type="text/plain"
+      data-consent="targeting"
+      is:inline
+      define:vars={{
+        ONESIGNAL_APP_ID,
+        ONESIGNAL_SAFARI_WEB_ID,
+        ONESIGNAL_NOTIFY_BUTTON,
+      }}
+    >
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      window.OneSignalDeferred.push(async function (OneSignal) {
+        await OneSignal.init({
+          appId: ONESIGNAL_APP_ID,
+          safari_web_id: ONESIGNAL_SAFARI_WEB_ID,
+          notifyButton: {
+            enable: ONESIGNAL_NOTIFY_BUTTON,
+          },
+        });
+      });
+    </script>
+  </>
+)}

@@ -1,0 +1,144 @@
+---
+// src/layouts/VideoSection.astro
+/**
+ * Video Section — a video beside a content slot, usable in both directions.
+ *
+ * Replaces the forced 50/50 split of the legacy `imageCol` band. The problem
+ * with 50/50: Koi's clips are 720x1280 portrait (9:16), so a half-width column
+ * (~576px on desktop) renders them ~1024px tall and the whole section balloons.
+ *
+ * Instead the video is capped to a sane width and keeps its natural aspect,
+ * while the content slot takes whatever width is left. Layout is driven by
+ * `flex-none` on the media + `flex-1 min-w-0` on the copy — no percentage
+ * widths — so a landscape clip and a portrait clip both sit correctly.
+ *
+ * Used by: the homepage About band (copy right, video left via `reverse`) and
+ * the reversed icon-list band.
+ */
+import VideoCard from "@/components/Video/VideoCard.astro";
+
+interface Props {
+  /** Public path to the video, e.g. "/koirands-intro.mp4". */
+  video: string;
+  /** Poster image shown before playback. */
+  poster?: string;
+  /** Put the media on the right (copy on the left). */
+  reverse?: boolean;
+  /** Max width of the media column. */
+  mediaMaxWidth?: string;
+  /** Max height of the video. This is the primary control for portrait clips:
+   *  a 9:16 video capped only by width is still ~1.8x taller than it is wide. */
+  mediaMaxHeight?: string;
+  /** Height cap from `lg` up. Mobile is width-driven, so it keeps the
+   *  smaller `mediaMaxHeight`. */
+  mediaMaxHeightLg?: string;
+  /** Top-align the columns (default, matching 2025's `items-start`) or center
+   *  the copy against the video. */
+  align?: "center" | "start";
+  className?: string;
+  id?: string;
+  controls?: boolean;
+  autoplay?: boolean;
+  loop?: boolean;
+  muted?: boolean;
+}
+
+const {
+  video,
+  poster,
+  reverse = false,
+  mediaMaxWidth = "clamp(280px, 32vw, 460px)",
+  /** Desktop-only height ceiling — mobile keeps `mediaMaxHeight`. */
+  mediaMaxHeightLg = "clamp(600px, 78vh, 760px)",
+  mediaMaxHeight = "420px",
+  align = "start",
+  className = "",
+  id,
+  controls = true,
+  autoplay = false,
+  loop = false,
+  muted = false,
+} = Astro.props as Props;
+---
+
+<section id={id} class={`bg-bg text-text py-16 ${className}`}>
+  <div class="container mx-auto px-4">
+    <div
+      class:list={[
+        "flex flex-col gap-10 lg:gap-16",
+        align === "center" ? "lg:items-center" : "lg:items-start",
+        reverse ? "lg:flex-row-reverse" : "lg:flex-row",
+      ]}
+    >
+      {/* Media — flex-none so it keeps its own width and natural height
+          instead of being stretched to half the row. */}
+      <div
+        class="video-section-media w-fit max-w-full flex-none mx-auto lg:mx-0 sticky-section"
+        style={`--media-max: ${mediaMaxWidth}; --media-max-h: ${mediaMaxHeight}; --media-max-h-lg: ${mediaMaxHeightLg};`}
+      >
+        {/* Shared VideoCard — same click-to-play overlay as the testimonial
+            videos. `natural` keeps the clip's own aspect so the section still
+            sizes by max-height rather than a forced ratio. */}
+        <VideoCard
+          video={video}
+          videoAspect="natural"
+          showCaption={false}
+          class="w-fit max-w-full mx-auto rounded-2xl shadow-md overflow-hidden"
+        />
+      </div>
+
+      {/* Content — takes the remaining width. min-w-0 lets long copy wrap
+          rather than forcing the row wider than the container. */}
+      <div class="flex-1 min-w-0 w-full text-center lg:text-left sticky-section">
+        <slot />
+      </div>
+    </div>
+
+    {/* Full-width row beneath both columns (e.g. the Who-We-Serve tiers).
+        Spaced well clear of the media/copy row so it reads as its own band. */}
+    {Astro.slots.has("below") && (
+      <div class="w-full mt-[var(--spacing-2xl)] lg:mt-[var(--spacing-3xl)]">
+        <slot name="below" />
+      </div>
+    )}
+  </div>
+</section>
+
+<style>
+  /* The cap only applies once the row goes horizontal; on mobile the video is
+     full-width like every other stacked band. */
+  @media (min-width: 1024px) {
+    .video-section-media {
+      max-width: var(--media-max);
+    }
+  }
+
+  /* Let the video keep its own aspect, but cap the height so a portrait clip
+     can't run away with the section. width:auto lets the box shrink to match
+     the capped height instead of leaving letterbox gaps. */
+  .video-section-media :global(video) {
+    height: auto;
+    width: auto;
+    max-width: 100%;
+    max-height: var(--media-max-h);
+    margin-inline: auto;
+    display: block;
+  }
+
+  /* Desktop gets a taller ceiling; mobile height is driven by the container
+     width, so it keeps the smaller cap above. */
+  @media (min-width: 1024px) {
+    .video-section-media :global(video) {
+      max-height: var(--media-max-h-lg);
+    }
+  }
+
+  /* The card must shrink to the video's real width. Left at w-full it stays
+     the full column width while the height cap makes the video narrower,
+     leaving dark gaps down both sides of a portrait clip. */
+  .video-section-media :global(.video-card) {
+    width: fit-content;
+    max-width: 100%;
+    margin-inline: auto;
+  }
+</style>

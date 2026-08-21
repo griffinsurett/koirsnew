@@ -1,0 +1,72 @@
+---
+// src/components/ContentRenderer/variants/ListVariant.astro
+/**
+ * List Variant - Vertical stack of links
+ * Features: Simple list of links using Button component
+ */
+
+import type { BaseVariantProps } from "../ContentRenderer.types";
+import SectionHeading from "@/components/SectionHeading.astro";
+import Button from "@/components/Button/Button";
+import { shouldShowCollectionCTA } from "../utils/helpers";
+
+type Props = BaseVariantProps;
+
+const {
+  items = [],
+  title,
+  heading,
+  description,
+  className = "",
+  collectionUrl,
+  collectionTitle,
+  id,
+} = Astro.props as Props;
+
+const viewAllText = `See Complete ${collectionTitle || "List"}`;
+---
+
+<section id={id} class={`py-16 ${className}`}>
+  {
+    (title || description) && (
+      <div class="mb-12">
+        <SectionHeading heading={heading} title={title} description={description} />
+      </div>
+    )
+  }
+
+  {
+    items.length > 0 && (
+      <nav class="flex flex-wrap gap-2 list-none">
+        {items.map((item) => (
+            <Button href={item.url} className="text-bg" variant="link">
+              {item.title}
+            </Button>
+        ))}
+      </nav>
+    )
+  }
+
+  {
+    shouldShowCollectionCTA(collectionUrl, items.length) && (
+      <div class="mt-12">
+        <Button href={collectionUrl} variant="tertiary">
+          {viewAllText}
+          <svg
+            class="ml-2 w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M17 8l4 4m0 0l-4 4m4-4H3"
+            />
+          </svg>
+        </Button>
+      </div>
+    )
+  }
+</section>

@@ -1,0 +1,73 @@
+---
+// src/components/LoopComponents/MasonryCard.astro
+/**
+ * Masonry Card Component
+ *
+ * Variable-height card for masonry/Pinterest-style layouts.
+ * Features:
+ * - Auto-sizing image
+ * - Compact design
+ * - Tags support
+ * - break-inside-avoid for proper masonry flow
+ *
+ * Used in MasonryVariant for testimonials, portfolios, galleries.
+ */
+
+export interface Props {
+  title: string;
+  url?: string;
+  description?: string;
+  tags?: string[];
+  image?: {
+    src: string;
+    alt: string;
+  };
+}
+
+const { title, url, description, tags, image } = Astro.props;
+---
+
+<article
+  class="break-inside-avoid mb-6 bg-bg rounded-lg overflow-hidden shadow-md hover:-translate-y-1 hover:shadow-lg transition-all duration-200"
+>
+  {/* Auto-height image */}
+  {image && <img src={image.src} alt={image.alt} class="w-full h-auto block" />}
+
+  <div class="p-5">
+    {/* Title */}
+    <h3 class="text-lg font-semibold mb-2">
+      {
+        url ? (
+          <a
+            href={url}
+            class="text-heading hover:text-primary transition-colors"
+          >
+            {title}
+          </a>
+        ) : (
+          <span>{title}</span>
+        )
+      }
+    </h3>
+
+    {/* Description */}
+    {
+      description && (
+        <p class="text-text text-sm leading-relaxed">{description}</p>
+      )
+    }
+
+    {/* Tags */}
+    {
+      tags && Array.isArray(tags) && tags.length > 0 && (
+        <div class="mt-3 flex flex-wrap gap-1">
+          {tags.map((tag: string) => (
+            <span class="text-xs bg-text/5 text-text px-2 py-1 rounded">
+              {tag}
+            </span>
+          ))}
+        </div>
+      )
+    }
+  </div>
+</article>

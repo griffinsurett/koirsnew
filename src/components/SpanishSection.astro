@@ -1,0 +1,43 @@
+---
+// src/components/SpanishSection.astro
+/**
+ * Spanish CTA band — "¡Hablamos Español!" with a click-to-call button.
+ *
+ * Ports the legacy <SpanishSection /> (2025 site) exactly: it was a `media2`
+ * section, which means the Koi roofing/solar video plays behind a navy tint at
+ * 80%, the headline is `.h2` (thin + wide-tracked) uppercase, and the line of
+ * reassurance is large italic. The CTA is the shared `secondary` (amber)
+ * button with a phone glyph on the left.
+ *
+ * MediaBand already encodes the media2 defaults (opacity-80 overlay, uppercase
+ * heading, `text-lg md:text-3xl italic` description), so this composes it
+ * rather than re-implementing the band.
+ */
+import { getCollection } from "astro:content";
+import { formatPhoneNumber } from "@/utils/string";
+import MediaBand from "@/components/MediaBand.astro";
+
+const contact = await getCollection("contact-us");
+const phoneEntry = contact.find((entry: any) =>
+  entry.data?.tags?.includes("phone")
+);
+const rawPhone = phoneEntry?.data?.value ?? "";
+const phoneDisplay = rawPhone ? formatPhoneNumber(rawPhone) : "";
+---
+
+<MediaBand
+  heading="¡Hablamos Español!"
+  description="Nuestro equipo está listo para atenderle en su idioma. ¡Llámanos ahora!"
+  video="/roofingandsolarvid-smaller.webm"
+  overlayClass="bg-primary opacity-80"
+  buttons={rawPhone
+    ? [
+        {
+          text: `Llámanos ${phoneDisplay}`,
+          link: `tel:${rawPhone}`,
+          variant: "secondary",
+          leftIcon: "fa6:phone",
+        },
+      ]
+    : []}
+/>

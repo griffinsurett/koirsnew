@@ -1,0 +1,66 @@
+---
+// src/components/ContentRenderer/variants/ImageCardVariant.astro
+/**
+ * Image Card Variant — image-forward card grid (centered text under a large
+ * rounded image). Driven by a collection query. Used for the additional
+ * services (decking, siding) section.
+ */
+import type { BaseVariantProps } from "../ContentRenderer.types";
+import ImageCard from "@/components/LoopComponents/ImageCard.astro";
+import SectionHeading from "@/components/SectionHeading.astro";
+
+interface Props extends BaseVariantProps {
+  pretitle?: string;
+  /** Red accent phrase appended after the title (matches the site's heading style). */
+  accentTitle?: string;
+  columns?: 2 | 3 | 4;
+}
+
+const {
+  items = [],
+  title,
+  heading,
+  accentTitle,
+  description,
+  pretitle,
+  className = "",
+  columns = 3,
+  id,
+} = Astro.props as Props;
+
+const columnClasses = {
+  2: "grid-cols-1 md:grid-cols-2",
+  3: "grid-cols-1 md:grid-cols-2 lg:grid-cols-3",
+  4: "grid-cols-1 md:grid-cols-2 lg:grid-cols-4",
+};
+
+// An even item count divides cleanly into 2 columns, which leaves no orphan on
+// the last row — 4 items as 2x2 reads better than 3+1. Odd counts keep the
+// requested column count. Only applies when the caller asked for 3+.
+const itemCount = Array.isArray(items) ? items.length : 0;
+const effectiveColumns =
+  columns > 2 && itemCount > 0 && itemCount % 2 === 0 && itemCount % 3 !== 0
+    ? 2
+    : columns;
+---
+
+<section id={id} class={`bg-bg py-[100px] ${className}`}>
+  <div class="container">
+    <SectionHeading heading={heading}
+      pretitle={pretitle}
+      title={title}
+      accentTitle={accentTitle}
+      class="pb-[var(--spacing-2xl)]"
+    />
+
+    {
+      items.length > 0 && (
+        <div class={`grid gap-8 ${columnClasses[effectiveColumns]}`}>
+          {items.map((item) => (
+            <ImageCard {...item} />
+          ))}
+        </div>
+      )
+    }
+  </div>
+</section>

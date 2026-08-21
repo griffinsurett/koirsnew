@@ -1,0 +1,41 @@
+---
+// src/pages/[collection]/index.astro
+/**
+ * Collection Index Pages
+ * 
+ * Generates index pages for collections at /collection path.
+ * Uses CollectionIndexLayout to render the page.
+ * 
+ * Works exactly like [slug].astro but for collection index pages:
+ * - Gets the layout component (CollectionIndexLayout)
+ * - Gets MDX Content from _meta.mdx body
+ * - Passes everything to the layout
+ * - Layout decides how to render
+ */
+
+import {
+  generateCollectionIndexPaths,
+  prepareCollectionIndexData,
+} from "@/utils/pages/pageGeneration/collectionIndexHelpers";
+
+export async function getStaticPaths() {
+  return generateCollectionIndexPaths();
+}
+
+const {
+  LayoutComponent,
+  Content,
+  collectionName,
+  collectionMeta,
+  seoProps,
+  hasContent,
+} = await prepareCollectionIndexData(Astro.params, Astro.props);
+---
+<LayoutComponent
+  Content={Content}
+  collectionName={collectionName}
+  collectionMeta={collectionMeta}
+  seoProps={seoProps}
+  hasContent={hasContent}
+  {...collectionMeta}
+/>

@@ -1,0 +1,528 @@
+/* src/integrations/preferences/accessibility/styles/accessibility.css */
+/*
+ * This file is imported by global.css, so all Tailwind utilities are available.
+ * Do NOT add @reference or @import directives to global.css here (circular import).
+ */
+
+/* Safelist classes used dynamically in AccessibilityModal.tsx (ternary expressions) */
+@source inline("a11y-modal-shell a11y-scroll-region a11y-card a11y-card--compact a11y-card--spacious a11y-toggle a11y-toggle--active a11y-toggle--idle a11y-header-action a11y-slider");
+
+/* ============================================================================
+   CSS VARIABLES - Applied via JavaScript
+   ============================================================================ */
+:root {
+  --a11y-font-size: 100%;
+  --a11y-line-height: 1.5;
+  --a11y-letter-spacing: 0;
+  --a11y-word-spacing: 0;
+  --a11y-font-family: inherit;
+  --a11y-font-weight: 400;
+  --a11y-text-align: left;
+  --a11y-animation-duration: 0.3s;
+  --cursor-x: 50%;
+  --cursor-y: 50%;
+
+  /* ============================================================================
+     INTEGRATION THEMING TOKENS
+     These provide sensible defaults that inherit from the site's theme.
+     ============================================================================ */
+  --int-a11y-highlight-bg: rgba(255, 255, 0, 0.25);
+  --int-a11y-highlight-bg-subtle: rgba(255, 255, 0, 0.15);
+  --int-a11y-focus-color: var(--color-primary, var(--color-accent, #4CAF50));
+  --int-a11y-focus-shadow: color-mix(in srgb, var(--int-a11y-focus-color) 30%, transparent);
+  --int-a11y-mask-overlay: rgba(0, 0, 0, 0.7);
+  --int-a11y-image-bg: var(--color-bg2, #f0f0f0);
+  --int-a11y-image-border: var(--color-muted, #999);
+  --int-a11y-tooltip-bg: var(--color-bg, white);
+  --int-a11y-tooltip-border: var(--color-border-dim, #ddd);
+  --int-a11y-tooltip-text: var(--color-text, #666);
+  --int-a11y-tooltip-shadow: rgba(0, 0, 0, 0.1);
+  --int-a11y-modal-shadow: rgba(8, 15, 52, 0.35);
+  --int-a11y-slider-shadow: rgba(12, 20, 40, 0.55);
+  --int-a11y-slider-shadow-active: rgba(12, 20, 40, 0.65);
+}
+
+/* Font weight mappings - TODO: semibold override needs more work */
+[data-a11y-font-weight="semibold"] { --a11y-font-weight: 700; }
+[data-a11y-font-weight="bold"] { --a11y-font-weight: 900; }
+
+/* ============================================================================
+   TEXT & TYPOGRAPHY
+   ============================================================================ */
+
+/* Font size on html element - this scales ALL rem-based sizes across the site */
+html {
+  font-size: var(--a11y-font-size);
+}
+
+/* Other text properties on body */
+body {
+  line-height: var(--a11y-line-height);
+  letter-spacing: var(--a11y-letter-spacing);
+  word-spacing: var(--a11y-word-spacing);
+  font-family: var(--a11y-font-family);
+  font-weight: var(--a11y-font-weight);
+}
+
+/* ==========================================================================
+   COMPREHENSIVE TEXT OVERRIDES
+   All text properties use the same pattern for maximum Tailwind compatibility:
+   1. Universal selector with !important
+   2. Explicit Tailwind class overrides
+   3. SVG exclusions where needed
+   ========================================================================== */
+
+/* LINE-HEIGHT */
+[data-a11y-line-height] *,
+[data-a11y-line-height] *::before,
+[data-a11y-line-height] *::after,
+html[data-a11y-line-height] body,
+html[data-a11y-line-height] body * {
+  line-height: var(--a11y-line-height) !important;
+}
+[data-a11y-line-height] [class*="leading-"],
+[data-a11y-line-height] .leading-none,
+[data-a11y-line-height] .leading-tight,
+[data-a11y-line-height] .leading-snug,
+[data-a11y-line-height] .leading-normal,
+[data-a11y-line-height] .leading-relaxed,
+[data-a11y-line-height] .leading-loose {
+  line-height: var(--a11y-line-height) !important;
+}
+[data-a11y-line-height] svg,
+[data-a11y-line-height] svg * {
+  line-height: initial !important;
+}
+
+/* LETTER-SPACING */
+[data-a11y-letter-spacing] *,
+[data-a11y-letter-spacing] *::before,
+[data-a11y-letter-spacing] *::after,
+html[data-a11y-letter-spacing] body,
+html[data-a11y-letter-spacing] body * {
+  letter-spacing: var(--a11y-letter-spacing) !important;
+}
+[data-a11y-letter-spacing] [class*="tracking-"],
+[data-a11y-letter-spacing] .tracking-tighter,
+[data-a11y-letter-spacing] .tracking-tight,
+[data-a11y-letter-spacing] .tracking-normal,
+[data-a11y-letter-spacing] .tracking-wide,
+[data-a11y-letter-spacing] .tracking-wider,
+[data-a11y-letter-spacing] .tracking-widest {
+  letter-spacing: var(--a11y-letter-spacing) !important;
+}
+[data-a11y-letter-spacing] svg,
+[data-a11y-letter-spacing] svg * {
+  letter-spacing: initial !important;
+}
+
+/* WORD-SPACING */
+[data-a11y-word-spacing] *,
+[data-a11y-word-spacing] *::before,
+[data-a11y-word-spacing] *::after,
+html[data-a11y-word-spacing] body,
+html[data-a11y-word-spacing] body * {
+  word-spacing: var(--a11y-word-spacing) !important;
+}
+[data-a11y-word-spacing] svg,
+[data-a11y-word-spacing] svg * {
+  word-spacing: initial !important;
+}
+
+/* TEXT-ALIGN */
+[data-a11y-text-align] *,
+[data-a11y-text-align] *::before,
+[data-a11y-text-align] *::after,
+html[data-a11y-text-align] body,
+html[data-a11y-text-align] body * {
+  text-align: var(--a11y-text-align) !important;
+}
+[data-a11y-text-align] [class*="text-left"],
+[data-a11y-text-align] [class*="text-center"],
+[data-a11y-text-align] [class*="text-right"],
+[data-a11y-text-align] [class*="text-justify"],
+[data-a11y-text-align] .text-left,
+[data-a11y-text-align] .text-center,
+[data-a11y-text-align] .text-right,
+[data-a11y-text-align] .text-justify {
+  text-align: var(--a11y-text-align) !important;
+}
+/* Exclude interactive elements from text-align changes */
+[data-a11y-text-align] button,
+[data-a11y-text-align] input,
+[data-a11y-text-align] select,
+[data-a11y-text-align] svg,
+[data-a11y-text-align] svg * {
+  text-align: initial !important;
+}
+
+/* FONT-WEIGHT */
+[data-a11y-font-weight] *,
+[data-a11y-font-weight] *::before,
+[data-a11y-font-weight] *::after,
+html[data-a11y-font-weight] body,
+html[data-a11y-font-weight] body * {
+  font-weight: var(--a11y-font-weight) !important;
+}
+[data-a11y-font-weight] .font-thin,
+[data-a11y-font-weight] .font-extralight,
+[data-a11y-font-weight] .font-light,
+[data-a11y-font-weight] .font-normal,
+[data-a11y-font-weight] .font-medium,
+[data-a11y-font-weight] .font-semibold,
+[data-a11y-font-weight] .font-bold,
+[data-a11y-font-weight] .font-extrabold,
+[data-a11y-font-weight] .font-black {
+  font-weight: var(--a11y-font-weight) !important;
+}
+[data-a11y-font-weight] svg,
+[data-a11y-font-weight] svg * {
+  font-weight: initial !important;
+}
+
+/* Dyslexia Font */
+@font-face {
+  font-family: 'OpenDyslexic';
+  src: url('/fonts/OpenDyslexic-Regular.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+[data-a11y-font="dyslexia"] {
+  --a11y-font-family: 'OpenDyslexic', sans-serif;
+}
+
+[data-a11y-font="readable"] {
+  --a11y-font-family: 'Verdana', 'Arial', sans-serif;
+}
+
+/* FONT-FAMILY - Dyslexia */
+[data-a11y-font="dyslexia"] *,
+[data-a11y-font="dyslexia"] *::before,
+[data-a11y-font="dyslexia"] *::after,
+html[data-a11y-font="dyslexia"] body,
+html[data-a11y-font="dyslexia"] body * {
+  font-family: 'OpenDyslexic', sans-serif !important;
+}
+[data-a11y-font="dyslexia"] [class*="font-"],
+[data-a11y-font="dyslexia"] .font-sans,
+[data-a11y-font="dyslexia"] .font-serif,
+[data-a11y-font="dyslexia"] .font-mono {
+  font-family: 'OpenDyslexic', sans-serif !important;
+}
+[data-a11y-font="dyslexia"] svg,
+[data-a11y-font="dyslexia"] svg * {
+  font-family: initial !important;
+}
+
+/* FONT-FAMILY - Readable */
+[data-a11y-font="readable"] *,
+[data-a11y-font="readable"] *::before,
+[data-a11y-font="readable"] *::after,
+html[data-a11y-font="readable"] body,
+html[data-a11y-font="readable"] body * {
+  font-family: 'Verdana', 'Arial', sans-serif !important;
+}
+[data-a11y-font="readable"] [class*="font-"],
+[data-a11y-font="readable"] .font-sans,
+[data-a11y-font="readable"] .font-serif,
+[data-a11y-font="readable"] .font-mono {
+  font-family: 'Verdana', 'Arial', sans-serif !important;
+}
+[data-a11y-font="readable"] svg,
+[data-a11y-font="readable"] svg * {
+  font-family: initial !important;
+}
+
+/* ============================================================================
+   VISUAL ENHANCEMENTS
+   ============================================================================ */
+
+/* Link Highlighting */
+[data-a11y-links="true"] a {
+  background-color: var(--int-a11y-highlight-bg);
+  padding: 2px 4px;
+  border-radius: 2px;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+}
+
+/* Title Highlighting */
+[data-a11y-titles="true"] h1,
+[data-a11y-titles="true"] h2,
+[data-a11y-titles="true"] h3,
+[data-a11y-titles="true"] h4,
+[data-a11y-titles="true"] h5,
+[data-a11y-titles="true"] h6 {
+  background-color: var(--int-a11y-highlight-bg-subtle);
+  padding: 0.25em 0.5em;
+  border-left: 4px solid var(--int-a11y-focus-color);
+  margin-bottom: 0.5em;
+}
+
+/* Contrast Boost */
+[data-a11y-contrast="boost"] {
+  filter: contrast(1.15);
+}
+
+/* Saturation Controls */
+[data-a11y-saturation="low"] {
+  filter: saturate(0.5);
+}
+
+[data-a11y-saturation="high"] {
+  filter: saturate(1.5);
+}
+
+[data-a11y-saturation="monochrome"] {
+  filter: grayscale(100%);
+}
+
+/* ============================================================================
+   READING AIDS
+   ============================================================================ */
+
+/* Reading Mask */
+[data-a11y-mask="true"]::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+    circle 400px at var(--cursor-x) var(--cursor-y),
+    transparent 0%,
+    var(--int-a11y-mask-overlay) 100%
+  );
+  pointer-events: none;
+  z-index: 9998;
+  transition: background 0.05s ease;
+}
+
+/* Focus Highlighting */
+[data-a11y-focus="true"] *:focus {
+  outline: 3px solid var(--int-a11y-focus-color) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 4px var(--int-a11y-focus-shadow) !important;
+}
+
+[data-a11y-focus="true"] *:focus-visible {
+  outline: 3px solid var(--int-a11y-focus-color) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 4px var(--int-a11y-focus-shadow) !important;
+}
+
+/* Big Cursor
+   Note: SVG data URIs cannot use CSS variables. These use universal
+   white/black colors for maximum visibility across all themes. */
+[data-a11y-cursor="big"] {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48"><circle cx="24" cy="24" r="16" fill="white" stroke="black" stroke-width="3"/><circle cx="24" cy="24" r="8" fill="black"/></svg>') 24 24, auto;
+}
+
+[data-a11y-cursor="big"] a,
+[data-a11y-cursor="big"] button,
+[data-a11y-cursor="big"] [role="button"] {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48"><circle cx="24" cy="24" r="16" fill="white" stroke="black" stroke-width="3"/><circle cx="24" cy="24" r="8" fill="black"/></svg>') 24 24, pointer;
+}
+
+/* ============================================================================
+   CONTENT SIMPLIFICATION
+   ============================================================================ */
+
+/* Hide Images - CSS-only approach using opacity and outline */
+[data-a11y-images="hide"] img {
+  opacity: 0 !important;
+  outline: 2px dashed var(--int-a11y-image-border) !important;
+  outline-offset: -2px !important;
+  background: var(--int-a11y-image-bg) !important;
+}
+
+/* For images inside picture elements */
+[data-a11y-images="hide"] picture img {
+  opacity: 0 !important;
+}
+
+[data-a11y-images="hide"] picture {
+  position: relative;
+  display: block;
+  background: var(--int-a11y-image-bg);
+  outline: 2px dashed var(--int-a11y-image-border);
+}
+
+/* Show alt text using a wrapper approach - requires JS to inject alt text spans */
+[data-a11y-images="hide"] [data-img-alt] {
+  position: relative;
+  display: block;
+}
+
+[data-a11y-images="hide"] [data-img-alt]::after {
+  content: '📷 ' attr(data-img-alt);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 0.75em 1em;
+  background: var(--int-a11y-tooltip-bg);
+  border: 1px solid var(--int-a11y-tooltip-border);
+  border-radius: 4px;
+  font-style: italic;
+  color: var(--int-a11y-tooltip-text);
+  text-align: center;
+  max-width: 90%;
+  box-shadow: 0 2px 4px var(--int-a11y-tooltip-shadow);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Mute Sounds */
+[data-a11y-sounds="mute"] video,
+[data-a11y-sounds="mute"] audio,
+[data-a11y-sounds="mute"] iframe[src*="youtube"],
+[data-a11y-sounds="mute"] iframe[src*="vimeo"] {
+  display: none !important;
+}
+
+/* Pause/Reduce Animations */
+[data-a11y-motion="reduced"] *,
+[data-a11y-motion="reduced"] *::before,
+[data-a11y-motion="reduced"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Also respect system preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ============================================================================
+   UTILITIES
+   ============================================================================ */
+
+[data-a11y-animations="true"] *,
+[data-a11y-animations="true"] *::before,
+[data-a11y-animations="true"] *::after {
+  animation-duration: var(--a11y-animation-duration);
+  transition-duration: calc(var(--a11y-animation-duration) * 0.5);
+}
+
+/* Prevent layout shift */
+[data-a11y-links="true"] a,
+[data-a11y-titles="true"] h1,
+[data-a11y-titles="true"] h2,
+[data-a11y-titles="true"] h3,
+[data-a11y-titles="true"] h4,
+[data-a11y-titles="true"] h5,
+[data-a11y-titles="true"] h6 {
+  box-sizing: border-box;
+}
+
+/* ============================================================================
+   COMPONENT UTILITIES - Accessibility Panel
+   ============================================================================ */
+@layer components {
+  .a11y-modal-shell {
+    @apply rounded-[28px] bg-surface text-text border border-text/10 backdrop-blur-md overflow-hidden flex flex-col max-h-[78vh];
+    box-shadow: 0 20px 60px var(--int-a11y-modal-shadow);
+  }
+
+  .a11y-scroll-region {
+    @apply flex-1 overflow-y-auto space-y-5 px-5 py-5;
+    scrollbar-gutter: stable;
+  }
+
+  .a11y-card {
+    @apply rounded-2xl border border-text/10 bg-surface shadow-sm;
+  }
+
+  .a11y-card--compact {
+    @apply px-4 py-3;
+  }
+
+  .a11y-card--spacious {
+    @apply p-4;
+  }
+
+  .a11y-toggle {
+    @apply rounded-2xl border border-text/10 bg-surface px-4 py-3 shadow-sm text-left transition focus:outline-none focus:ring-2 focus:ring-primary/40;
+  }
+
+  .a11y-toggle--active {
+    @apply border-primary/60 bg-primary/10;
+  }
+
+  .a11y-toggle--idle {
+    @apply hover:border-primary/40;
+  }
+
+  .a11y-header-action {
+    @apply rounded-full px-2 text-xs font-semibold uppercase tracking-wide text-bg transition flex items-center justify-center gap-1;
+  }
+
+  .a11y-slider {
+    @apply mt-3 w-full h-2 rounded-full bg-bg border border-primary/20 appearance-none cursor-pointer transition;
+  }
+
+  .a11y-slider:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 55%, transparent);
+  }
+
+  .a11y-slider::-webkit-slider-runnable-track {
+    height: 0.5rem;
+    background: var(--color-bg);
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--color-primary) 35%, transparent);
+  }
+
+  .a11y-slider::-moz-range-track {
+    height: 0.5rem;
+    background: var(--color-bg);
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--color-primary) 35%, transparent);
+  }
+
+  .a11y-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 18px;
+    width: 18px;
+    border-radius: 999px;
+    background: var(--color-primary);
+    box-shadow: 0 10px 25px var(--int-a11y-slider-shadow);
+    margin-top: -8px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .a11y-slider::-moz-range-thumb {
+    height: 18px;
+    width: 18px;
+    border-radius: 999px;
+    background: var(--color-primary);
+    border: 2px solid var(--color-bg);
+    box-shadow: 0 10px 25px var(--int-a11y-slider-shadow);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .a11y-slider:active::-webkit-slider-thumb,
+  .a11y-slider:active::-moz-range-thumb {
+    transform: scale(1.05);
+    box-shadow: 0 12px 30px var(--int-a11y-slider-shadow-active);
+  }
+}
+
+@media (min-width: 768px) {
+  .a11y-modal-shell {
+    max-height: 85vh;
+  }
+}

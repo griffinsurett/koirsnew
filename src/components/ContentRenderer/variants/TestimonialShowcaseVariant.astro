@@ -1,0 +1,210 @@
+---
+// src/components/ContentRenderer/variants/TestimonialShowcaseVariant.astro
+/**
+ * Testimonial Showcase Variant — the i75/CBC treatment: video testimonials and
+ * text reviews interleaved in one horizontally-scrolling band.
+ *
+ * The band is exactly ONE video card tall. Portrait videos occupy the full
+ * height; text reviews are stacked two-per-column so a pair fills the same
+ * height as one video. Columns scroll as a marquee (same motion as
+ * TestimonialCarouselVariant) and pause on hover.
+ *
+ * Feed it the whole testimonials collection — it splits video vs text itself.
+ */
+import type { BaseVariantProps } from "../ContentRenderer.types";
+import TestimonialCard from "@/components/LoopComponents/TestimonialCard.astro";
+import JsonLd from "@/components/JsonLd.astro";
+import SectionHeading from "@/components/SectionHeading.astro";
+import { buildReviewSchema } from "@/utils/schema/reviewSchema";
+
+interface Props extends BaseVariantProps {
+  /** Seconds for one full marquee pass. */
+  speed?: number;
+  /** Height of the band (one video card tall). */
+  cardHeight?: string;
+  pretitle?: string;
+}
+
+const {
+  items = [],
+  title,
+  heading,
+  pretitle,
+  description,
+  className = "",
+  speed = 80,
+  cardHeight = "520px",
+  id,
+} = Astro.props as Props;
+
+const safeItems = Array.isArray(items) ? items : [];
+
+const hasMedia = (item: any) =>
+  (typeof item?.video === "string" && item.video.length > 0) ||
+  Boolean(item?.featuredImage);
+
+// Cards with media (video or image) run full height, like the old Koi layout.
+// Text-only reviews stack two-per-column so a pair equals one media card.
+const mediaItems = safeItems.filter(hasMedia);
+const textItems = safeItems.filter((item: any) => !hasMedia(item));
+
+type Column =
+  | { kind: "media"; item: any }
+  | { kind: "text"; items: any[] };
+
+const textPairs: any[][] = [];
+for (let i = 0; i < textItems.length; i += 2) {
+  textPairs.push(textItems.slice(i, i + 2));
+}
+
+const columns: Column[] = [];
+const maxLen = Math.max(mediaItems.length, textPairs.length);
+for (let i = 0; i < maxLen; i++) {
+  if (mediaItems[i]) columns.push({ kind: "media", item: mediaItems[i] });
+  if (textPairs[i]) columns.push({ kind: "text", items: textPairs[i] });
+}
+
+// Duplicate the sequence so the marquee can loop seamlessly (translateX -50%).
+const loopColumns = [...columns, ...columns];
+
+const reviewSchema = buildReviewSchema(safeItems as any);
+---
+
+<JsonLd schema={reviewSchema} />
+
+<section id={id} class={`bg-bg py-16 md:py-24  testimonial-showcase overflow-hidden ${className}`}>
+  <div class="container">
+    {(heading || title || description || pretitle) && (
+      <SectionHeading
+        pretitle={pretitle}
+        heading={heading}
+        title={title}
+        class="py-8"
+      />
+    )}
+  </div>
+
+  {columns.length > 0 && (
+    <div
+      class="showcase-marquee"
+      style={`--marquee-speed:${speed}s; --card-h:${cardHeight};`}
+      aria-label="Customer testimonials"
+    >
+      <ul class="showcase-track">
+        {loopColumns.map((col, i) => (
+          <li
+            class={`showcase-col showcase-col--${col.kind}`}
+            aria-hidden={i >= columns.length ? "true" : undefined}
+          >
+            {col.kind === "media" ? (
+              <TestimonialCard {...col.item} fillMedia={true} />
+            ) : (
+              <div class="showcase-stack">
+                {col.items.map((item: any) => (
+                  <TestimonialCard {...item} />
+                ))}
+              </div>
+            )}
+          </li>
+        ))}
+      </ul>
+    </div>
+  )}
+</section>
+
+<style>
+  .showcase-marquee {
+    width: 100%;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
+  }
+
+  .showcase-track {
+    display: flex;
+    align-items: flex-start;
+    width: max-content;
+    gap: 24px;
+    padding: 8px 15px;
+    margin: 0;
+    list-style: none;
+    animation: showcase-scroll var(--marquee-speed, 80s) linear infinite;
+  }
+
+  .showcase-marquee:hover .showcase-track,
+  .showcase-marquee:focus-within .showcase-track {
+    animation-play-state: paused;
+  }
+
+  /* Every column is exactly one video-card tall — that's the whole point. */
+  .showcase-col {
+    flex: 0 0 auto;
+    display: flex;
+    /* Definite height so percentage heights inside resolve against the band
+       (a bare max-height leaves children free to overflow). */
+    height: var(--card-h);
+  }
+
+  .showcase-col--text {
+    width: clamp(280px, 30vw, 360px);
+  }
+
+  /* Media cards (video or image) are portrait-ish: media on top, text band
+     beneath, filling the full band height. */
+  .showcase-col--media {
+    width: clamp(300px, 26vw, 380px);
+  }
+
+  .showcase-col--media > :global(*) {
+    height: 100%;
+    min-height: 0;
+  }
+
+  /* A pair of text reviews splits the column height evenly, so two stacked
+     cards equal one video. */
+  /* True 50/50: two equal rows regardless of quote length. Each card scrolls
+     its own overflow rather than growing. */
+  .showcase-stack {
+    display: grid;
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+    height: 100%;
+    width: 100%;
+  }
+
+  /* A lone trailing review keeps the top half rather than stretching. */
+  .showcase-stack:has(> :global(*:only-child)) {
+    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .showcase-stack > :global(.testimonial-card) {
+    height: 100%;
+    min-height: 0;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  /* A lone trailing review shouldn't stretch to the full column height. */
+  .showcase-stack:has(> :global(*:only-child)) {
+    grid-template-rows: 1fr;
+  }
+
+  @keyframes showcase-scroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .showcase-track {
+      animation: none;
+      overflow-x: auto;
+      width: 100%;
+    }
+  }
+
+  /* Held until the band scrolls into view (see scripts/marqueeOnView.ts) so it
+     starts from its first item instead of mid-cycle. */
+  .showcase-track.marquee-paused {
+    animation-play-state: paused;
+  }
+</style>

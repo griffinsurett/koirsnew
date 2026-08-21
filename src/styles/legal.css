@@ -1,0 +1,194 @@
+/* src/styles/legal.css */
+/**
+ * Legal Document Styles
+ * 
+ * Styles specific to legal pages (Privacy Policy, Cookie Policy, Terms of Service, etc.)
+ * Used by LegalLayout.astro
+ * 
+ * Features:
+ * - Improved readability for legal text
+ * - Consistent typography hierarchy
+ * - Print-friendly optimizations
+ * - Professional document formatting
+ */
+
+/* ============================================================================
+   Base Legal Document Styles
+   ========================================================================== */
+
+.legal-document {
+  /* Improve readability for legal text */
+  line-height: 1.75;
+}
+
+/* ============================================================================
+   Typography Hierarchy
+   ========================================================================== */
+
+.legal-document h1 {
+  @apply text-4xl font-bold mb-4;
+}
+
+.legal-document h2 {
+  @apply text-2xl font-bold mt-12 mb-4;
+}
+
+.legal-document h3 {
+  @apply text-xl font-semibold mt-8 mb-3;
+}
+
+.legal-document h4 {
+  @apply text-lg font-semibold mt-6 mb-2;
+}
+
+/* ============================================================================
+   Content Elements
+   ========================================================================== */
+
+.legal-document p {
+  @apply mb-4;
+}
+
+.legal-document ul,
+.legal-document ol {
+  @apply mb-4 ml-6;
+}
+
+.legal-document li {
+  @apply mb-2;
+}
+
+.legal-document a {
+  @apply text-primary underline hover:text-primary-700 transition-colors;
+}
+
+.legal-document strong {
+  @apply font-semibold text-heading;
+}
+
+.legal-document em {
+  @apply italic;
+}
+
+/* ============================================================================
+   Special Elements
+   ========================================================================== */
+
+.legal-document blockquote {
+  @apply border-l-4 border-primary pl-4 py-2 my-4 italic;
+}
+
+.legal-document code {
+  @apply bg-text/5 px-2 py-1 rounded text-sm font-mono;
+}
+
+.legal-document pre {
+  @apply bg-text/5 p-4 rounded-lg overflow-x-auto my-4;
+}
+
+.legal-document table {
+  @apply w-full border-collapse my-4;
+}
+
+.legal-document th {
+  @apply bg-text/5 border border-surface px-4 py-2 font-semibold text-left;
+}
+
+.legal-document td {
+  @apply border border-surface px-4 py-2;
+}
+
+.legal-document hr {
+  @apply my-8 border-surface;
+}
+
+/* ============================================================================
+   Print Styles
+   ========================================================================== */
+
+@media print {
+  .legal-document {
+    @apply max-w-full px-0;
+  }
+
+  /* Hide navigation and interactive elements when printing */
+  header,
+  footer,
+  button,
+  .no-print {
+    display: none !important;
+  }
+
+  /* Ensure dates and headings stay with following content */
+  .legal-document h1,
+  .legal-document h2,
+  .legal-document h3,
+  .legal-document p:has(em) {
+    page-break-after: avoid;
+  }
+
+  /* Better page breaks for headings */
+  .legal-document h2,
+  .legal-document h3,
+  .legal-document h4 {
+    page-break-after: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Avoid breaking lists */
+  .legal-document ul,
+  .legal-document ol {
+    page-break-inside: avoid;
+  }
+
+  /* Keep list items together */
+  .legal-document li {
+    page-break-inside: avoid;
+  }
+
+  /* Add page numbers and margins */
+  @page {
+    margin: 2cm;
+
+    @bottom-right {
+      content: "Page " counter(page);
+    }
+  }
+
+  /* Ensure links are visible with URLs in print */
+  .legal-document a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    color: #666;
+  }
+
+  /* Don't show URLs for internal links */
+  .legal-document a[href^="/"]::after,
+  .legal-document a[href^="#"]::after {
+    content: "";
+  }
+
+  /* Black text for better print quality */
+  .legal-document,
+  .legal-document p,
+  .legal-document li {
+    color: #000 !important;
+  }
+
+  /* Ensure consistent font size */
+  .legal-document {
+    font-size: 12pt;
+  }
+
+  .legal-document h1 {
+    font-size: 24pt;
+  }
+
+  .legal-document h2 {
+    font-size: 18pt;
+  }
+
+  .legal-document h3 {
+    font-size: 14pt;
+  }
+}

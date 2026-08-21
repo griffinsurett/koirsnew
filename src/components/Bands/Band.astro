@@ -1,0 +1,155 @@
+---
+// src/components/Bands/Band.astro
+/**
+ * Band — one content section inside a <Bands> wrapper.
+ *
+ * Stack as many <Band> blocks as you want; backgrounds alternate
+ * automatically (odd = white, even = brand navy with light text) via the
+ * `:nth-of-type` rules in <Bands>. Authors never set a color — just add
+ * content. Put any markup/MDX inside; headings and prose are styled by the
+ * `.band-prose` rules so copy reads consistently across bands.
+ *
+ * Pass an `image` (imported asset) to render a side-by-side layout: image on
+ * one side, the slotted copy on the other. Pass a `video` (public-path string)
+ * instead to render an autoplaying, lazy-loaded clip in the same media slot.
+ * `reverse` puts the media on the right. Without media the band stays
+ * full-width text, exactly as before.
+ *
+ * @example
+ *   <Bands>
+ *     <Band image={roofImg} imageAlt="New shingle roof">
+ *       ## When it's time to replace your roof
+ *       Most asphalt-shingle roofs...
+ *     </Band>
+ *     <Band video="/koirands-intro.mp4" videoAlt="Koi crew installing a new roof" reverse>
+ *       ## What a replacement includes
+ *       - Tear-off and inspection...
+ *     </Band>
+ *   </Bands>
+ */
+import { Image } from "astro:assets";
+import VideoCard from "@/components/Video/VideoCard.astro";
+
+interface Props {
+  class?: string;
+  /** Imported image asset. When set, the band becomes a two-column image+text. */
+  image?: ImageMetadata | string;
+  imageAlt?: string;
+  /** Public-path video (e.g. "/koirands-intro.mp4"). Renders in place of an image as a
+   *  video card: an overlay play button on load to start, then native HTML
+   *  controls once it's playing. */
+  video?: string;
+  videoAlt?: string;
+  /** Media aspect ratio. "landscape" (4/3, default) or "portrait" (9/16) for
+   *  tall phone-shot video/photos. Portrait media is width-capped and centered
+   *  in its column so it doesn't dominate the row. */
+  aspect?: "landscape" | "portrait";
+  /** Place the media on the right instead of the left. */
+  reverse?: boolean;
+}
+const {
+  class: className = "",
+  image,
+  imageAlt = "",
+  video,
+  videoAlt = "",
+  aspect = "landscape",
+  reverse = false,
+} = Astro.props as Props;
+
+const hasVideo = Boolean(video);
+const hasMedia = hasVideo || Boolean(image);
+const videoAspect = aspect === "portrait" ? "portrait" : "landscape";
+---
+
+<section class={`band ${hasMedia ? "band--split" : ""} ${className}`}>
+  {
+    hasMedia ? (
+      <div class={`container band-split ${reverse ? "band-split--reverse" : ""}`}>
+        {hasVideo ? (
+          <div class="band-split__videocell" data-aspect={aspect}>
+            <VideoCard
+              video={video as string}
+              videoAspect={videoAspect}
+              centered
+              class="w-full h-full"
+            />
+          </div>
+        ) : (
+        <div class="band-split__media" data-aspect={aspect}>
+          {typeof image === "string" ? (
+            <img src={image} alt={imageAlt} class="band-split__img" loading="lazy" />
+          ) : (
+            <Image
+              src={image as ImageMetadata}
+              alt={imageAlt}
+              widths={[480, 768, 960]}
+              sizes="(min-width: 768px) 45vw, 100vw"
+              class="band-split__img"
+              loading="lazy"
+            />
+          )}
+        </div>
+        )}
+        <div class="band-prose band-split__copy">
+          <slot />
+        </div>
+      </div>
+    ) : (
+      <div class="container band-prose">
+        <slot />
+      </div>
+    )
+  }
+</section>
+
+<style is:global>
+  /* Side-by-side image + copy. Stacks on mobile, two columns from md up. */
+  .band-split {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(1.5rem, 4vw, 3.5rem);
+    align-items: center;
+  }
+  @media (min-width: 768px) {
+    .band-split {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+    /* Reverse: copy first, media second (media lands on the right). */
+    .band-split--reverse .band-split__media,
+    .band-split--reverse .band-split__videocell {
+      order: 2;
+    }
+  }
+  /* Fixed, balanced aspect ratio so short-copy bands don't balloon the image.
+     The media fills that box (cover) regardless of how tall the copy is. */
+  .band-split__media {
+    aspect-ratio: 4 / 3;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  }
+  /* Portrait (9/16) — tall phone-shot video/photos. Cap the width and center
+     the media in its column so a vertical clip reads like a phone screen
+     instead of stretching the whole row taller. */
+  .band-split__media[data-aspect="portrait"] {
+    aspect-ratio: 9 / 16;
+    max-width: 340px;
+    margin-inline: auto;
+    width: 100%;
+  }
+  .band-split__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  /* Video card cell — the VideoCard frames itself (aspect, rounding, overlay
+     play button), so the cell only handles column sizing. Portrait caps the
+     width and centers it, matching the image portrait behavior. */
+  .band-split__videocell[data-aspect="portrait"] {
+    max-width: 340px;
+    margin-inline: auto;
+    width: 100%;
+  }
+</style>

@@ -1,0 +1,149 @@
+/* src/styles/language-switcher.css */
+/**
+ * Language Switcher Styles
+ * 
+ * Styling for the language dropdown component.
+ * Uses plain CSS values for Tailwind 4 compatibility.
+ */
+
+@import "tailwindcss";
+
+/* Button */
+.language-switcher-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  background-color: white;
+  border: 2px solid rgb(209 213 219);
+  color: rgb(55 65 81);
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.language-switcher-button:hover {
+  border-color: rgb(156 163 175);
+  background-color: rgb(249 250 251);
+}
+
+.language-switcher-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px white, 0 0 0 4px rgb(59 130 246);
+}
+
+.language-switcher-button[aria-expanded="true"] {
+  border-color: rgb(59 130 246);
+  background-color: rgb(239 246 255);
+}
+
+/* Dropdown */
+.language-dropdown {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  margin-bottom: 0.5rem;
+  min-width: 200px;
+  max-height: 300px;
+  overflow-y: auto;
+  background-color: white;
+  border: 2px solid rgb(209 213 219);
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  z-index: 50;
+  animation: slide-up 0.2s ease-out;
+}
+
+.language-dropdown[aria-hidden="true"] {
+  display: none;
+}
+
+/* Options */
+.language-option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.625rem 1rem;
+  text-align: left;
+  font-size: 0.875rem;
+  color: rgb(55 65 81);
+  transition: background-color 0.15s;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+.language-option:hover,
+.language-option:focus {
+  background-color: rgb(243 244 246);
+  outline: none;
+}
+
+.language-option[aria-selected="true"] {
+  background-color: rgb(239 246 255);
+  color: rgb(29 78 216);
+  font-weight: 600;
+}
+
+.language-option-flag {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.language-option-text {
+  flex: 1;
+}
+
+.language-option-native {
+  display: block;
+  margin-top: 0.125rem;
+  color: rgb(107 114 128);
+  font-size: 0.75rem;
+}
+
+/* Google Translate UI - Hide Everything */
+.goog-te-banner-frame,
+.goog-te-balloon-frame,
+.goog-te-gadget {
+  display: none !important;
+}
+
+body {
+  top: 0 !important;
+}
+
+.skiptranslate {
+  display: none !important;
+}
+
+iframe.goog-te-menu-frame {
+  display: none !important;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .language-dropdown {
+    left: auto;
+    right: 0;
+    max-width: 280px;
+  }
+}
+
+/* Animation */
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+div.VIpgJd-ZVi9od-aZ2wEe-OiiCO {
+  display: none !important;
+}

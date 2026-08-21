@@ -1,0 +1,113 @@
+---
+// src/components/GalleryMarquee.astro
+/**
+ * GalleryMarquee — a continuous auto-scrolling row of gallery photos, using the
+ * same marquee motion as the testimonial carousel (track slides left in an
+ * infinite loop, pauses on hover, disabled under reduced-motion).
+ *
+ * Self-contained: it queries the `gallery` collection itself, so it can be
+ * dropped anywhere (e.g. inside the StatsVariant "Why Choose Us" band on both
+ * the homepage and the About page) with no props. No heading — it's a visual
+ * prelude, not a titled section.
+ */
+import { query, sortByOrder } from "@/utils/query";
+
+interface Props {
+  /** Seconds for one full loop (lower = faster). */
+  speed?: number;
+  class?: string;
+}
+const { speed = 45, class: className = "" } = Astro.props as Props;
+
+const items = await query("gallery").orderBy(sortByOrder()).all();
+
+/** Resolve a gallery item's featuredImage to a src. */
+function imgSrc(featuredImage: any): string {
+  return typeof featuredImage === "string"
+    ? featuredImage
+    : (featuredImage?.src?.src ?? featuredImage?.src ?? "");
+}
+
+const tiles = items
+  .map((item: any) => ({ src: imgSrc(item.data?.featuredImage), alt: item.data?.title ?? "" }))
+  .filter((t) => t.src);
+
+// Duplicate the set so the marquee can loop seamlessly (translateX -50%).
+const loopTiles = [...tiles, ...tiles];
+---
+
+{
+  tiles.length > 0 && (
+    <div
+      class={`gallery-marquee ${className}`}
+      style={`--gallery-marquee-speed:${speed}s;`}
+      aria-label="Project and job-site photos"
+    >
+      <ul class="gallery-marquee-track">
+        {loopTiles.map((tile, i) => (
+          <li class="gallery-marquee-item" aria-hidden={i >= tiles.length ? "true" : undefined}>
+            <img
+              src={tile.src}
+              alt={tile.alt}
+              loading="lazy"
+              class="w-full h-full object-cover"
+            />
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+<style>
+  .gallery-marquee {
+    width: 100%;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  }
+
+  .gallery-marquee-track {
+    display: flex;
+    align-items: stretch;
+    width: max-content;
+    gap: 24px;
+    padding: 4px 12px;
+    margin: 0;
+    list-style: none;
+    animation: gallery-marquee-scroll var(--gallery-marquee-speed, 45s) linear infinite;
+  }
+
+  .gallery-marquee:hover .gallery-marquee-track {
+    animation-play-state: paused;
+  }
+
+  .gallery-marquee-item {
+    flex: 0 0 auto;
+    width: 340px;
+    max-width: 80vw;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-radius: 0.75rem;
+    box-shadow: var(--shadow-md, 0 10px 20px rgba(0, 0, 0, 0.08));
+  }
+
+  @keyframes gallery-marquee-scroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .gallery-marquee-track {
+      animation: none;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+  }
+
+  /* Held until the band scrolls into view (see scripts/marqueeOnView.ts) so it
+     starts from its first item instead of mid-cycle. */
+  .gallery-marquee-track.marquee-paused {
+    animation-play-state: paused;
+  }
+</style>

@@ -1,0 +1,68 @@
+---
+// src/components/LoopComponents/FeatureCard.astro
+/**
+ * Feature Card Component
+ *
+ * Card for displaying product/service features with:
+ * - Optional header image
+ * - Title and description
+ * - Optional CTA link
+ * - Hover lift effect
+ *
+ * Used in CardVariant for feature showcases, service listings.
+ */
+
+export interface Props {
+  title: string;
+  url?: string;
+  description?: string;
+  image?: {
+    src: string;
+    alt: string;
+  };
+  ctaText?: string; // Call-to-action text
+}
+
+const {
+  title,
+  url,
+  description,
+  image,
+  ctaText = "Learn More →",
+} = Astro.props;
+---
+
+<div
+  class="bg-bg rounded-xl overflow-hidden shadow-lg hover:-translate-y-2 hover:shadow-xl transition-all duration-300 flex flex-col"
+>
+  {/* Optional header image */}
+  {
+    image && (
+      <img src={image.src} alt={image.alt} class="w-full h-48 object-cover" />
+    )
+  }
+
+  {/* Card content */}
+  <div class="p-6 flex-1 flex flex-col">
+    <h3 class="text-2xl font-bold mb-4">{title}</h3>
+
+    {/* Description takes available space */}
+    {
+      description && (
+        <p class="text-text mb-6 flex-1 leading-relaxed">{description}</p>
+      )
+    }
+
+    {/* CTA link at bottom */}
+    {
+      url && (
+        <a
+          href={url}
+          class="text-primary font-semibold hover:underline self-start"
+        >
+          {ctaText}
+        </a>
+      )
+    }
+  </div>
+</div>

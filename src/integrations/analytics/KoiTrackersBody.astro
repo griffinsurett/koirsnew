@@ -1,0 +1,68 @@
+---
+// src/integrations/analytics/KoiTrackersBody.astro
+/**
+ * The <body> half of Koi's tracker set. Rendered from IntBodyScripts.
+ *
+ * These specifically CANNOT live in <head>:
+ *  - <noscript> iframes/images are only valid inside <body>
+ *  - the chat widget injects DOM, so it needs the body to exist
+ *
+ * ── BOTH GTM CONTAINERS GET A NOSCRIPT IFRAME ─────────────────────────────
+ * PUBLIC_GTM_ID has a head loader (GoogleTagManager.astro) AND this iframe.
+ * PUBLIC_GTM_ID_2 has ONLY this iframe — no head loader, exactly as the legacy
+ * site had it. See the note in GoogleTagManager.astro: do not "fix" that.
+ *
+ * Requires `frame-src https://www.googletagmanager.com` in the CSP, or the
+ * iframes are blocked — which would silently break the noscript-only container
+ * entirely, since the iframe is its only delivery path.
+ */
+
+const GTM_IDS = [
+  import.meta.env.PUBLIC_GTM_ID,
+  import.meta.env.PUBLIC_GTM_ID_2,
+].filter(Boolean);
+
+const PIXEL_IDS = [
+  import.meta.env.PUBLIC_META_PIXEL_ID,
+  import.meta.env.PUBLIC_META_PIXEL_ID_2,
+].filter(Boolean);
+
+const CHAT_WIDGET_ID = import.meta.env.PUBLIC_LEADCONNECTOR_WIDGET_ID;
+---
+
+{/* GTM noscript — one per container */}
+{GTM_IDS.map((id) => (
+  <noscript>
+    <iframe
+      src={`https://www.googletagmanager.com/ns.html?id=${id}`}
+      height="0"
+      width="0"
+      style="display:none;visibility:hidden"
+      title="Google Tag Manager"
+    />
+  </noscript>
+))}
+
+{/* Meta Pixel noscript — one tracking image per pixel */}
+{PIXEL_IDS.map((id) => (
+  <noscript>
+    <img
+      height="1"
+      width="1"
+      style="display:none"
+      src={`https://www.facebook.com/tr?id=${id}&ev=PageView&noscript=1`}
+      alt=""
+    />
+  </noscript>
+))}
+
+{/* LeadConnector chat widget */}
+{CHAT_WIDGET_ID && (
+  <script
+    is:inline
+    src="https://widgets.leadconnectorhq.com/loader.js"
+    data-resources-url="https://widgets.leadconnectorhq.com/chat-widget/loader.js"
+    data-widget-id={CHAT_WIDGET_ID}
+    data-source="WEB_USER"
+  />
+)}

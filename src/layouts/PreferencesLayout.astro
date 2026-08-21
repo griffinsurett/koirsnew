@@ -1,0 +1,68 @@
+---
+// src/layouts/PreferencesLayout.astro
+/**
+ * Preferences Layout
+ *
+ * Consolidates all user preference systems:
+ * - Cookie consent (with script management)
+ * - Accessibility preferences
+ * - Language switcher (Google Translate)
+ *
+ * All use the same lazy-load, zero-impact pattern.
+ */
+
+// Cookie Consent Preferences
+// import CookiePreferencesButton from "@/integrations/preferences/consent/ui/CookiePreferencesButton";
+// import CookieConsentBanner from "@/integrations/preferences/consent/ui/CookieConsentBanner";
+// import ConsentScript from "@/integrations/preferences/consent/core/scripts/ConsentScript.astro";
+
+// Accessibility Preferences
+// import AccessibilityButton from "@/integrations/preferences/accessibility/ui/AccessibilityButton";
+
+// Language Switcher
+// import LanguageSwitcher from "@/integrations/preferences/language/ui/LanguageSwitcher";
+// import BrowserTranslateScript from "@/integrations/preferences/language/core/scripts/BrowserTranslateScript.astro";
+
+interface Props {
+  /** Render the visible preference buttons row. The consent script + cookie
+   *  banner always render regardless. Set false when cookie preferences lives
+   *  elsewhere (e.g. the footer's Legal links). */
+  showButtons?: boolean;
+}
+const { showButtons = true } = Astro.props as Props;
+---
+
+{/*
+  ── ALL PREFERENCE UIs INTENTIONALLY DISABLED (see AGENTS.md) ──────────────
+  The legacy Koi site shipped no cookie banner, no language switcher, and no
+  accessibility panel. Enabling any of them would be a user-visible change,
+  which this port exists to avoid. Commented, never deleted — restoring any
+  one is uncommenting its line.
+
+  ⚠️ ConsentScript is ALSO the third-party script gate: scriptManager rewrites
+  `<script type="text/plain" data-consent="…">` into live scripts once consent
+  is granted. With it off, the analytics tags MUST load as plain <script> or
+  they never fire at all.
+
+  Markup-level accessibility (semantic HTML, alt text, keyboard nav, contrast,
+  focus states) is untouched — only the preferences toolbar is hidden.
+*/}
+
+{/* <ConsentScript /> */}
+{/* <CookieConsentBanner client:idle /> */}
+{/* <BrowserTranslateScript enableNative={true} enableGoogle={true} /> */}
+
+{/* showButtons is false everywhere today (Footer passes showButtons={false}),
+    but the row is commented too so the intent is explicit, not incidental. */}
+{/*
+{showButtons && (
+  <div class="flex flex-wrap justify-center items-center gap-3">
+    <LanguageSwitcher client:visible />
+    <a href="/privacy-policy#ccpa-rights" class="text-bg hover:text-bg"
+      >Do Not Sell My Personal Information</a
+    >
+    <CookiePreferencesButton client:visible />
+    <AccessibilityButton client:idle />
+  </div>
+)}
+*/}

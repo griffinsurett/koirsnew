@@ -1,0 +1,98 @@
+---
+// src/components/Bands/Bands.astro
+/**
+ * Bands — wrapper that lays out a stack of <Band> sections with alternating
+ * backgrounds (whites and blues). Drop in any number of <Band> children; the
+ * `:nth-of-type` rules below handle the rhythm with no per-band config:
+ *   - odd  bands → white background, navy text
+ *   - even bands → primary (navy) background, light text
+ *
+ * Self-contained styling so it can drop onto any page.
+ */
+interface Props {
+  class?: string;
+}
+const { class: className = "" } = Astro.props as Props;
+---
+
+<div class={`bands ${className}`}>
+  <slot />
+</div>
+
+<style is:global>
+  /* Alternating band backgrounds — whites and blues. */
+  .bands .band {
+    padding-block: clamp(3rem, 6vw, 6rem);
+  }
+  .bands .band:nth-of-type(odd) {
+    background-color: var(--color-bg); /* white */
+    color: var(--color-heading);
+  }
+  .bands .band:nth-of-type(even) {
+    /* Koi's primary navy. (Ported from johns-pro-roofing, which used its own
+       --color-brand-navy alias — undefined here, so the band would have had no
+       background at all.) */
+    background-color: var(--color-primary);
+    color: var(--color-bg);
+  }
+  /* Headings inherit the band's text color (the global h1–h6 rule forces navy,
+     so override it explicitly per band). */
+  .bands .band:nth-of-type(odd) :is(h2, h3, h4) {
+    color: var(--color-heading);
+  }
+  .bands .band:nth-of-type(even) :is(h2, h3, h4) {
+    color: var(--color-bg);
+  }
+
+  /* Prose styling inside bands — consistent across both color schemes.
+     Width/centering comes from .container; keep copy left-aligned. */
+  .band-prose {
+    text-align: left;
+  }
+  .band-prose > * + * {
+    margin-top: 1.25rem;
+  }
+  .band-prose h2 {
+    font-size: clamp(1.5rem, 3vw, 2.25rem);
+    line-height: 1.15;
+    font-weight: 800;
+    margin-bottom: 0.25rem;
+  }
+  .band-prose h3 {
+    font-size: clamp(1.15rem, 2vw, 1.4rem);
+    font-weight: 700;
+  }
+  .band-prose p,
+  .band-prose li {
+    font-size: 1.0625rem;
+    line-height: 1.7;
+  }
+  .band-prose ul {
+    list-style: disc;
+    padding-left: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  /* Prose links only — never restyle buttons (.btn-base) rendered inside a band
+     (e.g. RepairCallout), which own their color/decoration. */
+  .band-prose a:not(.btn-base) {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  /* On navy (even) bands, links and muted text use the light palette. */
+  .bands .band:nth-of-type(even) .band-prose a:not(.btn-base) {
+    color: var(--color-bg);
+    font-weight: 600;
+  }
+  .bands .band:nth-of-type(odd) .band-prose a:not(.btn-base) {
+    color: var(--color-primary);
+    font-weight: 600;
+  }
+  /* Blockquote callout (used for cross-links). */
+  .band-prose blockquote {
+    border-left: 3px solid currentColor;
+    padding-left: 1rem;
+    opacity: 0.95;
+  }
+</style>

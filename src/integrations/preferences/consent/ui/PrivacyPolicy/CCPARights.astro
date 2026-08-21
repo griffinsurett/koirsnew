@@ -1,0 +1,222 @@
+---
+// src/integrations/preferences/ui/consent/components/PrivacyPolicy/CCPARights.astro
+/**
+ * CCPA Rights Component
+ *
+ * Displays California Consumer Privacy Act (CCPA/CPRA) information including:
+ * - Explanation of "sale" or "sharing" under California law
+ * - What data is shared and with whom
+ * - Opt-out mechanisms (instant opt-out button, cookie settings, Do Not Track)
+ * - California consumer rights (know, delete, opt-out, correct, non-discrimination)
+ * - Categories of personal information collected
+ * - How to exercise rights with contact information
+ *
+ * This component can be embedded in privacy policies or displayed standalone.
+ */
+import OptOutButton from "../OptOutButton";
+import { find } from "@/utils/query";
+import { formatPhoneNumber } from "@/utils/string";
+
+interface Props {
+  sectionNumber?: number; // Optional section number for sequential numbering
+}
+
+const { sectionNumber } = Astro.props;
+
+// Query contact information dynamically from contact-us collection
+const emailEntry = await find("contact-us", "email");
+const phoneEntry = await find("contact-us", "phone");
+const emailValue = emailEntry?.data?.value ?? emailEntry?.data?.description ?? emailEntry?.data?.title ?? "";
+const phoneValue = phoneEntry?.data?.value ?? phoneEntry?.data?.description ?? phoneEntry?.data?.title ?? "";
+---
+
+<div
+  id="ccpa-rights"
+  class="border-4 border-primary rounded-xl p-8 my-16 bg-primary/10"
+>
+  <h2 class="text-3xl font-bold text-primary mt-0">
+    {sectionNumber ? `${sectionNumber}. ` : ""}California Privacy Rights (CCPA)
+  </h2>
+  <p class="text-xl font-semibold text-primary">
+    Do Not Sell or Share My Personal Information
+  </p>
+
+  <h3>What Does "Sale" or "Sharing" Mean?</h3>
+  <p>
+    Under California law (CCPA/CPRA), "sale" or "sharing" means making your
+    personal information available to third parties in exchange for anything of
+    value, including for advertising or analytics purposes.
+  </p>
+
+  <h3>What We Share</h3>
+  <p>When you enable certain features, we may share data with:</p>
+  <ul>
+    <li>
+      <strong>Google Translate</strong> — Translation services (functional cookies)
+    </li>
+    <li>
+      <strong>Google Analytics</strong> — Site analytics (performance cookies)
+    </li>
+    <li>
+      <strong>Advertising Networks</strong> — Facebook, Google Ads (targeting cookies)
+    </li>
+  </ul>
+
+  <div class="bg-bg border-2 border-primary rounded-lg p-6 my-6">
+    <h3 class="mt-0">Opt Out Now</h3>
+    <p class="mb-4">
+      Click below to instantly disable all non-essential cookies and stop data
+      sharing:
+    </p>
+    <OptOutButton client:visible />
+  </div>
+
+  <div class="bg-text/5 border-2 border-surface rounded-lg p-6 my-6">
+    <h3 class="mt-0">Other Ways to Opt Out</h3>
+
+    <div class="mb-4">
+      <p class="font-semibold mb-2">Manage Individual Cookie Categories</p>
+      <button
+        id="open-cookie-preferences"
+        class="bg-bg border-2 border-primary text-primary px-6 py-3 rounded-lg font-bold hover:bg-primary/10 transition-colors"
+        type="button"
+      >
+        🍪 Cookie Settings
+      </button>
+      <p class="text-sm text-text mt-2">
+        Choose which types of cookies to enable or disable individually.
+      </p>
+    </div>
+
+    <div>
+      <p class="font-semibold mb-2">Use "Do Not Track" in Your Browser</p>
+      <p class="text-sm mb-2">
+        Enable "Do Not Track" in your browser settings. We automatically honor
+        this signal.
+      </p>
+      <details class="text-sm">
+        <summary
+          class="cursor-pointer text-primary hover:text-primary-700 font-semibold"
+        >
+          How to enable Do Not Track →
+        </summary>
+        <ul class="mt-2 space-y-1 ml-4 text-text">
+          <li>
+            <strong>Chrome:</strong> Settings → Privacy and security → "Do Not Track"
+          </li>
+          <li>
+            <strong>Firefox:</strong> Settings → Privacy & Security → "Do Not Track"
+          </li>
+          <li>
+            <strong>Safari:</strong> Preferences → Privacy → "Ask websites not to
+            track me"
+          </li>
+          <li><strong>Edge:</strong> Settings → Privacy → "Do Not Track"</li>
+        </ul>
+      </details>
+    </div>
+  </div>
+
+  <h3>Your California Privacy Rights</h3>
+  <p>If you're a California resident, you have these rights:</p>
+  <ul>
+    <li>
+      <strong>Right to Know:</strong> Request disclosure of what personal information
+      we've collected about you in the past 12 months.
+    </li>
+    <li>
+      <strong>Right to Delete:</strong> Request deletion of your personal information,
+      subject to certain exceptions.
+    </li>
+    <li>
+      <strong>Right to Opt-Out:</strong> Stop the sale or sharing of your personal
+      information (use the button above).
+    </li>
+    <li>
+      <strong>Right to Correct:</strong> Request correction of inaccurate personal
+      information.
+    </li>
+    <li>
+      <strong>Right to Non-Discrimination:</strong> We won't discriminate against
+      you for exercising your rights. Same service, same pricing.
+    </li>
+  </ul>
+
+  <h3>Categories of Personal Information We Collect</h3>
+  <ul>
+    <li><strong>Identifiers:</strong> Name, email address, IP address</li>
+    <li>
+      <strong>Internet Activity:</strong> Pages visited, clicks, browsing behavior
+    </li>
+    <li>
+      <strong>Geolocation:</strong> Approximate location derived from IP address
+    </li>
+    <li>
+      <strong>Sensitive Information:</strong> We do NOT collect SSN, financial data,
+      or health information
+    </li>
+  </ul>
+
+  <h3>How to Exercise Your Rights</h3>
+  <p>
+    To request access to your data, request deletion, or ask questions about
+    your privacy:
+  </p>
+
+  <div class="bg-bg border-2 border-surface rounded-lg p-6 mt-4">
+    <p class="font-semibold mb-3">Contact Us</p>
+    <ul class="space-y-2 mb-4">
+      {
+        emailEntry && (
+          <li>
+            <strong>Email:</strong>{" "}
+            <a
+              href={`${emailEntry.data.linkPrefix || "mailto:"}${emailValue}`}
+              class="text-primary underline hover:text-primary-700"
+            >
+              {emailValue}
+            </a>
+          </li>
+        )
+      }
+      {
+        phoneEntry && (
+          <li>
+            <strong>Phone:</strong>{" "}
+            <a
+              href={`${phoneEntry.data.linkPrefix || "tel:"}${phoneValue}`}
+              class="text-primary underline hover:text-primary-700"
+            >
+              {formatPhoneNumber(phoneValue)}
+            </a>
+          </li>
+        )
+      }
+      <li>
+        <strong>Subject Line:</strong> "CCPA Request - [Right to Know/Delete/Correct]"
+      </li>
+      <li>
+        <strong>Include:</strong> Your name, email, and description of your request
+      </li>
+      <li><strong>Response Time:</strong> We'll respond within 45 days</li>
+    </ul>
+    <a
+      href="/contact"
+      class="inline-block bg-primary text-bg px-6 py-3 rounded-lg font-bold hover:bg-primary-700 transition-colors"
+    >
+      Contact Us About Privacy →
+    </a>
+  </div>
+
+  <div class="bg-yellow-50 border-2 border-yellow-600 rounded-lg p-4 mt-4">
+    <p class="text-sm text-yellow-900 mb-2">
+      <strong>⚠️ Verification Required</strong>
+    </p>
+    <p class="text-sm text-yellow-900 mb-0">
+      To protect your privacy, we must verify your identity before processing
+      requests. We may ask you to confirm recent interactions with our site or
+      provide additional identifying information. Authorized agents must provide
+      proof of authorization.
+    </p>
+  </div>
+</div>

@@ -1,0 +1,72 @@
+---
+// src/components/MediaBand.astro
+/**
+ * Media Band — a full-width band over a background image or video, with
+ * centered copy and CTAs.
+ *
+ * Ports the legacy `media1` / `media2` / `media4` section variants (13 usages:
+ * the mission statement band, the closing bands on service pages). These carry
+ * no collection items — they're copy + CTA — so this is a plain component
+ * rather than a ContentRenderer variant, same as SpanishSection.
+ */
+import type { SectionButton } from "@/components/ContentRenderer/ContentRenderer.types";
+import BackgroundMedia from "@/components/BackgroundMedia.astro";
+import SectionHeading from "@/components/SectionHeading.astro";
+import SectionButtons from "@/components/ContentRenderer/SectionButtons.astro";
+
+interface Props {
+  title?: string;
+  heading?: any;
+  description?: string;
+  className?: string;
+  buttons?: SectionButton[];
+  buttonsClassName?: string;
+  id?: string;
+  /** Background image (Astro asset or public path). */
+  image?: any;
+  /** Background video (public path). */
+  video?: string;
+  /** Tint over the media so the copy stays legible. */
+  overlayClass?: string;
+}
+
+const {
+  title,
+  heading,
+  description,
+  className = "",
+  buttons = [],
+  buttonsClassName = "",
+  image,
+  video,
+  overlayClass = "bg-primary opacity-80",
+  id,
+} = Astro.props as Props;
+
+
+const backgroundMedia = (image || video)
+  ? {
+      ...(image ? { image: { src: image, imageClass: "object-cover" } } : {}),
+      ...(video ? { video: { src: video, preload: "metadata" } } : {}),
+      overlayClass,
+    }
+  : null;
+
+---
+
+<section id={id} class={`relative overflow-hidden py-16 md:py-24 ${className}`}>
+  {backgroundMedia && <BackgroundMedia backgroundMedia={backgroundMedia} />}
+
+  <div class="relative z-10 container mx-auto px-4 text-center text-bg">
+    <SectionHeading
+      heading={heading}
+      title={title}
+      description={description}
+      tone="dark"
+      headingClass="uppercase py-[var(--spacing-sm)]"
+      descriptionClass="!text-lg md:!text-3xl !font-thin italic"
+    />
+
+    <SectionButtons buttons={buttons} class={`my-[var(--spacing-lg)] mt-[var(--spacing-md)] ${buttonsClassName}`} />
+  </div>
+</section>

@@ -1,0 +1,30 @@
+---
+// src/components/LoopTemplates/Menu/MenuDropdown.astro
+/**
+ * Menu Dropdown Component
+ * 
+ * Dropdown/submenu that appears on hover.
+ * Uses semantic HTML with ARIA for accessibility.
+ */
+import MenuList from './MenuList.astro';
+
+export interface Props {
+  items: any[];
+  level?: number;
+  parentSlug?: string;
+}
+
+const { items = [], level = 1, parentSlug = 'menu' } = Astro.props;
+const dropdownId = `dropdown-${parentSlug}-${level}`;
+
+// Level 1 drops down from the menu bar; deeper levels fly out to the side of
+// their parent row (stacking them below would overlap the list they belong to).
+const positionClass = level > 1 ? 'top-0 left-full' : 'top-full left-0';
+---
+
+<div 
+  id={dropdownId}
+  class={`menu-dropdown hidden absolute mt-0 ${positionClass}`}
+>
+  <MenuList items={items} level={level} />
+</div>

@@ -1,0 +1,182 @@
+---
+// src/layouts/FrontPageHero.astro
+/**
+ * Front Page Hero Layout
+ *
+ * Full-width hero section with optimized background media for homepage.
+ *
+ * Features:
+ * - Responsive background images with LCP optimization
+ * - Optional video background with poster image
+ * - Large centered text with gradient overlay
+ * - Primary and secondary CTAs
+ * - Configurable minimum height (default 95vh)
+ * - Supports both static images and video backgrounds
+ *
+ * This is a layout component for landing pages.
+ * Use directly in your homepage or marketing pages.
+ */
+
+import Button from "@/components/Button/Button";
+import BackgroundMedia from "@/components/BackgroundMedia.astro";
+import SectionHeading from "@/components/SectionHeading.astro";
+import { ctaData } from "@/content/siteData";
+import DefaultImg from "@/assets/background.jpg";
+import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
+import { query } from "@/utils/query";
+
+export interface Props {
+  /** Amber uppercase line above the H1 — the legacy hero used the company name. */
+  eyebrow?: string;
+  title?: string;
+  description?: string;
+  image?: any; // Astro image asset or public path
+  video?: {
+    src: string;
+    autoPlay?: boolean;
+    muted?: boolean;
+    loop?: boolean;
+    playsInline?: boolean;
+    controls?: boolean;
+    preload?: string;
+  };
+  primaryCTA?: {
+    text: string;
+    link: string;
+    variant?: string;
+  };
+  secondaryCTA?: {
+    text: string;
+    link: string;
+    variant?: string;
+  };
+  className?: string;
+  id?: string;
+  minHeight?: string;
+}
+
+const {
+  eyebrow,
+  title = "Welcome",
+  description,
+  image,
+  video,
+  primaryCTA = {
+    text: ctaData.text,
+    link: ctaData.link,
+  },
+  secondaryCTA,
+  className = "",
+  id = "hero",
+  minHeight,
+} = Astro.props;
+
+// Prepare optimized background media
+const backgroundMedia = {
+  image: {
+    // src: image || DefaultImg,
+    imageClass: "bg-cover bg-center",
+    aboveTheFold: true, // Front page hero is always LCP
+  },
+  video: video
+    ? {
+        src: video.src,
+        autoPlay: video.autoPlay ?? true,
+        muted: video.muted ?? true,
+        loop: video.loop ?? true,
+        playsInline: video.playsInline ?? true,
+        controls: video.controls ?? false,
+        preload: video.preload ?? "metadata",
+        videoClass: "object-cover",
+      }
+    : undefined,
+  // Koi's hero overlay: navy at 70% with brightness-50 over the video.
+  // Ported from the legacy primaryHero variant — a black gradient reads as a
+  // different brand entirely.
+  overlayClass: "bg-primary opacity-80 brightness-40",
+};
+---
+
+<section id={id} class={`relative ${className}`}>
+  <div
+    class="section-lg relative flex items-center justify-center overflow-hidden p-[var(--spacing-lg)] md:p-[var(--spacing-md)] md:px-20 lg:px-24"
+    style={minHeight ? `min-height: ${minHeight}` : undefined}
+  >
+    {/* Optimized background media with overlay */}
+    <BackgroundMedia backgroundMedia={backgroundMedia} />
+
+    {/* Social rail — vertical, pinned to the right edge at every breakpoint.
+        Positioned against the hero box itself rather than the centered text
+        column. Part of the hero rather than a slot: every page that uses this
+        hero wants the same rail, so callers shouldn't have to pass it. */}
+    <ContentRenderer
+      query={query("social-media")}
+      variant="SocialMediaVariant"
+      layout="vertical"
+      alignment="center"
+      size="md"
+      itemClass="inline-flex items-center justify-center transition-all duration-200 hover:scale-110"
+      iconClass="text-current !h-8 !w-auto lg:!h-10"
+      className="absolute right-1 lg:right-8 top-1/2 -translate-y-1/2 z-20 text-white/80 [&_a]:transition-colors [&_a:hover]:text-white"
+    />
+
+    {/* Hero Content — top padding clears the fixed transparent header
+        (h-[13vh] xl:h-[17vh]) so the stack optically centers in the visible
+        area instead of sitting behind the nav. */}
+    <div class="relative w-full lg:w-4/6 mx-auto flex flex-col items-center justify-center text-center text-bg z-10 lg:gap-[var(--spacing-sm)] pt-[13vh] xl:pt-[17vh] px-6 md:px-0">
+      <SectionHeading
+        headingTag="h1"
+        tone="dark"
+        pretitle={eyebrow}
+        title={title}
+        description={description}
+        class="!mb-0 !max-w-none"
+        pretitleClass="top-heading !font-bold !text-accent !mb-0"
+        headingClass="h1 !text-3xl md:!text-4xl lg:!text-5xl xl:!text-6xl !tracking-wider !text-bg py-[var(--spacing-sm)] "
+        descriptionClass="!text-lg lg:!text-2xl !font-thin"
+      />
+
+      {/* CTA Buttons */}
+      <div class="h6 lg:mt-[var(--spacing-sm)] gap-[var(--spacing-md)] flex flex-col md:flex-row items-center justify-center w-full lg:w-4/5">
+        {
+          primaryCTA && (
+            <Button
+              href={primaryCTA.link}
+              variant={primaryCTA.variant ?? "tertiary"}
+              size="lg"
+              className="w-full"
+            >
+              {primaryCTA.text}
+            </Button>
+          )
+        }
+
+        {
+          secondaryCTA && (
+            <Button
+              href={secondaryCTA.link}
+              variant={secondaryCTA.variant ?? "secondary"}
+              size="lg"
+              className="w-full"
+            >
+              {secondaryCTA.text}
+            </Button>
+          )
+        }
+      </div>
+
+      {/*
+        Content directly beneath the CTAs, inside the hero's text column — used
+        for the Google review badge. Distinct from the default slot below, which
+        sits outside the container and so renders after the whole hero box.
+      */}
+      <slot name="belowButtons" />
+      </div>
+    </div>
+  </div>
+
+  {/* Optional slot for additional content below hero */}
+  <slot />
+</section>
+
+

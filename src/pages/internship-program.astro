@@ -1,0 +1,86 @@
+---
+// src/pages/internship-program.astro
+/**
+ * Internship Program — like /careers, a single bespoke page with its own form,
+ * so it stays a page rather than a one-entry collection (plan §9.3).
+ *
+ * ── STATUS: Phase 3.5 stub ────────────────────────────────────────────────
+ * Real copy, no styling. The program's step/benefit lists move into collections
+ * during the design phase.
+ */
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import InternshipForm from "@/components/Form/forms/InternshipForm.astro";
+
+const title = "KOI Home Improvement Internship Program";
+const description =
+  "KOI's 2026 Home Improvement Internship Program gives college students a field-based education in leadership, sales, and revenue generation across NJ, NY, and PA.";
+---
+
+<BaseLayout title={title} description={description}>
+  <main class="flex-1">
+    <h1>{title}</h1>
+    <p>
+      KOI built this internship for students who want real skills, real
+      leadership experience, and the ability to create income anywhere.
+    </p>
+    <p>
+      Over the summer, interns progress from communication fundamentals to
+      confidently generating qualified leads alongside KOI sales pros. By August,
+      top performers walk away with real-world sales experience, referrals, and a
+      clear understanding of how high-performing roofing and solar companies
+      operate.
+    </p>
+
+    <p>KOI's 2026 Home Improvement Internship Program gives college students a field-based education in leadership, sales, and revenue generation across NJ, NY, and PA.</p>
+    <h2>Summer 2026 | May 25 – August 28</h2>
+    <h2>Grow. Earn. Lead.</h2>
+    <p>KOI built this internship for students who want real skills, real leadership experience, and the ability to create income anywhere.</p>
+    <h2>Why We Created This Program</h2>
+    <h2>How the Program Works</h2>
+    <h2>Program Journey</h2>
+    <h2>Call 732-362-6476</h2>
+    <h2>Email Customer Support</h2>
+    <p>Over the summer, interns progress from communication fundamentals to confidently generating qualified leads alongside KOI sales pros. By August, top performers walk away with real-world sales experience, referrals, and a clear understanding of how high-performing roofing and solar companies operate.</p>
+    <h2>Primary Position</h2>
+    <h2>Door Knocker / Appointment Setter (Intro Sales)</h2>
+    <h2>Ready to Apply?</h2>
+    <h2>Tell us about yourself and why you want to grow with KOI this summer.</h2>
+
+    <p>College teaches business theory — KOI teaches revenue. Real leadership starts with communication, sales, and negotiation skills. Our interns don’t fetch coffee—they learn income skills and contribute from day one.</p>
+    <p>Our mission: Build young leaders who can generate income anywhere.</p>
+    <ul>
+      <li>College teaches business theory — KOI teaches revenue.</li>
+      <li>Leadership comes from mastering communication, sales, and negotiation.</li>
+      <li>Students deserve income skills, not busywork.</li>
+      <li>KOI interns don’t just observe business—they produce results.</li>
+    </ul>
+    <h3>Dates</h3>
+    <p>May 25 – August 28, 2026</p>
+    <h3>Work Territories</h3>
+    <p>New Jersey, New York, Pennsylvania</p>
+    <h3>Housing Provided</h3>
+    <p>Available for traveling interns (limited slots)</p>
+    <h3>Format</h3>
+    <p>Field-based internship with real customer interaction</p>
+    <h3>Rapid Communication</h3>
+    <p>Learn confident door approaches that break the ice in seconds.</p>
+    <h3>Qualify Real Prospects</h3>
+    <p>Identify homeowners who are serious about roofing and solar upgrades.</p>
+    <h3>Set Appointments</h3>
+    <p>Book meetings for KOI closers and keep the pipeline full.</p>
+    <h3>Shadow Top Performers</h3>
+    <p>Ride along with executives to see elite sales execution up close.</p>
+    <h3>Professional Communication</h3>
+    <p>Build confidence, presence, and clarity in every interaction.</p>
+    <h3>Sales Psychology & Objections</h3>
+    <p>Understand why customers hesitate and how to move them forward.</p>
+    <h3>Finance & Profit Models</h3>
+    <p>See how real revenue is generated and managed inside KOI.</p>
+    <h3>Leadership & Teamwork</h3>
+    <p>Operate in fast-paced crews that rely on each other to win.</p>
+    <h3>Personal Branding</h3>
+    <p>Create a reputation that attracts referrals and future roles.</p>
+
+    <InternshipForm />
+  </main>
+</BaseLayout>

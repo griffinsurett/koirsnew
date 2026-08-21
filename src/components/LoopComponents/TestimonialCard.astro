@@ -1,0 +1,264 @@
+---
+// src/components/LoopComponents/TestimonialCard.astro
+/**
+ * Testimonial Card — the Koi testimonial card, ported from the 2025 site's
+ * VideoCard: optional media on top (video or image), the quote + gold stars
+ * below on the navy band, and the Google Verified Reviews badge pinned over
+ * the top-left of the media.
+ *
+ * Layout rules carried over from 2025:
+ *   • media present → badge sits `top-2 left-2` over the media
+ *   • no media      → badge sits `bottom-2 left-2`, scaled down
+ * The quote area scrolls when it overflows (i75 behaviour) so cards can share a
+ * fixed height without truncating anyone's review.
+ */
+import { Image } from "astro:assets";
+import VideoCard from "@/components/Video/VideoCard.astro";
+import { resolveImageMetadata, getImageAlt } from "@/utils/images";
+import type { ImageInput } from "@/content/schema";
+import GoogleReviewLogo from "@/assets/koi/google-review.webp";
+
+export interface Props {
+  title?: string;
+  description?: string;
+  content?: string;
+  role?: string;
+  company?: string;
+  rating?: number;
+  featuredImage?: ImageInput | null;
+  video?: string;
+  googleReview?: boolean;
+  externalLink?: string;
+  /** Let the media fill the leftover card height (fixed-height contexts). */
+  fillMedia?: boolean;
+}
+
+const {
+  title,
+  description,
+  content,
+  role,
+  company,
+  rating = 5,
+  featuredImage,
+  video,
+  googleReview = false,
+  externalLink,
+  fillMedia = false,
+} = Astro.props as Props;
+
+const quote = (content ?? description ?? "").trim();
+const byline = [role, company].filter(Boolean).join(" · ");
+const stars = Math.max(0, Math.min(5, Math.round(Number(rating) || 0)));
+
+const poster = resolveImageMetadata(featuredImage);
+const posterAlt = getImageAlt(featuredImage ?? undefined, title ?? "Testimonial");
+
+const hasMedia = Boolean(video || poster);
+---
+
+<article
+  class:list={[
+    "testimonial-card relative rounded overflow-hidden shadow-xs bg-primary text-bg flex flex-col w-full",
+    { "tc-has-media": hasMedia, "tc-fixed": fillMedia, "tc-video-only": Boolean(video) },
+  ]}
+>
+  {googleReview && (
+    <div
+      class:list={[
+        "tc-badge absolute z-10",
+        hasMedia ? "top-2 left-2" : "bottom-2 left-2 scale-75 origin-bottom-left",
+      ]}
+    >
+      {externalLink ? (
+        <a
+          href={externalLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`Read ${title ?? "this"} review on Google`}
+        >
+          <Image src={GoogleReviewLogo} alt="Google Review" class="h-auto w-20" loading="lazy" />
+        </a>
+      ) : (
+        <Image src={GoogleReviewLogo} alt="Google Review" class="h-auto w-20" loading="lazy" />
+      )}
+    </div>
+  )}
+
+  {video ? (
+    <div class="tc-media">
+      <VideoCard
+        video={video}
+        name={title}
+        showCaption={false}
+        videoAspect="portrait"
+        class="h-full w-full"
+      />
+    </div>
+  ) : poster ? (
+    <div class="tc-media">
+      <Image
+        src={poster}
+        alt={posterAlt}
+        format="webp"
+        loading="lazy"
+        class="w-full h-full object-cover object-center"
+      />
+    </div>
+  ) : null}
+
+  {!video && (quote || stars > 0) && (
+    <div class="tc-body flex flex-col justify-start items-center text-center italic px-6 py-5 gap-3">
+      {title && !googleReview && (
+        <h3 class="text-lg font-semibold not-italic text-bg">{title}</h3>
+      )}
+
+      {quote && (
+        <div class="tc-quote-scroll">
+          <p class="text-lg m-0">"{quote}"</p>
+        </div>
+      )}
+
+      {stars > 0 && (
+        <div class="tc-stars flex gap-1" aria-label={`${stars} out of 5 stars`}>
+          {Array.from({ length: 5 }).map((_, i) => (
+            <svg
+              viewBox="0 0 24 24"
+              class:list={["w-7 h-auto fill-accent", { "opacity-20": i >= stars }]}
+              aria-hidden="true"
+            >
+              <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+            </svg>
+          ))}
+        </div>
+      )}
+
+      {byline && <p class="text-sm not-italic text-bg/80 font-medium">{byline}</p>}
+    </div>
+  )}
+</article>
+
+<style>
+  /* 2025 styling: the media keeps its natural aspect and is capped by height —
+     never cropped into a fixed slot. Source clips are portrait (720x1280), so
+     an uncapped card would be ~1.78x its width tall. */
+  .tc-media {
+    position: relative;
+    width: 100%;
+    line-height: 0;
+    display: flex;
+    justify-content: center;
+    overflow: hidden;
+    max-height: var(--tc-media-max-h, 70vh);
+  }
+
+  .tc-media :global(video),
+  .tc-media :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-height: var(--tc-media-max-h, 70vh);
+    object-fit: cover;
+    object-position: center;
+  }
+
+  /* The newer VideoCard brings its own 9/16 aspect box — that IS the portrait
+     shape the 2025 card showed, so let it drive its own height. */
+  .tc-media :global(.video-card) {
+    width: 100%;
+    border-radius: 0;
+    border: 0;
+    box-shadow: none;
+  }
+
+  /* Text band sizes to its content (2025 behaviour) and only scrolls when a
+     max height is imposed by the context. */
+  .tc-quote-scroll {
+    width: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: rgb(255 255 255 / 0.35) transparent;
+  }
+
+  .tc-quote-scroll::-webkit-scrollbar { width: 6px; }
+  .tc-quote-scroll::-webkit-scrollbar-track { background: transparent; }
+  .tc-quote-scroll::-webkit-scrollbar-thumb {
+    background: rgb(255 255 255 / 0.35);
+    border-radius: 999px;
+  }
+
+  .tc-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  /* Text-only cards: the badge lives bottom-left, so keep the stars/byline row
+     clear of it instead of letting it overlap the quote. */
+  .testimonial-card:not(.tc-has-media) .tc-body {
+    padding-bottom: 4.25rem;
+  }
+
+  /* Stars/byline never get squeezed out by a long quote. */
+  .tc-stars,
+  .tc-body > :global(p.text-sm) {
+    flex: 0 0 auto;
+  }
+
+  /* In fixed-height contexts (the marquee) the card fills its column: media
+     takes what it needs up to its cap, the quote scrolls in the remainder. */
+  /* Video-only cards are pure media: fill the column edge to edge. */
+  .tc-video-only,
+  .tc-video-only .tc-media {
+    height: 100%;
+    max-height: 100%;
+    min-height: 0;
+  }
+
+  /* Inside a capped band the aspect box must yield to the band height.
+     VideoCardClient ships `aspect-[9/16]` + our wrapper adds h-full, so both
+     need overriding for the card to respect the cap. */
+  .tc-video-only .tc-media :global(.video-card) {
+    aspect-ratio: auto !important;
+    height: 100% !important;
+    max-height: 100% !important;
+  }
+
+  /* Video.tsx's wrapper is a grid whose track gets stretched by the video's
+     intrinsic 9:16 height, overflowing the band. Let the track shrink.
+     Scoped to the wrapper (`.grid`) so it can't hit the play button, which is
+     also a direct child of .video-card. */
+  .tc-media :global(.video-card > div.grid) {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+    grid-template-rows: minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .tc-media :global(.video-card video) {
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    object-fit: cover;
+  }
+
+  .tc-video-only .tc-media :global(.video-card) {
+    height: 100%;
+    border-radius: 0;
+    border: 0;
+  }
+
+  /* Capped context (marquee): media keeps at least half the card so the badge
+     always has media under it, and the quote scrolls in the remainder. */
+  .tc-fixed { max-height: 100%; }
+  .tc-fixed .tc-media {
+    flex: 1 1 55%;
+    min-height: 45%;
+  }
+  .tc-fixed .tc-media :global(.video-card) { height: 100%; }
+  .tc-fixed .tc-body { flex: 1 1 auto; min-height: 0; overflow: hidden; }
+</style>

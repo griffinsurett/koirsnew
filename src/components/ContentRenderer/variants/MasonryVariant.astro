@@ -1,0 +1,85 @@
+---
+// src/components/ContentRenderer/variants/MasonryVariant.astro
+/**
+ * Masonry Variant - Pinterest-style CSS columns layout
+ * Features: Variable height items, 1-4 responsive columns, compact layout
+ */
+
+import type { BaseVariantProps } from "../ContentRenderer.types";
+import SectionHeading from "@/components/SectionHeading.astro";
+import MasonryCard from "@/components/LoopComponents/MasonryCard.astro";
+import { shouldShowCollectionCTA } from "../utils/helpers";
+import Button from "@/components/Button/Button";
+
+type Props = BaseVariantProps;
+
+const {
+  items = [],
+  title,
+  heading,
+  description,
+  className = "",
+  collectionUrl,
+  collectionTitle,
+  id,
+} = Astro.props as Props;
+
+const viewAllText = collectionTitle?.toLowerCase().includes("testimonial")
+  ? "Read More Reviews"
+  : collectionTitle?.toLowerCase().includes("projects")
+    ? "View Full Gallery"
+    : `Browse All ${collectionTitle || ""}`.trim();
+
+const safeItems = Array.isArray(items) ? items : [];
+---
+
+<section id={id} class={`py-16 ${className}`}>
+  {
+    (title || description) && (
+      <div class="text-center mb-12">
+        <SectionHeading heading={heading} title={title} description={description} />
+      </div>
+    )
+  }
+
+  {
+    safeItems.length > 0 && (
+      <ul class="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-6 list-none">
+        {safeItems.map(
+          (item) =>
+            item && (
+              <li class="inline-block w-full">
+                <MasonryCard {...item} />
+              </li>
+            )
+        )}
+      </ul>
+    )
+  }
+
+  {
+    shouldShowCollectionCTA(collectionUrl, safeItems.length) && (
+      <div class="mt-12 text-center">
+        <Button
+          href={collectionUrl}
+          variant="tertiary"
+          >
+          {viewAllText}
+          <svg
+            class="ml-2 w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M13 7l5 5m0 0l-5 5m5-5H6"
+            />
+          </svg>
+        </Button>
+      </div>
+    )
+  }
+</section>

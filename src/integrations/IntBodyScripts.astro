@@ -1,0 +1,51 @@
+---
+// src/integrations/IntBodyScripts.astro
+/**
+ * Integration Body Scripts Bundle
+ *
+ * Consolidates all integration scripts/components that should load in the <body>.
+ * Import this single component near the start of your body.
+ *
+ * Includes:
+ * - Translation Loader (lightweight - full script loads on demand)
+ * - Vercel Analytics & Speed Insights (for static builds)
+ * - Partytown (conditional - only loads if type="text/partytown" scripts exist)
+ *
+ * Usage in BaseLayout.astro:
+ *   <body>
+ *     <IntBodyScripts />
+ *     <!-- rest of body content -->
+ *   </body>
+ */
+
+// import TranslationLoader from "@/integrations/preferences/language/core/scripts/TranslationLoader.astro";
+import SpeedInsights from "@vercel/speed-insights/astro";
+import Analytics from "@vercel/analytics/astro";
+import PartytownLoader from "@/integrations/partytown/PartytownLoader.astro";
+import KoiTrackersBody from "@/integrations/analytics/KoiTrackersBody.astro";
+
+export interface Props {
+  /** Enable Chrome/Edge native Translator API (default: true) */
+  enableNativeTranslation?: boolean;
+  /** Enable Google Translate SDK fallback (default: true) */
+  enableGoogleTranslation?: boolean;
+}
+
+const {
+  enableNativeTranslation = true,
+  enableGoogleTranslation = true,
+} = Astro.props;
+---
+
+<!-- Translation: Lightweight loader - full script loads only when needed -->
+{/* <TranslationLoader enableNative={enableNativeTranslation} enableGoogle={enableGoogleTranslation} /> */}
+
+<!-- Vercel Analytics & Speed Insights -->
+<SpeedInsights />
+<Analytics />
+
+<!-- Partytown: Conditional loader - only loads bootstrap if partytown scripts exist -->
+<PartytownLoader forward={['dataLayer.push']} />
+
+<!-- GTM/Pixel noscript fallbacks + chat widget (must be inside <body>) -->
+<KoiTrackersBody />

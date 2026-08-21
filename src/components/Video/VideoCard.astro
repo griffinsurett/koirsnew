@@ -1,0 +1,54 @@
+---
+// src/components/Video/VideoCard.astro
+/**
+ * VideoCard — Astro wrapper around the React VideoCard client component.
+ *
+ * Generates the poster from the video at build time (ffmpeg), then hands it to
+ * the client card. Use this from .astro/.mdx where top-level `await` for poster
+ * generation isn't available (MDX ESM blocks can't await).
+ */
+import VideoCardClient from "@/components/Video/VideoCardClient";
+import { generateVideoPoster } from "@/utils/videoThumbnails";
+
+interface Props {
+  video: string;
+  name?: string;
+  role?: string;
+  videoAspect?: "portrait" | "landscape" | "square" | "natural";
+  centered?: boolean;
+  posterTime?: number;
+  showCaption?: boolean;
+  class?: string;
+}
+
+const {
+  video,
+  name = "",
+  role,
+  videoAspect = "portrait",
+  centered = true,
+  posterTime = 1,
+  showCaption = true,
+  class: className = "w-full max-w-[380px] mx-auto lg:mx-0",
+} = Astro.props as Props;
+
+let poster: string | undefined;
+try {
+  poster = (await generateVideoPoster(video, { timecodeSeconds: posterTime })).src;
+} catch (err) {
+  console.warn(`[VideoCard] Failed to generate poster for ${video}:`, err);
+}
+---
+
+<div class={className}>
+  <VideoCardClient
+    client:visible
+    name={name}
+    role={role}
+    video={video}
+    poster={poster}
+    videoAspect={videoAspect}
+    centered={centered}
+    showCaption={showCaption}
+  />
+</div>

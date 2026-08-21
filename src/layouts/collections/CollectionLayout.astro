@@ -1,0 +1,52 @@
+---
+// src/layouts/collections/CollectionLayout.astro
+/**
+ * Collection Layout - Default Item Page Layout
+ * 
+ * The standard layout for individual collection items.
+ * Features:
+ * - Uses SecondaryHero with bannerImage (or default)
+ * - Metadata display (date, author, reading time)
+ * - MDX content rendering
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import SecondaryHero from '@/layouts/SecondaryHero.astro';
+import { humanizeSlug } from '@/utils/string';
+import type { CollectionLayoutProps } from './types';
+
+const { 
+  entry,
+  collection,
+  collectionMeta,
+  Content,
+  isIndexPage,
+  seoProps = {},
+  ...extraProps
+} = Astro.props as CollectionLayoutProps;
+
+const data = entry?.data || {};
+---
+<BaseLayout {...seoProps}>
+  <main class="flex-1">
+    {/* Hero section - always displayed */}
+    <SecondaryHero
+      eyebrow={humanizeSlug(entry?.id ?? "")}
+      title={data.title}
+      heading={data.heading}
+      description={data.description}
+      image={data.bannerImage}
+      publishDate={data.publishDate}
+      author={data.author}
+      readingTime={data.readingTime}
+    />
+
+    {/* MDX content */}
+    {Content && (
+      <article>
+        <div class="prose prose-lg">
+          <Content />
+        </div>
+      </article>
+    )}
+  </main>
+</BaseLayout>

@@ -1,0 +1,182 @@
+---
+// src/layouts/collections/LocationLayout.astro
+/**
+ * Location Layout — item page for a single service area.
+ *
+ * Selected via `itemsLayout` in src/content/service-areas/_meta.mdx, and
+ * responsible for all 577 local-SEO pages — by far the largest page group on
+ * the site.
+ *
+ * ── STATUS: Phase 3.5 stub ────────────────────────────────────────────────
+ * Deliberately unstyled. Its job right now is to render the *correct content*
+ * for every location so the Phase 3.5 text-diff against the legacy site can
+ * run, and so the 577 URLs exist. The visual treatment (hero, service bands,
+ * CTA, testimonials, gallery) lands in the UI phases.
+ *
+ * The legacy page interpolated the location name into its copy:
+ *   "Top-Quality Roofing & Solar Solutions in {title}"
+ *   "…bringing premium, reliable service right to your doorstep in {title}"
+ * That interpolation is reproduced below so the copy is diff-comparable; the
+ * surrounding layout is not.
+ *
+ * The legacy page also fed `keywords={[pageTitle, ...tags]}` into SEO — the
+ * per-location tags (county + region) carry real local-SEO value, so they're
+ * merged into seoProps here rather than waiting for the styling phase.
+ */
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import MediaBand from "@/components/MediaBand.astro";
+import SplitMedia from "@/components/SplitMedia.astro";
+import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
+import RoofingForm from "@/components/Form/forms/RoofingForm.astro";
+import SpanishSection from "@/components/SpanishSection.astro";
+import JsonLd from "@/components/JsonLd.astro";
+import VideoCard from "@/components/Video/VideoCard.astro";
+import { siteData, businessData, serviceBtns } from "@/content/siteData";
+import { buildAreaServedFor } from "@/utils/schema/placeSchema";
+import { query, sortByOrder } from "@/utils/query";
+import { BUSINESS_ID, BUSINESS_TYPE } from "@/utils/schema/businessSchema";
+import type { CollectionLayoutProps } from "./types";
+
+const {
+  entry,
+  Content,
+  seoProps = {},
+} = Astro.props as CollectionLayoutProps;
+
+const data = (entry?.data ?? {}) as Record<string, any>;
+const place = data.title ?? "";
+const tags: string[] = Array.isArray(data.tags) ? data.tags : [];
+
+// Per-page geography from the service-areas hierarchy. A town emits itself
+// nested inside its county inside its state (via containedInPlace), and a
+// county also lists its municipalities — far more useful for local intent than
+// repeating the three top-level regions the site-wide entity already carries.
+const areaServed = entry?.id ? await buildAreaServedFor(entry.id) : undefined;
+
+// Scope the business entity to THIS location. Same @id as the site-wide entity,
+// so the graph stays one coherent business rather than splitting.
+const localBusinessSchema = areaServed?.length
+  ? {
+      "@context": "https://schema.org",
+      "@type": BUSINESS_TYPE,
+      "@id": BUSINESS_ID,
+      name: siteData.legalName || siteData.title,
+      url: siteData.url,
+      areaServed,
+    }
+  : null;
+
+// Merge the location's tags into keywords, matching the legacy behavior.
+const locationSeo = {
+  ...seoProps,
+  seo: {
+    ...(seoProps as any).seo,
+    keywords: [place, ...tags].filter(Boolean),
+  },
+};
+---
+
+<BaseLayout {...locationSeo}>
+  <JsonLd schema={localBusinessSchema} />
+  <main class="flex-1">
+    <h1>Top-Quality Roofing &amp; Solar Solutions in {place}</h1>
+
+    <p>
+      At {siteData.title} we specialize in bringing premium, reliable service
+      right to your doorstep in {place}. From $0-down financing to full-system
+      installs, your home is in expert hands.
+    </p>
+
+    <p>
+      {siteData.description} Backed by {businessData.experience} and a{" "}
+      {businessData.warranty}.
+    </p>
+
+    {/* "Serving X & Surrounding Areas" — the legacy location page's main body,
+        interpolating the place name so all 577 read as local pages rather than
+        boilerplate. */}
+    <SplitMedia
+      heading={`Serving ${place} & Surrounding Areas`}
+      description={`As a family-owned company with ${businessData.experience}, we bring expert craftsmanship, transparent pricing, and genuine care to every roof and solar installation. Whether you need a free inspection, emergency repair, a brand-new roof, or a turnkey solar energy system, our local team makes the process smooth and stress-free. We offer ${businessData.financing}, industry-leading warranties, and a commitment to treating your home like our own—because here in ${place}, your peace of mind is our top priority.`}
+      buttons={serviceBtns}
+    >
+      {/* Shared VideoCard so this matches the click-to-play behaviour used
+          everywhere else on the site. */}
+      <VideoCard
+        video="/roofingandsolarvid-smaller.webm"
+        videoAspect="natural"
+        showCaption={false}
+        class="w-full rounded-2xl shadow-md overflow-hidden"
+      />
+    </SplitMedia>
+
+    {/* Mission band — same on every legacy page (legacy: variant="media1"). */}
+    <MediaBand
+      heading="Our goal is simple:"
+      description={'"Make Roofing and Solar an enjoyable, trustworthy, and inspiring experience for everyone."'}
+      video="/roofingandsolarvid-smaller.webm"
+      overlayClass="bg-primary opacity-80"
+    />
+
+    {/* Financing and warranty points. */}
+    <ContentRenderer
+      query={query("benefits").orderBy(sortByOrder())}
+      variant="GridVariant"
+      columns={3}
+    />
+
+    {Content && <Content />}
+
+    {/* The legacy location pages rendered the WHOLE MainPageLayout after the
+        hero/about, so the rest of this file mirrors its band order:
+        Spanish → testimonials → services → projects → faq → gallery.
+        Note it did NOT list nearby towns, so a location-navigation band would
+        be a new feature, not a port. */}
+    <RoofingForm />
+
+    {/* legacy: <SpanishSection /> */}
+    <SpanishSection />
+
+    <ContentRenderer
+      query={query("testimonials").orderBy(sortByOrder())}
+      variant="TestimonialShowcaseVariant"
+      title="Hear It Straight from Homeowners"
+    />
+
+    {/* legacy: collection="services" query="parent" — the two lines of business */}
+    <ContentRenderer
+      query={query("roofing").orderBy(sortByOrder())}
+      variant="GridVariant"
+      columns={3}
+    />
+    <ContentRenderer
+      query={query("solar").orderBy(sortByOrder())}
+      variant="GridVariant"
+      columns={3}
+    />
+
+    <ContentRenderer
+      query={query("projects").orderBy(sortByOrder())}
+      variant="BeforeAfterVariant"
+      columns={2}
+      title={`Discover ${siteData.title}'s Rooftop Masterpieces`}
+    />
+
+    <ContentRenderer
+      query={query("faq")
+        .where((e: any) => !e.data.monmouthPage && !e.data.post)
+        .orderBy(sortByOrder())}
+      variant="AccordionVariant"
+      title="Frequently Asked Questions"
+    />
+
+    {/* legacy: collection="gallery" closed the page */}
+    <ContentRenderer
+      query={query("gallery").orderBy(sortByOrder())}
+      variant="GalleryVariant"
+      title="Whether you need a new roof or want to go solar with NO MONEY DOWN, we make it easy!"
+      video="/roofingandsolarvid-smaller.webm"
+      buttons={serviceBtns}
+    />
+  </main>
+</BaseLayout>

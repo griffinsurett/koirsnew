@@ -1,0 +1,42 @@
+---
+// src/integrations/partytown/PartytownLoader.astro
+/**
+ * Conditional Partytown Loader
+ *
+ * Only loads the Partytown bootstrap script if there are actual
+ * scripts with type="text/partytown" on the page.
+ *
+ * This prevents loading ~3KB of unused JS when partytown isn't needed.
+ *
+ * Usage:
+ *   <PartytownLoader forward={['dataLayer.push']} />
+ */
+
+export interface Props {
+  /** Global variables to forward to partytown workers */
+  forward?: string[];
+  /** Enable debug mode */
+  debug?: boolean;
+}
+
+const { forward = ['dataLayer.push'], debug = false } = Astro.props;
+
+const forwardConfig = JSON.stringify(forward);
+---
+
+<script is:inline define:vars={{ forwardConfig, debug }}>
+  // Conditional Partytown loader - only loads if partytown scripts exist
+  (function() {
+    // Check if there are any partytown scripts on the page
+    if (!document.querySelector('script[type="text/partytown"]')) return;
+
+    // Partytown scripts exist, configure and load
+    var f = JSON.parse(forwardConfig);
+    window.partytown = { lib: '/~partytown/', debug: debug, forward: f };
+
+    // Load partytown bootstrap dynamically
+    var s = document.createElement('script');
+    s.src = '/~partytown/partytown.js';
+    document.head.appendChild(s);
+  })();
+</script>

@@ -1,0 +1,209 @@
+---
+// src/integrations/preferences/core/language/scripts/TranslationLoader.astro
+/**
+ * Translation Loader - Lightweight Script
+ *
+ * This small script replaces the massive BrowserTranslateScript in the critical path.
+ * It only loads the full translation system when actually needed:
+ * - User has a saved non-English language preference
+ * - User interacts with the language picker
+ *
+ * The full BrowserTranslateScript.astro is loaded dynamically via import().
+ * This removes ~50KB of inline JS from pages where translation isn't used.
+ */
+
+export interface Props {
+  /** Enable Chrome/Edge native Translator API (default: true) */
+  enableNative?: boolean;
+  /** Enable Google Translate SDK fallback (default: true) */
+  enableGoogle?: boolean;
+}
+
+const {
+  enableNative = true,
+  enableGoogle = true,
+} = Astro.props;
+---
+
+<script is:inline define:vars={{ enableNative, enableGoogle }}>
+(function() {
+  var STORAGE_KEY = "user-language";
+  var SCRIPT_ID = "browser-translate-script";
+
+  // Store config for when the full script loads
+  window.__translationConfig = {
+    enableNative: enableNative,
+    enableGoogle: enableGoogle
+  };
+
+  // Track loading state
+  var isLoading = false;
+  var isLoaded = false;
+  var pendingLanguage = null;
+
+  function getStoredLanguage() {
+    try {
+      return localStorage.getItem(STORAGE_KEY) || "en";
+    } catch (e) {
+      return "en";
+    }
+  }
+
+  function hasFunctionalConsent() {
+    try {
+      var cookies = document.cookie.split(';');
+      for (var i = 0; i < cookies.length; i++) {
+        var cookie = cookies[i].trim();
+        if (cookie.indexOf('cookie-consent=') === 0) {
+          var value = decodeURIComponent(cookie.substring(15));
+          var consent = JSON.parse(value);
+          return consent && consent.functional === true;
+        }
+      }
+    } catch (e) {}
+    return false;
+  }
+
+  function hasNativeTranslatorAPI() {
+    return enableNative && typeof window !== "undefined" && "Translator" in window;
+  }
+
+  // Load the full translation script dynamically
+  function loadTranslationScript(callback) {
+    if (isLoaded) {
+      if (callback) callback();
+      return;
+    }
+
+    if (isLoading) {
+      // Script is loading, queue the callback
+      window.addEventListener('translation-script-loaded', function handler() {
+        window.removeEventListener('translation-script-loaded', handler);
+        if (callback) callback();
+      });
+      return;
+    }
+
+    isLoading = true;
+
+    var script = document.createElement('script');
+    script.id = SCRIPT_ID;
+    script.src = '/_translation/browser-translate.js';
+    script.async = true;
+
+    script.onload = function() {
+      isLoaded = true;
+      isLoading = false;
+      window.dispatchEvent(new CustomEvent('translation-script-loaded'));
+      if (callback) callback();
+    };
+
+    script.onerror = function() {
+      isLoading = false;
+      console.warn('Failed to load translation script');
+    };
+
+    document.head.appendChild(script);
+  }
+
+  // Stub changeLanguage - loads full script then calls real implementation
+  window.changeLanguage = function(languageCode) {
+    var code = languageCode || "en";
+
+    // If reverting to English and nothing is loaded, just update storage
+    if (code === "en" && !isLoaded) {
+      try {
+        localStorage.setItem(STORAGE_KEY, code);
+      } catch (e) {}
+      document.documentElement.lang = "en";
+      document.documentElement.removeAttribute("data-preferred-language");
+      return;
+    }
+
+    // Load full script and call real changeLanguage
+    pendingLanguage = code;
+    loadTranslationScript(function() {
+      if (window.__realChangeLanguage) {
+        window.__realChangeLanguage(pendingLanguage);
+        pendingLanguage = null;
+      }
+    });
+  };
+
+  // Stub for checking if translation needs consent
+  window.translationNeedsConsent = function() {
+    return !hasNativeTranslatorAPI();
+  };
+
+  // Stub for getting translation method
+  window.getTranslationMethod = function() {
+    if (!isLoaded) return 'none';
+    return window.__browserTranslation?.translationMethod || 'none';
+  };
+
+  // Config accessor
+  window.getTranslationConfig = function() {
+    return window.__translationConfig;
+  };
+
+  // Check if translation is available
+  window.isTranslationAvailable = function() {
+    var nativeAvailable = enableNative && typeof window !== "undefined" && "Translator" in window;
+    return nativeAvailable || enableGoogle;
+  };
+
+  // Consent checker
+  window.hasFunctionalConsent = hasFunctionalConsent;
+
+  // Check if we need to load translation on page load
+  function checkInitialTranslation() {
+    var savedLang = getStoredLanguage();
+
+    // Only load if user has a non-English preference
+    if (savedLang && savedLang !== "en") {
+      // For native API, we need consent or native support
+      var canTranslate = hasNativeTranslatorAPI() || (enableGoogle && hasFunctionalConsent());
+
+      if (canTranslate) {
+        // Defer loading to not block initial render
+        if ("requestIdleCallback" in window) {
+          requestIdleCallback(function() {
+            loadTranslationScript(function() {
+              if (window.__realChangeLanguage) {
+                window.__realChangeLanguage(savedLang);
+              }
+            });
+          }, { timeout: 2000 });
+        } else {
+          setTimeout(function() {
+            loadTranslationScript(function() {
+              if (window.__realChangeLanguage) {
+                window.__realChangeLanguage(savedLang);
+              }
+            });
+          }, 500);
+        }
+      }
+    }
+  }
+
+  // Listen for consent changes
+  window.addEventListener("consent-changed", function() {
+    var savedLang = getStoredLanguage();
+    if (savedLang && savedLang !== "en" && !isLoaded) {
+      loadTranslationScript(function() {
+        if (window.__realChangeLanguage) {
+          window.__realChangeLanguage(savedLang);
+        }
+      });
+    }
+  });
+
+  // Run initial check after DOM is ready
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", checkInitialTranslation);
+  } else {
+    checkInitialTranslation();
+  }
+})();
+</script>

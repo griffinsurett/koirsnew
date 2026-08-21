@@ -1,0 +1,152 @@
+---
+// src/layouts/collections/MonmouthCountyLayout.astro
+/**
+ * Landing Page Layout — one layout for the hand-written local-SEO pages
+ * (the Monmouth County set).
+ *
+ * Selected via `itemsLayout` in src/content/monmouth-county/_meta.mdx.
+ *
+ * ── WHY THIS EXISTS ───────────────────────────────────────────────────────
+ * The legacy site had six of these as separate .astro files totalling ~3,130
+ * lines — and they were structurally IDENTICAL: every one ran the same
+ * `media2 · media2 · testimonials · faqs · banner` sequence, in the same
+ * order. Only four consts, the images, and the FAQ text differed.
+ *
+ * So they collapse to: this layout + six content entries. Their 62 inline
+ * FAQs move into the `faq` collection (scoped by the `monmouthPage` ref) so
+ * buildFaqSchema emits real FAQPage markup — which the legacy pages never
+ * had, despite showing the questions.
+ *
+ * Their six hand-pasted RoofingContractor JSON-LD blobs are deleted, not
+ * ported: buildBusinessSchema derives the same thing from siteData +
+ * contact-us + service-areas, consistently and without copy-paste drift.
+ *
+ * ── SECTION ORDER ─────────────────────────────────────────────────────────
+ * Matches the legacy LocationLayout, which rendered a primaryHero + about
+ * band and then delegated to MainPageLayout: hero(+form) → benefits →
+ * Spanish → testimonials → projects → lines of business → FAQ → gallery.
+ */
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
+import SecondaryHero from "@/layouts/SecondaryHero.astro";
+import SpanishSection from "@/components/SpanishSection.astro";
+import MediaBand from "@/components/MediaBand.astro";
+import RoofingForm from "@/components/Form/forms/RoofingForm.astro";
+import SolarForm from "@/components/Form/forms/SolarForm.astro";
+import { query, sortByOrder, normalizeReference } from "@/utils/query";
+import { siteData, serviceBtns } from "@/content/siteData";
+import type { CollectionLayoutProps } from "./types";
+
+const {
+  entry,
+  Content,
+  seoProps = {},
+} = Astro.props as CollectionLayoutProps;
+
+const data = (entry?.data ?? {}) as Record<string, any>;
+const pageId = entry?.id;
+
+// FAQs scoped to this landing page. Rendering them through AccordionVariant is
+// what produces the FAQPage schema, so the markup always matches what's shown.
+const faqQuery = pageId
+  ? query("faq")
+      .where((e: any) =>
+        normalizeReference(e.data.monmouthPage).some((r: any) => r.id === pageId)
+      )
+      .orderBy(sortByOrder())
+  : null;
+const faqCount = faqQuery ? (await faqQuery.all()).length : 0;
+---
+
+<BaseLayout {...seoProps}>
+  <main class="flex-1">
+    {/* Hero — the legacy pages opened on a full primaryHero with the inquiry
+        form beside the copy (solar pages get the solar qualifiers). */}
+    <SecondaryHero
+      eyebrow={siteData.title}
+      title={data.title}
+      description={data.description}
+      image={data.featuredImage}
+      minHeight="60vh"
+    >
+      <Fragment slot="aside">
+        {pageId?.startsWith("solar") ? <SolarForm /> : <RoofingForm />}
+      </Fragment>
+    </SecondaryHero>
+
+    {Content && (
+      <div class="container mx-auto px-4 py-12">
+        <Content />
+      </div>
+    )}
+
+    {/* ── Legacy MainPageLayout band sequence ───────────────────────────────
+        The legacy location pages rendered hero + about, then the WHOLE
+        MainPageLayout. Order below matches it exactly:
+        media1 → benefits → Spanish → testimonials → services → projects →
+        faq → gallery. */}
+
+    {/* legacy: variant="media1" — mission copy over the roofing/solar video */}
+    <MediaBand
+      heading="Our goal is simple:"
+      description={'"Make Roofing and Solar an enjoyable, trustworthy, and inspiring experience for everyone."'}
+      video="/roofingandsolarvid-smaller.webm"
+      overlayClass="bg-primary opacity-80"
+    />
+
+    {/* legacy: collection="benefits" — financing and warranty points */}
+    <ContentRenderer
+      query={query("benefits").orderBy(sortByOrder())}
+      variant="GridVariant"
+      columns={3}
+    />
+
+    {/* legacy: <SpanishSection /> */}
+    <SpanishSection />
+
+    {/* legacy: collection="testimonials" */}
+    <ContentRenderer
+      query={query("testimonials").orderBy(sortByOrder())}
+      variant="TestimonialShowcaseVariant"
+      title="Hear It Straight from Homeowners"
+    />
+
+    {/* legacy: collection="services" query="parent" — the two lines of business */}
+    <ContentRenderer
+      query={query("roofing").orderBy(sortByOrder())}
+      variant="GridVariant"
+      columns={3}
+    />
+    <ContentRenderer
+      query={query("solar").orderBy(sortByOrder())}
+      variant="GridVariant"
+      columns={3}
+    />
+
+    {/* legacy: collection="projects" — before/after portfolio */}
+    <ContentRenderer
+      query={query("projects").orderBy(sortByOrder())}
+      variant="BeforeAfterVariant"
+      columns={2}
+      title={`Discover ${siteData.title}'s Roofing Masterpieces`}
+    />
+
+    {/* legacy: collection="faq" query="getAll" */}
+    {faqQuery && faqCount > 0 && (
+      <ContentRenderer
+        query={faqQuery}
+        variant="AccordionVariant"
+        title="Frequently Asked Questions"
+      />
+    )}
+
+    {/* legacy: collection="gallery" — marquee + service buttons closed the page */}
+    <ContentRenderer
+      query={query("gallery").orderBy(sortByOrder())}
+      variant="GalleryVariant"
+      title="Whether you need a new roof or want to go solar with NO MONEY DOWN, we make it easy!"
+      video="/roofingandsolarvid-smaller.webm"
+      buttons={serviceBtns}
+    />
+  </main>
+</BaseLayout>

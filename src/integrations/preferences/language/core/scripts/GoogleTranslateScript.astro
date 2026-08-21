@@ -1,0 +1,186 @@
+---
+// src/integrations/preferences/core/language/scripts/GoogleTranslateScript.astro
+/**
+ * Google Translate Integration Script
+ *
+ * Deferred loading - only initializes after idle if user has a non-English
+ * language preference saved. Otherwise, waits for user interaction.
+ */
+---
+<script>
+  // Defer initialization to not block rendering
+  const STORAGE_KEY = "user-language";
+
+  function initTranslate() {
+    // Dynamic import to avoid bundling in critical path
+    Promise.all([
+      import("@/utils/cookies"),
+      import("@/utils/storage"),
+      import("@/integrations/preferences/consent/core/utils/consent")
+    ]).then(([cookies, storage, consent]) => {
+      const { setCookie, clearCookie } = cookies;
+      const { getStorageItem, setStorageItem } = storage;
+      const { hasConsentFor } = consent;
+
+      const GOOGLE_SCRIPT_ID = "google-translate-sdk";
+
+      const state = {
+        scriptRequested: false,
+        translateInitialized: false,
+        pendingLanguage: null as string | null,
+      };
+
+      function normalizeLanguage(code: string | null): string {
+        return code || "en";
+      }
+
+      function persistLanguagePreference(languageCode: string) {
+        setStorageItem(STORAGE_KEY, languageCode);
+
+        if (!hasConsentFor("functional")) {
+          if (languageCode === "en") clearCookie("googtrans");
+          return;
+        }
+
+        if (languageCode === "en") {
+          clearCookie("googtrans");
+        } else {
+          setCookie("googtrans", `/en/${languageCode}`, { expires: 365, sameSite: "Lax" });
+        }
+      }
+
+      function ensureTranslateScript() {
+        if (state.scriptRequested || state.translateInitialized) return;
+        if (!hasConsentFor("functional")) return;
+
+        const existing = document.getElementById(GOOGLE_SCRIPT_ID);
+        if (existing) {
+          state.scriptRequested = true;
+          return;
+        }
+
+        state.scriptRequested = true;
+
+        const script = document.createElement("script");
+        script.id = GOOGLE_SCRIPT_ID;
+        script.src = "https://translate.google.com/translate_a/element.js?cb=initializeGoogleTranslate";
+        script.async = true;
+        script.onerror = () => { state.scriptRequested = false; };
+        document.head.appendChild(script);
+      }
+
+      function applyLanguage(languageCode: string): boolean {
+        const combo = document.querySelector("select.goog-te-combo");
+        if (!(combo instanceof HTMLSelectElement)) return false;
+
+        const normalized = languageCode === "en" ? "" : languageCode;
+        if (combo.value === normalized) {
+          state.pendingLanguage = null;
+          return true;
+        }
+
+        combo.value = normalized;
+        combo.dispatchEvent(new Event("change"));
+        if (normalized) {
+          document.documentElement.dataset.preferredLanguage = languageCode;
+        } else {
+          document.documentElement.removeAttribute("data-preferred-language");
+        }
+        state.pendingLanguage = null;
+        return true;
+      }
+
+      (window as any).initializeGoogleTranslate = function () {
+        const google = (window as any).google;
+        if (!google?.translate?.TranslateElement) {
+          state.scriptRequested = false;
+          return;
+        }
+
+        new google.translate.TranslateElement(
+          { pageLanguage: "en", includedLanguages: "", autoDisplay: false },
+          "google_translate_element"
+        );
+
+        state.translateInitialized = true;
+
+        const desiredLanguage = state.pendingLanguage || normalizeLanguage(getStorageItem(STORAGE_KEY));
+        if (desiredLanguage && desiredLanguage !== "en") {
+          requestAnimationFrame(() => applyLanguage(desiredLanguage));
+        }
+      };
+
+      (window as any).changeLanguage = function (languageCode: string) {
+        const normalized = normalizeLanguage(languageCode);
+        persistLanguagePreference(normalized);
+
+        if (normalized === "en") {
+          document.documentElement.removeAttribute("data-preferred-language");
+          if (state.translateInitialized) applyLanguage("en");
+          else state.pendingLanguage = null;
+          return;
+        }
+
+        state.pendingLanguage = normalized;
+        if (!hasConsentFor("functional")) return;
+        ensureTranslateScript();
+        if (state.translateInitialized) applyLanguage(normalized);
+      };
+
+      const savedLanguage = normalizeLanguage(getStorageItem(STORAGE_KEY));
+      if (savedLanguage !== "en" && hasConsentFor("functional")) {
+        persistLanguagePreference(savedLanguage);
+        state.pendingLanguage = savedLanguage;
+        ensureTranslateScript();
+      }
+
+      window.addEventListener("consent-changed", () => {
+        if (!hasConsentFor("functional")) return;
+        const preferred = normalizeLanguage(getStorageItem(STORAGE_KEY));
+        if (preferred === "en") return;
+        persistLanguagePreference(preferred);
+        state.pendingLanguage = preferred;
+        if (state.translateInitialized) applyLanguage(preferred);
+        else ensureTranslateScript();
+      });
+    });
+  }
+
+  // Check if user has non-English language preference
+  const savedLang = localStorage.getItem(STORAGE_KEY);
+  if (savedLang && savedLang !== "en") {
+    // User has language preference - init after idle
+    if ("requestIdleCallback" in window) {
+      requestIdleCallback(() => initTranslate(), { timeout: 3000 });
+    } else {
+      setTimeout(initTranslate, 1000);
+    }
+  } else {
+    // No preference - defer until user tries to change language
+    // The changeLanguage function will be available after first call
+    (window as any).changeLanguage = function(code: string) {
+      initTranslate();
+      // Retry after init
+      setTimeout(() => (window as any).changeLanguage?.(code), 500);
+    };
+  }
+</script>
+
+<div id="google_translate_element" style="display: none;"></div>
+
+<style>
+  .goog-te-banner-frame,
+  .goog-te-balloon-frame,
+  .goog-te-gadget,
+  .skiptranslate,
+  iframe.goog-te-menu-frame,
+  #google_translate_element,
+  body > .skiptranslate,
+  iframe.skiptranslate {
+    display: none !important;
+  }
+
+  body {
+    top: 0 !important;
+  }
+</style>

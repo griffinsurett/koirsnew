@@ -1,0 +1,54 @@
+[
+  {
+    "id": "phone",
+    "title": "Call Us",
+    "value": "8483158038",
+    "icon": "lu:phone",
+    "tags": [
+      "phone"
+    ],
+    "linkPrefix": "tel:",
+    "phoneCountryCode": "1",
+    "order": 1,
+    "description": "8483158038"
+  },
+  {
+    "id": "email",
+    "title": "Email Us",
+    "value": "customersupport@koiroofingandsolar.com",
+    "icon": "lu:mail",
+    "tags": [
+      "email"
+    ],
+    "linkPrefix": "mailto:",
+    "order": 2,
+    "description": "customersupport@koiroofingandsolar.com",
+    "linkBehavior": {
+      "mode": "prefixed",
+      "linkPrefix": "linkPrefix",
+      "valueFormatter": "none"
+    }
+  },
+  {
+    "id": "address",
+    "title": "Visit Us",
+    "value": "30 Union Pl, Unit 234, Elizabeth, NJ 07202",
+    "icon": "lu:map-pin",
+    "tags": [
+      "address"
+    ],
+    "url": "https://maps.google.com/?q=30+Union+Pl,+Elizabeth,+NJ+07202",
+    "streetAddress": "30 Union Pl, Unit 234",
+    "addressLocality": "Elizabeth",
+    "addressRegion": "NJ",
+    "postalCode": "07202",
+    "addressCountry": "US",
+    "order": 3,
+    "description": "30 Union Pl, Unit 234, Elizabeth, NJ 07202",
+    "linkBehavior": {
+      "mode": "field",
+      "link": "url",
+      "valueFormatter": "none"
+    }
+  }
+]

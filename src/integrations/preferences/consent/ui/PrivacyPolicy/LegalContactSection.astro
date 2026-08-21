@@ -1,0 +1,108 @@
+---
+// src/integrations/preferences/ui/consent/components/PrivacyPolicy/LegalContactSection.astro
+/**
+ * Legal Contact Section Component
+ *
+ * Reusable contact section for legal pages (Privacy Policy, Cookie Policy, Terms of Service, etc.)
+ * Displays contact information dynamically from the contact-us collection:
+ * - Email address (with mailto link)
+ * - Phone number (with tel link)
+ * - Physical address or location
+ * - Link to contact page
+ *
+ * Props:
+ * - sectionNumber: Optional section number for sequential numbering
+ * - heading: Custom heading text (defaults to "Contact Us")
+ * - introText: Custom intro paragraph (optional)
+ * - showContactPageLink: Whether to show "Visit: Contact Page" link (default: true)
+ *
+ * Usage:
+ *   <LegalContactSection
+ *     sectionNumber={9}
+ *     introText="If you have questions about this Privacy Policy or wish to exercise your rights, contact us:"
+ *   />
+ */
+
+import { find } from "@/utils/query";
+import { formatPhoneNumber } from "@/utils/string";
+import { siteData } from "@/content/siteData";
+
+interface Props {
+  sectionNumber?: number;
+  heading?: string;
+  introText?: string;
+  showContactPageLink?: boolean;
+}
+
+const {
+  sectionNumber,
+  heading = "Contact Us",
+  introText = "If you have questions, reach us at:",
+  showContactPageLink = true,
+} = Astro.props;
+
+// Query contact information dynamically from contact-us collection
+const emailEntry = await find("contact-us", "email");
+const phoneEntry = await find("contact-us", "phone");
+const addressEntry = await find("contact-us", "address");
+const emailValue = emailEntry?.data?.value ?? emailEntry?.data?.description ?? emailEntry?.data?.title ?? "";
+const phoneValue = phoneEntry?.data?.value ?? phoneEntry?.data?.description ?? phoneEntry?.data?.title ?? "";
+const addressValue = addressEntry?.data?.value ?? addressEntry?.data?.description ?? "";
+---
+
+<h2>{sectionNumber ? `${sectionNumber}. ` : ""}{heading}</h2>
+<p>{introText}</p>
+<ul>
+  {
+    emailEntry && (
+      <li>
+        <strong>Email:</strong>{" "}
+        <a
+          href={`${emailEntry.data.linkPrefix || "mailto:"}${emailValue}`}
+          class="text-primary underline hover:text-primary-700"
+        >
+          {emailValue}
+        </a>
+      </li>
+    )
+  }
+  {
+    phoneEntry && (
+      <li>
+        <strong>Phone:</strong>{" "}
+        <a
+          href={`${phoneEntry.data.linkPrefix || "tel:"}${phoneValue}`}
+          class="text-primary underline hover:text-primary-700"
+        >
+          {formatPhoneNumber(phoneValue)}
+        </a>
+      </li>
+    )
+  }
+  {
+    addressValue ? (
+      <li>
+        <strong>Address:</strong> {addressValue}
+      </li>
+    ) : (
+      siteData.location && (
+        <li>
+          <strong>Location:</strong> {siteData.location}
+        </li>
+      )
+    )
+  }
+  {
+    showContactPageLink && (
+      <li>
+        <strong>Visit:</strong>{" "}
+        <a
+          href="/contact"
+          class="text-primary underline hover:text-primary-700"
+        >
+          Contact Page
+        </a>
+      </li>
+    )
+  }
+</ul>

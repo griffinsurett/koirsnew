@@ -1,0 +1,74 @@
+---
+// src/layouts/collections/LegalLayout.astro
+/**
+ * Legal Layout - Specialized Layout for Legal Documents
+ * 
+ * Alternative layout optimized for legal content.
+ * Features:
+ * - Clean, professional typography
+ * - Date display (Last Updated + Effective Date)
+ * - Print-friendly styling
+ * - No hero section (gets right to content)
+ * 
+ * Specify in _meta.mdx with: itemsLayout: "@/layouts/collections/LegalLayout.astro"
+ */
+
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import LastUpdated from '@/integrations/preferences/consent/ui/PrivacyPolicy/LastUpdated.astro';
+import SecondaryHero from '@/layouts/SecondaryHero.astro';
+import { humanizeSlug } from '@/utils/string';
+import type { CollectionLayoutProps } from './types';
+
+const { 
+  entry,
+  collection,
+  collectionMeta,
+  Content,
+  isIndexPage,
+  seoProps = {},
+  ...extraProps
+} = Astro.props as CollectionLayoutProps;
+
+const data = entry?.data || {};
+
+// Format dates for display
+const formatDate = (date?: Date) => {
+  if (!date) return undefined;
+  return new Date(date).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+};
+
+const lastUpdated = formatDate(data.publishDate);
+const effectiveDate = formatDate(data.effectiveDate);
+---
+
+<BaseLayout {...seoProps}>
+  <main class="flex-1">
+    <SecondaryHero
+      eyebrow={humanizeSlug(entry?.id ?? "")}
+      title={data.title}
+      heading={data.heading}
+      description={data.description}
+      image={data.bannerImage}
+      publishDate={data.publishDate}
+      minHeight="45vh"
+    />
+
+    <article class="legal-document prose prose-lg max-w-4xl mx-auto py-12 px-6">
+      {/* Dates Section */}
+      {lastUpdated && (
+        <LastUpdated 
+          lastUpdated={lastUpdated} 
+          effectiveDate={effectiveDate} 
+          className="mb-8 opacity-80"
+        />
+      )}
+
+      {/* Legal Content */}
+      {Content && <Content />}
+    </article>
+  </main>
+</BaseLayout>

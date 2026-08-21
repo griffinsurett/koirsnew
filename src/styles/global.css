@@ -1,0 +1,398 @@
+/* src/styles/global.css */
+@import "tailwindcss";
+
+/* Tell Tailwind to scan integration components for class usage */
+@source "../integrations";
+
+/* disabled with its UI (AGENTS.md) — stylesheet stays on disk */
+/* @import "../integrations/preferences/language/styles/language-switcher.css"; */
+@import "../integrations/preferences/shared/styles/preferences.css";
+/* disabled with its UI (AGENTS.md) — stylesheet stays on disk */
+/* @import "../integrations/preferences/accessibility/styles/accessibility.css"; */
+@import "@/styles/legal.css";
+@import "@/styles/system.css";
+@import "@/styles/menu.css";
+
+@theme {
+  /* ═══════════════════════════════════════════════════════════════════════
+     KOI ROOFING & SOLAR — brand tokens
+     Ported verbatim from the legacy site's @theme block. These hex values are
+     the visual contract: users must not perceive a colour change, so they are
+     not "improved", re-derived, or converted to oklch.
+     ═══════════════════════════════════════════════════════════════════════ */
+
+  /* ───── PRIMARY – Koi navy. Change ONLY this line to rebrand. ───── */
+  --color-primary: #232f49;
+  /* ───── ACCENT – Koi amber (hero eyebrow, CTAs) ───── */
+  --color-accent: #feae00;
+  /* ───── SECONDARY – Koi blue. Pairs with primary for the gradient
+           .heading-primary treatment, which is the brand's most
+           recognisable detail. ───── */
+  --color-secondary: #0d75b6;
+
+  /* ───── Neutrals — Koi's own, not greastro's oklch set ───── */
+  --color-text:         #5d626d;   /* slate body copy */
+  --color-heading:      #111111;   /* near-black headings */
+  --color-bg:           #f2f0ef;   /* warm off-white */
+  --color-surface:      #ffffff;   /* cards, modals */
+  /* Form input borders. The 2025 site referenced --color-border but never
+     defined it, so inputs fell back to currentColor (navy, from text-primary).
+     Defined here so that intent is explicit rather than accidental. */
+  --color-border:       #232f49;   /* navy input outline */
+
+  /* Semantic pairs the legacy markup uses directly. These are NOT derivable
+     from primary/accent, so they stay explicit tokens. */
+  --color-bg-2:         #e9ecee;   /* alternating band background */
+  --color-text-light:   #f2f0efc4; /* body copy on navy (note: alpha) */
+  --color-neutral:      #f3f4f6;
+
+  /* ───── Typography ─────
+     The legacy site declared "Poppins"/"Lato" in its @theme but NEVER loaded
+     either face — no <link>, no @font-face, verified in its built output. So it
+     has always rendered in the system stack, and matching it means NOT adding
+     webfonts: shipping them now would change every glyph on the site, which is
+     exactly the user-visible change this port avoids.
+     The names are kept first in the stack so that IF the fonts are ever
+     self-hosted (@fontsource, per the house convention), they take effect with
+     no other edit. */
+  --font-heading: "Poppins", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-base:    "Lato", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-sans:    var(--font-base);
+
+  /* ───── Spacing scale (legacy names kept — the ported markup uses
+           var(--spacing-*) directly in arbitrary values) ───── */
+  --spacing-xs:    0.35rem;
+  --spacing-sm:    0.7rem;
+  --spacing-md:    1rem;
+  --spacing-lg:    1.5rem;
+  --spacing-xl:    2rem;
+  --spacing-2xl:   3rem;
+  --spacing-3xl:   4.5rem;
+  --spacing-4xl:   6rem;
+  --spacing-sec-y: 75px;
+
+  /* ───── Radius ───── */
+  --radius-xs: 0.125rem;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+
+  /* ───── Shadows — Koi's 10-step scale ───── */
+  --shadow-xs:      0px 0px 2px 0px rgba(0, 0, 0, 0.5);
+  --shadow-sm:      0px 0px 5px 0px rgba(0, 0, 0, 0.5);
+  --shadow:         0px 0px 7.5px 0px rgba(0, 0, 0, 0.5);
+  --shadow-md:      0px 0px 10px 0px rgba(0, 0, 0, 0.5);
+  --shadow-lg:      0px 0px 20px 0px rgba(0, 0, 0, 0.5);
+  --shadow-xl:      0px 5px 30px 0px rgba(0, 0, 0, 0.5);
+  --shadow-2xl:     0px 10px 45px 0px rgba(0, 0, 0, 0.5);
+  --shadow-3xl:     0px 15px 60px 0px rgba(0, 0, 0, 0.5);
+  --shadow-inner:   inset 0px 2px 4px 0px rgba(0, 0, 0, 0.5);
+  --shadow-outline: 0px 0px 0px 3px rgba(66, 153, 225, 0.5);
+  --shadow-none:    none;
+
+  /* ───── Derived ramps. Greastro derives 50–950 from the base via oklch;
+           only the bases above are edited, never these steps. ───── */
+  --color-primary-50:   oklch(from var(--color-primary) calc(l + 0.40) c h);
+  --color-primary-100:  oklch(from var(--color-primary) calc(l + 0.35) c h);
+  --color-primary-200:  oklch(from var(--color-primary) calc(l + 0.25) c h);
+  --color-primary-300:  oklch(from var(--color-primary) calc(l + 0.15) c h);
+  --color-primary-400:  oklch(from var(--color-primary) calc(l + 0.08) c h);
+  --color-primary-500:  var(--color-primary);
+  --color-primary-600:  oklch(from var(--color-primary) calc(l - 0.08) c h);
+  --color-primary-700:  oklch(from var(--color-primary) calc(l - 0.15) c h);
+  --color-primary-800:  oklch(from var(--color-primary) calc(l - 0.25) c h);
+  --color-primary-900:  oklch(from var(--color-primary) calc(l - 0.35) c h);
+  --color-primary-950:  oklch(from var(--color-primary) calc(l - 0.45) c h);
+
+  --color-accent-50:   oklch(from var(--color-accent) calc(l + 0.40) c h);
+  --color-accent-100:  oklch(from var(--color-accent) calc(l + 0.35) c h);
+  --color-accent-200:  oklch(from var(--color-accent) calc(l + 0.25) c h);
+  --color-accent-300:  oklch(from var(--color-accent) calc(l + 0.15) c h);
+  --color-accent-400:  oklch(from var(--color-accent) calc(l + 0.08) c h);
+  --color-accent-500:  var(--color-accent);
+  --color-accent-600:  oklch(from var(--color-accent) calc(l - 0.08) c h);
+  --color-accent-700:  oklch(from var(--color-accent) calc(l - 0.15) c h);
+  --color-accent-800:  oklch(from var(--color-accent) calc(l - 0.25) c h);
+  --color-accent-900:  oklch(from var(--color-accent) calc(l - 0.35) c h);
+  --color-accent-950:  oklch(from var(--color-accent) calc(l - 0.45) c h);
+
+  --color-secondary-500: var(--color-secondary);
+  --color-secondary-600: oklch(from var(--color-secondary) calc(l - 0.08) c h);
+  --color-secondary-700: oklch(from var(--color-secondary) calc(l - 0.15) c h);
+}
+
+
+body {
+  @apply overflow-x-hidden;
+}
+
+@layer base {
+  /* ═══════════════════════════════════════════════════════════════════════
+     KOI base styling — ported from the legacy site.
+     ═══════════════════════════════════════════════════════════════════════ */
+
+  /* 2025 parity: the legacy site set `font-thin` on <main>, so ALL body copy
+     inherited weight 100 — that airy weight is the brand voice, not a default.
+     Applied here (rather than per-page <main>) so it holds site-wide. */
+  main {
+    @apply font-thin;
+  }
+
+  /* Legal documents need normal weight for sustained reading — they opt out
+     of the brand's thin body voice. */
+  /* Mobile menu drawer — the shared MobileMenuItem uses dark type for a light
+     panel, but the drawer sits on a navy-tinted photo. Recolour to the brand's
+     light-on-dark voice. `!` is needed: the component sets its colour with a
+     utility class, which otherwise wins on equal specificity. */
+  .koi-mobile-nav a,
+  .koi-mobile-nav button {
+    @apply !text-bg uppercase tracking-widest font-medium;
+  }
+
+  .koi-mobile-nav a:hover,
+  .koi-mobile-nav button:hover {
+    @apply !text-accent;
+  }
+
+  /* The hamburger/X bars are spans painted with `bg-current`, so they follow
+     the LABEL's colour, not the button's — recolour the label too. */
+  .koi-mobile-nav label {
+    @apply !text-bg;
+  }
+
+  .koi-mobile-nav label:hover {
+    @apply !text-accent;
+  }
+
+  .koi-mobile-nav > ul > li > a,
+  .koi-mobile-nav > ul > li > div > a,
+  .koi-mobile-nav > ul > li > div > button {
+    @apply text-lg whitespace-nowrap;
+  }
+
+  /* MobileMenuItem indents leaf links with an inline padding-left for nesting;
+     at top level that shifts them off-centre in a centred drawer. */
+  .koi-mobile-nav > ul > li > a {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  /* The parent row is a space-between flex (label + chevron), which pushes the
+     label off-centre. Centre the label and let the chevron sit beside it. */
+  .koi-mobile-nav > ul > li > div {
+    @apply justify-center gap-1;
+  }
+
+  .koi-mobile-nav > ul > li > div > a,
+  .koi-mobile-nav > ul > li > div > button {
+    @apply flex-none;
+  }
+
+  .koi-mobile-nav [class*="hover:bg-text/5"]:hover {
+    background-color: rgb(255 255 255 / 0.08);
+  }
+
+  .koi-mobile-nav ul ul a {
+    @apply text-base !text-bg/80;
+  }
+
+  .legal-document {
+    @apply font-normal;
+  }
+
+  body {
+    font-family: var(--font-base);
+    /* The legacy site's body sits on NAVY, not white — sections paint their
+       own light backgrounds over it. Getting this wrong makes every gap
+       between bands read as the wrong colour. */
+    background-color: var(--color-primary);
+    color: var(--color-text);
+    /* clip, not hidden: hidden makes body a scroll container and breaks
+       position: sticky on the header. */
+    overflow-x: clip;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+  }
+
+  /* Koi's type scale. The airy feel comes from font-thin + wide tracking on
+     the display sizes — that combination IS the brand's voice, so the weights
+     are not "corrected" to something heavier. */
+  /* Explicit font-family utilities — needed because headings default to
+     --font-heading, and some legacy-matched surfaces (the hero H1) render in
+     the base face instead. */
+  .font-base { font-family: var(--font-base); }
+  .font-heading { font-family: var(--font-heading); }
+
+  .h1 { @apply text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-thin tracking-wider; }
+  .h2 { @apply text-3xl md:text-4xl lg:text-5xl font-thin tracking-wide; }
+  .h3 { @apply text-2xl md:text-2xl lg:text-3xl font-medium tracking-wide; }
+  .h4 { @apply text-xl md:text-xl lg:text-2xl font-medium tracking-wide; }
+  .h5 { @apply text-lg md:text-lg lg:text-xl font-medium; }
+  .h6 { @apply text-lg md:text-lg tracking-wide; }
+
+  .h1, .h2, .h3, .h4, .h5, .h6 { @apply capitalize; }
+
+  p { @apply mb-4 leading-relaxed text-base; }
+
+  /* The amber uppercase eyebrow above the hero H1. */
+  .top-heading { @apply text-lg lg:text-xl font-medium tracking-widest uppercase; }
+
+  /* ★ THE signature treatment: navy → blue gradient clipped to text.
+       Koi's most recognisable detail — used on nearly every section heading. */
+  .heading-primary {
+    @apply bg-gradient-to-r from-primary to-secondary inline-block text-transparent bg-clip-text leading-tight;
+  }
+
+  .border-radius { @apply rounded-2xl; }
+
+  /* Legacy layout helpers the ported markup still uses. */
+  .container {
+    max-width: 1200px;
+    margin-inline: auto;
+    padding: var(--spacing-md);
+  }
+  .content-section { width: 85%; }
+
+  /* Legacy hero height: the 2025 primaryHero used .section-lg to stand the
+     hero at 110vh with generous vertical padding. Ported verbatim so the
+     front-page hero matches the old site's proportions. */
+  .section-lg {
+    @apply min-h-[110vh] lg:min-h-[110vh] py-[80px] sm:py-[90px] md:py-[100px];
+  }
+
+  .sec-spacing-y { padding-top: 37.5px; }
+  @media (min-width: 768px) {
+    .sec-spacing-y { padding-top: var(--spacing-sec-y); }
+  }
+}
+
+@layer components {
+  button, a {
+    @apply cursor-pointer;
+  }
+
+  /* ───── Section heading ─────
+     The one "top of section" header treatment, consumed by
+     SectionHeading.astro. Intentionally neutral — future sites override
+     these four classes (weight, case, spacing, color) to match their brand.
+     The red/italic emphasis on the accent word lives in SectionHeading's
+     `emphasisClass` default (`italic text-accent`), not here. */
+  .section-header {
+    @apply text-center mx-auto;
+  }
+
+  /* Eyebrow above a heading. The legacy "WHY CHOOSE US?" line was secondary
+     blue, uppercase, wide-tracked. */
+  /* 2025 parity: the eyebrow was `.h5 uppercase text-secondary`
+     (text-lg lg:text-xl font-medium) — no extra tracking. */
+  .section-pretitle {
+    @apply block text-lg lg:text-xl md:text-lg font-medium uppercase text-secondary;
+  }
+
+  /* Koi's headings are THIN + wide-tracked (see .h2) — font-bold is the wrong
+     brand voice. This matches .h2 so every section header reads the same. */
+  /* 2025 parity: section headings were `.h2` exactly. */
+  /* Default = the 2025 site's most-used heading: `.h2 heading-primary`.
+     The gradient is the brand's default, not an opt-in. Pass
+     `headingClass="!bg-none !text-bg"` (or similar) for dark bands. */
+  .section-title {
+    @apply text-3xl md:text-4xl lg:text-5xl font-thin tracking-wide capitalize
+           bg-gradient-to-r from-primary to-secondary inline-block
+           text-transparent bg-clip-text leading-tight;
+  }
+
+  /* The italic secondary line under a heading — the legacy motto slot. */
+  /* 2025 parity: the About motto was `.h5 font-medium italic text-secondary`. */
+  .section-tagline {
+    @apply text-lg lg:text-xl md:text-lg py-[var(--spacing-sm)] font-medium italic capitalize text-secondary;
+  }
+
+  /* 2025's body-copy-under-heading pattern. */
+  .section-description {
+    @apply text-text text-lg md:text-xl leading-relaxed;
+  }
+
+  /* Base button styles — ported from the 2025 site's `baseButtonClasses`:
+     uppercase, medium weight, rounded-2xl (its `.border-radius`), and a
+     colour-only transition. */
+  .btn-base {
+    @apply relative inline-flex items-center justify-center gap-2 text-center;
+    @apply uppercase font-medium rounded-2xl;
+    @apply transition-colors duration-300 ease-in-out;
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Size variants */
+  .btn-none {
+    @apply p-0 text-sm;
+  }
+
+  .btn-sm {
+    @apply px-3 py-1.5 text-sm;
+  }
+
+  .btn-md {
+    @apply px-4 py-2 text-base;
+  }
+
+  /* Legacy CTA scale — the 2025 base used fluid spacing tokens, widening at xl. */
+  .btn-lg {
+    padding: var(--spacing-md) var(--spacing-xl);
+    @apply text-lg;
+  }
+
+  @media (min-width: 1280px) {
+    .btn-lg {
+      padding-inline: var(--spacing-3xl);
+    }
+  }
+
+  /* Link base styles */
+  .link-base {
+    @apply inline-flex items-center gap-1;
+    @apply text-primary hover:text-primary-700 hover:underline;
+    @apply bg-transparent font-normal;
+    @apply transition-colors duration-200;
+    @apply focus:outline-none focus:ring-0 focus:ring-offset-0;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Link sizes (no padding) */
+  .link-sm {
+    @apply text-sm;
+  }
+
+  .link-md {
+    @apply text-base;
+  }
+
+  .link-lg {
+    @apply text-lg;
+  }
+}
+
+@layer utilities {
+  /* Pins a column while a taller sibling scrolls past it — the 2025 service
+     hero pinned its copy column this way. top-40 clears the fixed header. */
+  .sticky-section {
+    @apply lg:sticky lg:top-35;
+  }
+
+  @keyframes slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(1rem);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-slide-up {
+    animation: slide-up 0.3s ease-out;
+  }
+}

@@ -1,0 +1,141 @@
+---
+// src/components/ContentRenderer/variants/MenuVariant.astro
+/**
+ * Menu Variant - Responsive Navigation Menu
+ * 
+ * Now expects items to be passed with potential parent relationships.
+ * Builds tree structure from flat items.
+ */
+
+import type { BaseVariantProps } from "../ContentRenderer.types";
+import MenuList from '@/components/LoopTemplates/Menu/MenuList.astro';
+import MobileMenuDrawer from '@/components/Menu/HamburgerMenuDrawer';
+import ContentRenderer from '@/components/ContentRenderer/ContentRenderer.astro';
+import { query as buildQuery } from '@/utils/query';
+import { buildMenuTree } from '@/utils/menuQueries';
+import { isTopLevelPlacement } from '@/utils/navigation/topLevelCheck';
+
+type MenuMode = 'responsive' | 'flat-only' | 'hamburger-only';
+
+interface Props extends BaseVariantProps {
+  maxDepth?: number;
+  mode?: MenuMode;
+  closeButton?: boolean;
+  hamburgerTransform?: boolean;
+  /** Breakpoint at which the bar menu replaces the hamburger. Defaults to md. */
+  breakpoint?: "sm" | "md" | "lg" | "xl" | "2xl";
+}
+
+const {
+  items = [],
+  className = "",
+  id,
+  maxDepth = 3,
+  mode = 'responsive',
+  closeButton = false,
+  hamburgerTransform = true,
+  breakpoint = 'md',
+} = Astro.props as Props;
+
+// Build hierarchical tree from flat items
+const menuTree = buildMenuTree(items);
+
+// Determine which versions to show based on mode
+const showDesktop = mode === 'responsive' || mode === 'flat-only';
+const showMobile = mode === 'responsive' || mode === 'hamburger-only';
+
+// Responsive visibility classes
+// Crossover point between hamburger and bar menu. Callers can raise it (Koi's
+// legacy header switched at xl, not md).
+//
+// Tailwind scans source statically, so the interpolated variants below are not
+// discoverable. Keep every supported pair spelled out here so they get emitted:
+// hidden sm:block sm:hidden md:block md:hidden lg:block lg:hidden xl:block xl:hidden 2xl:block 2xl:hidden
+const desktopClasses = mode === 'responsive' ? `hidden ${breakpoint}:block` : '';
+const mobileClasses =
+  showMobile && mode === 'responsive' ? `${breakpoint}:hidden` : '';
+
+const inferredTopLevel = isTopLevelPlacement({
+  id,
+  className,
+});
+
+const useClientLoad =
+  mode === 'hamburger-only' ? inferredTopLevel : false;
+
+const mobileHydrationStrategy =
+  mode === 'hamburger-only'
+    ? useClientLoad
+      ? 'load'
+      : 'visible'
+    : 'media';
+---
+<div id={id} class={`menu-variant ${className}`}>
+  {showDesktop && (
+    <nav class={`menu-desktop ${desktopClasses}`} aria-label="Main navigation">
+      <MenuList items={menuTree} level={0} />
+    </nav>
+  )}
+  
+  {showMobile && (
+    <div class={`menu-mobile ${mobileClasses}`}>
+      {mobileHydrationStrategy === 'load' && (
+        <MobileMenuDrawer
+          items={menuTree}
+          closeButton={closeButton}
+          hamburgerTransform={hamburgerTransform}
+          client:load
+        >
+          <ContentRenderer
+            slot="footer"
+            query={buildQuery('social-media')}
+            variant="SocialMediaVariant"
+            layout="horizontal"
+            alignment="center"
+            size="md"
+            iconClass="text-current !h-7 !w-auto"
+            className="text-bg/90 [&_a]:transition-colors [&_a:hover]:text-accent"
+          />
+        </MobileMenuDrawer>
+      )}
+      {mobileHydrationStrategy === 'visible' && (
+        <MobileMenuDrawer
+          items={menuTree}
+          closeButton={closeButton}
+          hamburgerTransform={hamburgerTransform}
+          client:visible
+        >
+          <ContentRenderer
+            slot="footer"
+            query={buildQuery('social-media')}
+            variant="SocialMediaVariant"
+            layout="horizontal"
+            alignment="center"
+            size="md"
+            iconClass="text-current !h-7 !w-auto"
+            className="text-bg/90 [&_a]:transition-colors [&_a:hover]:text-accent"
+          />
+        </MobileMenuDrawer>
+      )}
+      {mobileHydrationStrategy === 'media' && (
+        <MobileMenuDrawer
+          items={menuTree}
+          closeButton={closeButton}
+          hamburgerTransform={hamburgerTransform}
+          client:media="(max-width: 768px)"
+        >
+          <ContentRenderer
+            slot="footer"
+            query={buildQuery('social-media')}
+            variant="SocialMediaVariant"
+            layout="horizontal"
+            alignment="center"
+            size="md"
+            iconClass="text-current !h-7 !w-auto"
+            className="text-bg/90 [&_a]:transition-colors [&_a:hover]:text-accent"
+          />
+        </MobileMenuDrawer>
+      )}
+    </div>
+  )}
+</div>

@@ -1,0 +1,20 @@
+[
+  {
+    "id": "facebook",
+    "title": "Facebook",
+    "link": "https://www.facebook.com/koiroofingandsolar",
+    "icon": "facebook"
+  },
+  {
+    "id": "instagram",
+    "title": "Instagram",
+    "link": "https://www.instagram.com/koiroofingandsolar",
+    "icon": "instagram"
+  },
+  {
+    "id": "tiktok",
+    "title": "TikTok",
+    "link": "https://www.tiktok.com/@koiroofingandsolar",
+    "icon": "tiktok"
+  }
+]

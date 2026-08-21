@@ -1,0 +1,94 @@
+---
+// src/layouts/collections/ServiceLayout.astro
+/**
+ * ServiceLayout — item-page layout for a single service.
+ *
+ * Point a collection at it with `itemsLayout` in the collection's _meta.mdx:
+ *   itemsLayout: "@/layouts/collections/ServiceLayout.astro"
+ *
+ * Same contract as the default CollectionLayout (receives entry / collectionMeta
+ * / Content / seoProps), but additionally:
+ *  - emits schema.org `Service` structured data for the page, and
+ *  - renders a scoped FAQ accordion below the content for any `faq` entry whose
+ *    `service` reference points at this service.
+ */
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import SecondaryHero from "@/layouts/SecondaryHero.astro";
+import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
+import { humanizeSlug } from "@/utils/string";
+import { query, sortByOrder, normalizeReference } from "@/utils/query";
+import { siteData } from "@/content/siteData";
+import { buildServiceSchema } from "@/utils/schema/serviceSchema";
+import JsonLd from "@/components/JsonLd.astro";
+import type { CollectionLayoutProps } from "./types";
+
+const {
+  entry,
+  collection,
+  collectionMeta,
+  Content,
+  isIndexPage,
+  seoProps = {},
+  ...extraProps
+} = Astro.props as CollectionLayoutProps;
+
+const data = entry?.data || {};
+const serviceId = entry?.id;
+
+// FAQ band: FAQs whose `service` reference points at this service.
+const faqQuery = serviceId
+  ? query("faq")
+      .where((e: any) => {
+        const refs = normalizeReference(e.data.service);
+        return refs.some((r: any) => r.id === serviceId);
+      })
+      .orderBy(sortByOrder())
+  : null;
+const faqCount = faqQuery ? (await faqQuery.all()).length : 0;
+
+// Service schema — content-specific structured data for this service page.
+const serviceName = data.title;
+const serviceSchema = await buildServiceSchema({
+  name: serviceName,
+  description: data.description,
+  serviceType: data.category ?? serviceName,
+  url: `${siteData.url}${Astro.url.pathname.replace(/\/$/, "")}`,
+});
+---
+<BaseLayout {...seoProps}>
+  <JsonLd schema={serviceSchema} />
+  <main class="flex-1">
+    <SecondaryHero
+      eyebrow={humanizeSlug(entry?.id ?? "")}
+      title={data.title}
+      heading={data.heading}
+      description={data.description}
+      image={data.bannerImage}
+      publishDate={data.publishDate}
+      author={data.author}
+      readingTime={data.readingTime}
+    />
+
+    {Content && (
+      <article class="py-8 md:py-12">
+        <div class="prose prose-lg">
+          <Content />
+        </div>
+      </article>
+    )}
+
+    {faqQuery && faqCount > 0 && (
+      <section class="py-[80px] lg:py-[100px]">
+        <div class="container">
+          <ContentRenderer
+            query={faqQuery}
+            variant="AccordionVariant"
+            pretitle="FAQ"
+            title="Frequently Asked Questions"
+            description={`Common questions about ${(data.title ?? "this service").toLowerCase()}.`}
+          />
+        </div>
+      </section>
+    )}
+  </main>
+</BaseLayout>

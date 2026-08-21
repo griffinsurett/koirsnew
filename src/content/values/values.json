@@ -1,0 +1,27 @@
+[
+  {
+    "id": "integrity",
+    "title": "Integrity",
+    "description": "doing the right thing, every time"
+  },
+  {
+    "id": "reliability",
+    "title": "Reliability",
+    "description": "delivering what we promise, when we promise it"
+  },
+  {
+    "id": "accountability",
+    "title": "Accountability",
+    "description": "owning our work and our results"
+  },
+  {
+    "id": "respect",
+    "title": "Respect",
+    "description": "treating every customer and teammate like family"
+  },
+  {
+    "id": "honor",
+    "title": "Honor",
+    "description": "honoring our warranties and our word"
+  }
+]

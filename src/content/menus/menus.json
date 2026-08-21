@@ -1,0 +1,17 @@
+[
+  {
+    "id": "main-menu",
+    "title": "Main Menu",
+    "description": "Primary site navigation"
+  },
+  {
+    "id": "footer-menu",
+    "title": "Footer Menu",
+    "description": "Secondary footer links"
+  },
+  {
+    "id": "links-menu",
+    "title": "Links",
+    "description": "Social links and important pages"
+  }
+]

@@ -1,0 +1,99 @@
+---
+// src/components/Pagination/QueryParamPagination.astro
+/**
+ * Reusable query-param pagination UI + behavior for collection feeds.
+ *
+ * Usage:
+ * - Feed container: data-pagination-feed="<id>" data-page-size="10"
+ * - Feed items: data-pagination-item
+ * - Pagination component: <QueryParamPagination paginationId="<id>" ... />
+ */
+
+import { buildPageHref, buildPaginationMeta } from "@/utils/pages/pagination";
+
+export interface Props {
+  totalItems: number;
+  pageSize?: number;
+  paginationId: string;
+  queryParam?: string;
+  ariaLabel?: string;
+  class?: string;
+  linkClassName?: string;
+  activeLinkClassName?: string;
+  disabledLinkClassName?: string;
+  prevLabel?: string;
+  nextLabel?: string;
+}
+
+const {
+  totalItems,
+  pageSize = 10,
+  paginationId,
+  queryParam = "page",
+  ariaLabel = "Pagination",
+  class: className = "pt-6 flex flex-wrap items-center justify-center gap-2",
+  linkClassName =
+    "inline-flex items-center justify-center min-w-10 h-10 px-3 rounded-md border border-surface text-heading bg-bg hover:bg-primary/10 hover:border-primary/40 transition-colors",
+  activeLinkClassName = "bg-primary text-white border-primary",
+  disabledLinkClassName = "pointer-events-none opacity-40",
+  prevLabel = "Prev",
+  nextLabel = "Next",
+} = Astro.props as Props;
+
+const meta = buildPaginationMeta({ totalItems, pageSize });
+const totalPages = meta.totalPages;
+const prevNextClassName =
+  "inline-flex items-center justify-center h-10 px-4 rounded-md border border-surface text-heading bg-bg hover:bg-primary/10 hover:border-primary/40 transition-colors";
+---
+
+{
+  totalPages > 1 && (
+    <nav
+      class={className}
+      aria-label={ariaLabel}
+      data-query-pagination
+      data-pagination-id={paginationId}
+      data-query-param={queryParam}
+      data-active-link-classes={activeLinkClassName}
+      data-disabled-link-classes={disabledLinkClassName}
+      data-total-pages={totalPages}
+      data-page-size={meta.pageSize}
+    >
+      <a
+        href={buildPageHref(1, queryParam)}
+        data-page-prev
+        class={prevNextClassName}
+      >
+        {prevLabel}
+      </a>
+
+      {meta.pages.map((page) => (
+        <a
+          href={buildPageHref(page, queryParam)}
+          data-page-link={page}
+          class={linkClassName}
+        >
+          {page}
+        </a>
+      ))}
+
+      <a
+        href={buildPageHref(totalPages, queryParam)}
+        data-page-next
+        class={prevNextClassName}
+      >
+        {nextLabel}
+      </a>
+    </nav>
+  )
+}
+
+{
+  totalPages > 1 && (
+    <script>
+      import { initQueryParamPagination } from "@/components/Pagination/queryParamPagination.client";
+
+      initQueryParamPagination();
+    </script>
+  )
+}

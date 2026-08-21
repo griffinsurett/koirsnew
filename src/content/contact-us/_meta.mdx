@@ -1,0 +1,30 @@
+---
+title: "Contact Us"
+heading: "Get In Touch"
+description: "Get in touch with Us"
+hasPage: true
+itemsHasPage: false
+redirectFrom: ["/contact", "/contactus"]
+addToMenu:
+  # Legacy weight 1000: top-level, always last.
+  - menu: "main-menu"
+    order: 1000
+  - menu: "footer-menu"
+itemsLinkBehavior:
+  mode: prefixed
+  linkPrefix: linkPrefix
+  valueFormatter: phone
+---
+import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
+import { query } from "@/utils/query";
+import ContactForm from "@/components/Form/forms/ContactForm.astro";
+
+<ContentRenderer
+  query={query("contact-us")}
+  variant="ContactVariant"
+  columns={2}
+/>
+
+{/* The legacy /contact-us led with the contact form — it's the page's whole
+    purpose, so it renders above the contact-method cards. */}
+<ContactForm title="Get in Touch" />

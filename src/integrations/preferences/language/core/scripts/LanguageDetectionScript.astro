@@ -1,0 +1,103 @@
+---
+// src/integrations/preferences/core/language/scripts/LanguageDetectionScript.astro
+import { supportedLanguages } from "../utils/languages";
+
+const languageMappings = supportedLanguages.map((language) => ({
+  code: language.code,
+  base: language.code.split("-")[0].toLowerCase(),
+}));
+---
+<script is:inline define:vars={{ languageMappings }}>
+  (function () {
+    const STORAGE_KEY = "user-language";
+    const mappings = languageMappings || [];
+
+    function safeGetLanguage() {
+      try {
+        const value = localStorage.getItem(STORAGE_KEY);
+        return value || null;
+      } catch (error) {
+        console.warn("Unable to read stored language preference", error);
+        return null;
+      }
+    }
+
+    function safeSetLanguage(value) {
+      try {
+        localStorage.setItem(STORAGE_KEY, value);
+      } catch (error) {
+        console.warn("Unable to store language preference", error);
+      }
+    }
+
+    function parseConsent() {
+      const match = document.cookie.match(/(?:^|;)\s*cookie-consent=([^;]+)/);
+      if (!match) return null;
+      try {
+        return JSON.parse(decodeURIComponent(match[1]));
+      } catch (error) {
+        console.warn("Unable to parse consent cookie", error);
+        return null;
+      }
+    }
+
+    function setLanguageCookie(lang) {
+      try {
+        const expires = new Date();
+        expires.setTime(expires.getTime() + 365 * 24 * 60 * 60 * 1000);
+        document.cookie =
+          "googtrans=/en/" +
+          lang +
+          ";expires=" +
+          expires.toUTCString() +
+          ";path=/";
+      } catch (error) {
+        console.warn("Unable to set translation cookie", error);
+      }
+    }
+
+    function findLanguageByBase(base) {
+      const normalized = base?.toLowerCase();
+      if (!normalized) return null;
+      const match = mappings.find((language) => language.base === normalized);
+      return match ? match.code : null;
+    }
+
+    let savedLang = safeGetLanguage();
+    const isSupported = mappings.some((language) => language.code === savedLang);
+    if (savedLang && !isSupported) {
+      savedLang = null;
+    }
+
+    if (!savedLang) {
+      const nav = navigator || {};
+      const browserLang = nav.language || (Array.isArray(nav.languages) ? nav.languages[0] : undefined);
+      const langCode = browserLang?.split("-")[0]?.toLowerCase();
+      const detected = langCode ? findLanguageByBase(langCode) : null;
+
+      if (detected && detected !== "en") {
+        savedLang = detected;
+        safeSetLanguage(savedLang);
+        console.log("🌍 Auto-detected browser language:", savedLang);
+      }
+    }
+
+    if (!savedLang || savedLang === "en") {
+      return;
+    }
+
+    const consent = parseConsent();
+    const hasFunctionalConsent = consent?.functional === true;
+
+    if (hasFunctionalConsent) {
+      setLanguageCookie(savedLang);
+    }
+
+    const globalKey = "__gwsTranslation";
+    const globalState = (window[globalKey] = window[globalKey] || {});
+    globalState.preferredLanguage = savedLang;
+    globalState.hasFunctionalConsent = hasFunctionalConsent;
+
+    document.documentElement.dataset.preferredLanguage = savedLang;
+  })();
+</script>

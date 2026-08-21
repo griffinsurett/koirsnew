@@ -1,0 +1,72 @@
+---
+// src/components/LoopComponents/ListCard.astro
+/**
+ * List Card Component
+ *
+ * Horizontal card layout for list views with:
+ * - Side-by-side image and content
+ * - Title, description, date
+ * - Larger click area
+ *
+ * Used in ListVariant for article/post lists.
+ */
+
+export interface Props {
+  title: string;
+  url?: string;
+  description?: string;
+  date?: Date | string;
+  image?: {
+    src: string;
+    alt: string;
+  };
+}
+
+const { title, url, description, date, image } = Astro.props;
+---
+
+<article
+  class="flex gap-8 p-6 bg-bg rounded-lg shadow-md hover:shadow-lg transition-shadow"
+>
+  {/* Side image */}
+  {
+    image && (
+      <div class="flex-shrink-0">
+        <img
+          src={image.src}
+          alt={image.alt}
+          class="w-48 h-36 object-cover rounded-md"
+        />
+      </div>
+    )
+  }
+
+  {/* Content area */}
+  <div class="flex-1">
+    <h3 class="text-2xl font-semibold mb-2">
+      {
+        url ? (
+          <a
+            href={url}
+            class="text-heading hover:text-primary transition-colors"
+          >
+            {title}
+          </a>
+        ) : (
+          <span class="text-heading">{title}</span>
+        )
+      }
+    </h3>
+
+    {description && <p class="text-text leading-relaxed mb-2">{description}</p>}
+
+    {/* Publication date */}
+    {
+      date && (
+        <time class="text-sm text-text">
+          {new Date(date).toLocaleDateString()}
+        </time>
+      )
+    }
+  </div>
+</article>

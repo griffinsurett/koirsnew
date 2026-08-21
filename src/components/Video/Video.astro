@@ -1,0 +1,85 @@
+---
+// src/components/Video/Video.astro
+/**
+ * Video Component
+ *
+ * Auto-generates poster thumbnails from video at build time using ffmpeg.
+ * Lazy loads video sources for optimal performance.
+ */
+import { generateVideoPoster } from "@/utils/videoThumbnails";
+import VideoClient from "./Video";
+
+interface Props {
+  src: string;
+  poster?: string;
+  alt?: string;
+  class?: string;
+  wrapperClass?: string;
+  autoplay?: boolean;
+  muted?: boolean;
+  loop?: boolean;
+  controls?: boolean;
+  playsinline?: boolean;
+  lazy?: boolean;
+  timecodeSeconds?: number;
+  clientLoadPlaceholder?: boolean;
+}
+
+const {
+  src,
+  poster: manualPoster,
+  alt = "Video",
+  class: className = "",
+  wrapperClass = "",
+  autoplay = true,
+  muted = true,
+  loop = true,
+  controls = false,
+  playsinline = true,
+  lazy = true,
+  timecodeSeconds = 0,
+  clientLoadPlaceholder = false,
+  ...rest
+} = Astro.props;
+
+// Generate poster from video if not provided
+let posterUrl = manualPoster;
+let placeholderUrl: string | undefined;
+if (!posterUrl && src) {
+  const generated = await generateVideoPoster(src, { timecodeSeconds });
+  posterUrl = generated.src;
+  placeholderUrl = generated.placeholderSrc;
+}
+
+// When clientLoadPlaceholder is true: show blurred placeholder, then swap to poster
+// When clientLoadPlaceholder is false: show poster directly as placeholder
+const ssrPoster = posterUrl;
+const deferredPosterSrc = clientLoadPlaceholder ? posterUrl : undefined;
+const ssrPlaceholder = clientLoadPlaceholder ? placeholderUrl : posterUrl;
+const clientPlaceholderSrc = clientLoadPlaceholder ? placeholderUrl : undefined;
+
+---
+
+<VideoClient
+  client:visible
+  className={className}
+  wrapperClass={wrapperClass}
+  src={src}
+  poster={ssrPoster}
+  clientPosterSrc={deferredPosterSrc}
+  placeholderSrc={ssrPlaceholder}
+  clientPlaceholderSrc={clientPlaceholderSrc}
+  autoPlay={autoplay}
+  muted={muted}
+  loop={loop}
+  controls={controls}
+  playsInline={playsinline}
+  lazy={lazy}
+  clientLoadPlaceholder={clientLoadPlaceholder}
+  sourceType={src?.endsWith(".mov")
+    ? "video/quicktime"
+    : src?.endsWith(".webm")
+      ? "video/webm"
+      : "video/mp4"}
+  {...rest}
+/>

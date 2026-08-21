@@ -1,0 +1,95 @@
+---
+// src/components/ContentRenderer/variants/AccordionVariant.astro
+/**
+ * AccordionVariant - Refactored to use ContentBridge
+ *
+ * The ONLY change: Wrap Accordion in ContentBridge instead of manually
+ * rendering hidden slots. Your existing Accordion.tsx works unchanged!
+ */
+
+import type { BaseVariantProps } from "../ContentRenderer.types";
+import ContentBridge from "../ContentBridge/ContentBridge.astro";
+import Accordion from "@/components/LoopTemplates/Accordion";
+import Button from "@/components/Button/Button";
+import JsonLd from "@/components/JsonLd.astro";
+import SectionHeading from "@/components/SectionHeading.astro";
+import { buildFaqSchema } from "@/utils/schema/faqSchema";
+import { shouldShowCollectionCTA } from "../utils/helpers";
+
+interface Props extends BaseVariantProps {
+  allowMultiple?: boolean;
+  /** Emit schema.org FAQPage JSON-LD from the items (default true). Set false
+   *  for a non-FAQ accordion to avoid a spurious FAQPage block. */
+  faqSchema?: boolean;
+}
+
+const {
+  items = [],
+  title,
+  heading,
+  description,
+  className = "",
+  allowMultiple = false,
+  faqSchema = true,
+  collectionUrl,
+  collectionTitle,
+  id,
+} = Astro.props as Props;
+
+const viewAllText = `View All ${collectionTitle || ""}`.trim();
+const bridgeId = id || "accordion";
+
+// FAQPage schema from the items rendered below (schema follows visible content).
+const faqStructuredData = faqSchema ? buildFaqSchema(items as any) : null;
+---
+<JsonLd schema={faqStructuredData} />
+
+<section id={id} class={`bg-bg flex text-center flex-col justify-center items-center py-[var(--spacing-2xl)] ${className}`}>
+  {/* Header Section */}
+  <div class="container flex flex-col justify-center w-full lg:py-[var(--spacing-2xl)] md:px-[var(--spacing-md)]">
+    <SectionHeading
+      heading={heading}
+      title={title}
+      class="pb-[var(--spacing-2xl)]"
+    />
+
+  {/* Accordion with ContentBridge */}
+  {
+    items.length > 0 && (
+      <ContentBridge items={items} bridgeId={bridgeId}>
+        {/* 
+        Your existing Accordion component!
+        ContentBridge generates slot IDs as: `${bridgeId}-slot-${index}`
+        Just pass that pattern to your Accordion as contentSlotId
+      */}
+        <Accordion
+          items={items.map((item, index) => ({
+            id: item.id,
+            title: item.title || "Untitled",
+            description: item.description,
+            contentSlotId: `${bridgeId}-slot-${index}`, // ← ContentBridge created this ID
+          }))}
+          allowMultiple={allowMultiple}
+          client:visible
+        />
+      </ContentBridge>
+    )
+  }
+
+  {/* Collection CTA */}
+  {
+    shouldShowCollectionCTA(collectionUrl, items.length) && (
+      <div class="mt-12 text-center">
+        <Button
+          href={collectionUrl}
+          rightIcon="lu:arrow-right"
+          variant="primary"
+          size="lg"
+        >
+          {viewAllText}
+        </Button>
+      </div>
+    )
+  }
+  </div>
+</section>

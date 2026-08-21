@@ -1,0 +1,99 @@
+---
+// src/components/Form/forms/HiringForm.astro
+/**
+ * Apply to Join the Team — ported field-for-field from the legacy site.
+ *
+ * Falls back to the contact endpoint when PUBLIC_FORMSPREE_HIRING_ID is unset, matching the legacy
+ * fallback chain.
+ *
+ * Includes the legacy resume upload. Formspree file uploads need a paid plan
+ * (this account has one) and a multipart request — submitToFormspree switches
+ * from JSON to multipart/form-data automatically when it sees a File, since a
+ * File cannot survive JSON.stringify.
+ */
+import FormWrapper from "@/components/Form/FormWrapper";
+import Input from "@/components/Form/inputs/Input";
+import Textarea from "@/components/Form/inputs/Textarea";
+import Checkbox from "@/components/Form/inputs/Checkbox";
+import Button from "@/components/Button/Button";
+
+interface Props {
+  title?: string;
+  description?: string;
+  className?: string;
+}
+
+const { title = "Apply to Join the Team", description, className = "" } = Astro.props;
+
+const formId =
+  import.meta.env.PUBLIC_FORMSPREE_HIRING_ID ||
+  import.meta.env.PUBLIC_FORMSPREE_CONTACT_ID ||
+  import.meta.env.PUBLIC_FORMSPREE_ID;
+
+const currentPageUrl = Astro.url.href;
+---
+
+<div class={className}>
+  {title && <h2>{title}</h2>}
+  {description && <p>{description}</p>}
+
+  <FormWrapper
+    client:idle
+    formspreeId={formId}
+    useNativeFormSubmission={Boolean(formId)}
+    successMessage="Thanks for applying! We'll review your details and reach out."
+    resetOnSuccess={true}
+    className="w-full gap-0"
+  >
+    <input type="hidden" name="formName" value="Koi Hiring Application" />
+    <input type="hidden" name="pageUrl" value={currentPageUrl} />
+
+    <Input name="firstName" label="First Name" type="text" required={true} />
+    <Input name="lastName" label="Last Name" type="text" required={true} />
+    <Input name="email" label="Email Address" type="email" required={true} />
+    <Input name="phone" label="Phone Number" type="tel" required={true} />
+    <Input name="street" label="Street Address" type="text" required={true} />
+    <Input name="city" label="City" type="text" required={true} />
+    <Input name="state" label="State / Province" type="text" required={true} />
+    <Input name="zip" label="ZIP / Postal Code" type="text" required={true} />
+    <Input
+      name="positionInterest"
+      label="Position of Interest"
+      type="text"
+      placeholder="e.g., Sales Rep, Roofer, Solar Installer"
+      required={true}
+    />
+    {/* Resume upload. `name` matches the legacy field so existing Formspree
+        rules/integrations keep working. Accepted formats mirror the old form. */}
+    <label
+      for="hiring-resume"
+      class="mb-4 w-full flex flex-col text-left cursor-pointer"
+    >
+      <span class="block text-sm font-medium text-text mb-1">
+        Resume or CV <span aria-hidden="true">*</span>
+      </span>
+      <input
+        type="file"
+        id="hiring-resume"
+        name="resumeOrCv"
+        accept=".pdf,.doc,.docx,.docm,.rtf"
+        required
+      />
+      <span class="text-xs text-text mt-1">
+        Accepted formats: PDF, DOC, or DOCX (max 10MB)
+      </span>
+    </label>
+
+    <Textarea name="message" label="Tell us about yourself" rows={5} required={true} />
+
+    {/* SMS/TCPA consent — legal requirement for texting applicants, separate
+        from cookie consent (disabled site-wide). */}
+    <Checkbox name="smsConsent" required={true}>
+      By checking this box, I consent to receive transactional messages related
+      to my application. Message frequency may vary. Message &amp; Data rates may
+      apply. Reply STOP to opt out.
+    </Checkbox>
+
+    <Button type="submit" variant="primary">Submit</Button>
+  </FormWrapper>
+</div>

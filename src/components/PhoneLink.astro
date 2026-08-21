@@ -1,0 +1,46 @@
+---
+// src/components/PhoneLink.astro
+/**
+ * PhoneLink — shared phone button.
+ *
+ * Queries the phone number from the contact-us collection (single source of
+ * truth, via the byTag query snippet) and renders it as a Button. Both the
+ * header (blue, plain) and the hero (white, outlined) use this — no need to
+ * query or pass the number/href manually.
+ *
+ * @example
+ *   <PhoneLink variant="phone" tone="blue" />
+ *   <PhoneLink variant="phone-outline" size="lg" />
+ */
+import Button from "@/components/Button/Button";
+import { getPhoneContact } from "@/utils/contactLinks";
+
+interface Props {
+  variant?: "primary" | "secondary" | "tertiary" | "underline" | "ghost" | "link";
+  tone?: "white" | "blue";
+  size?: "sm" | "md" | "lg";
+  class?: string;
+}
+
+const {
+  variant = "secondary",
+  tone,
+  size,
+  class: className,
+} = Astro.props as Props;
+
+const phone = await getPhoneContact();
+---
+
+{phone && (
+  <Button
+    variant={variant}
+    tone={tone}
+    size={size}
+    href={phone.url}
+    class={className}
+    aria-label={`Call us at ${phone.displayValue}`}
+  >
+    {phone.displayValue}
+  </Button>
+)}

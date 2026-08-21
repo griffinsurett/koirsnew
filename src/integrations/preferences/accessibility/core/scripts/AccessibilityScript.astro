@@ -1,0 +1,241 @@
+---
+// src/integrations/preferences/core/accessibility/scripts/AccessibilityScript.astro
+/**
+ * Accessibility Script Initialization
+ *
+ * Inline script that applies saved accessibility preferences on page load.
+ * Runs synchronously to prevent flash of unstyled content (FOUC).
+ *
+ * Two parts:
+ * 1. Inline script (is:inline) - applies CSS attributes immediately, blocking
+ * 2. Deferred script - initializes reading guide/mask event handlers after DOM ready
+ */
+---
+
+<!-- Critical: Apply accessibility preferences before content renders -->
+<script is:inline>
+  (function() {
+    try {
+      var raw = localStorage.getItem('user-a11y-prefs');
+      if (!raw) return;
+      var prefs = JSON.parse(raw);
+      if (!prefs || !prefs.text || !prefs.visual || !prefs.reading || !prefs.content) return;
+      var root = document.documentElement;
+
+      // TEXT & TYPOGRAPHY
+      var weightMap = { normal: '400', semibold: '600', bold: '700' };
+      var resolvedWeight = weightMap[prefs.text.fontWeight] || '400';
+      root.style.setProperty('--a11y-font-size', prefs.text.fontSize + '%');
+      root.style.setProperty('--a11y-line-height', String(prefs.text.lineHeight));
+      root.style.setProperty('--a11y-letter-spacing', prefs.text.letterSpacing + 'em');
+      root.style.setProperty('--a11y-word-spacing', prefs.text.wordSpacing + 'em');
+      root.style.setProperty('--a11y-font-weight', resolvedWeight);
+      root.style.setProperty('--a11y-text-align', prefs.text.textAlign);
+      root.setAttribute('data-a11y-font', prefs.text.fontFamily);
+
+      // Set data attributes to trigger overrides when changed from defaults
+      if (prefs.text.lineHeight !== 1.5) {
+        root.setAttribute('data-a11y-line-height', 'true');
+      }
+      if (prefs.text.letterSpacing !== 0) {
+        root.setAttribute('data-a11y-letter-spacing', 'true');
+      }
+      if (prefs.text.wordSpacing !== 0) {
+        root.setAttribute('data-a11y-word-spacing', 'true');
+      }
+      if (prefs.text.fontWeight !== 'normal') {
+        root.setAttribute('data-a11y-font-weight', prefs.text.fontWeight);
+      }
+      if (prefs.text.textAlign !== 'left') {
+        root.setAttribute('data-a11y-text-align', 'true');
+      }
+
+      // VISUAL ENHANCEMENTS
+      root.setAttribute('data-a11y-links', prefs.visual.linkHighlight ? 'true' : 'false');
+      root.setAttribute('data-a11y-titles', prefs.visual.titleHighlight ? 'true' : 'false');
+      root.setAttribute('data-a11y-contrast', prefs.visual.contrastBoost ? 'boost' : 'normal');
+      root.setAttribute('data-a11y-saturation', prefs.visual.saturation);
+
+      // READING AIDS
+      root.setAttribute('data-a11y-focus', prefs.reading.focusHighlight ? 'true' : 'false');
+      root.setAttribute('data-a11y-cursor', prefs.reading.bigCursor ? 'big' : 'normal');
+      root.setAttribute('data-a11y-mask', prefs.reading.readingMask ? 'true' : 'false');
+      if (prefs.reading.pauseAnimations) {
+        root.style.setProperty('--a11y-animation-duration', '0.01ms');
+        root.setAttribute('data-a11y-animations', 'true');
+      }
+
+      // CONTENT SIMPLIFICATION
+      root.setAttribute('data-a11y-images', prefs.content.hideImages ? 'hide' : 'show');
+      root.setAttribute('data-a11y-sounds', prefs.content.muteSounds ? 'mute' : 'play');
+      root.setAttribute('data-a11y-motion', prefs.content.reducedMotion ? 'reduced' : 'normal');
+
+      // Store prefs for deferred handler initialization
+      if (prefs.reading.readingGuide || prefs.reading.readingMask) {
+        window.__a11yPrefs = prefs;
+      }
+    } catch (e) {}
+  })();
+</script>
+
+<!-- Deferred: Initialize reading guide/mask/hide images after DOM ready -->
+<script>
+  (function() {
+    function hideImagesOnLoad() {
+      // Check if hideImages is enabled
+      const root = document.documentElement;
+      if (root.getAttribute('data-a11y-images') !== 'hide') return;
+
+      // Handle regular images
+      const images = document.querySelectorAll<HTMLImageElement>('img:not([data-a11y-hidden])');
+      images.forEach((img) => {
+        const alt = img.alt || 'Image';
+
+        // Create placeholder wrapper
+        const placeholder = document.createElement('div');
+        placeholder.className = 'a11y-image-placeholder';
+        placeholder.setAttribute('data-a11y-placeholder', 'true');
+        placeholder.setAttribute('role', 'img');
+        placeholder.setAttribute('aria-label', alt);
+        placeholder.style.cssText = `
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 100px;
+          padding: 1em;
+          background: #f0f0f0;
+          border: 2px dashed #999;
+          border-radius: 4px;
+          text-align: center;
+        `;
+
+        // Create alt text content
+        const altText = document.createElement('span');
+        altText.style.cssText = `
+          font-style: italic;
+          color: #666;
+          padding: 0.5em 1em;
+          background: white;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        `;
+        altText.textContent = '📷 ' + alt;
+        placeholder.appendChild(altText);
+
+        // Store reference and replace
+        img.setAttribute('data-a11y-hidden', 'true');
+        img.parentNode?.insertBefore(placeholder, img);
+        img.style.display = 'none';
+      });
+
+      // Handle Lottie containers
+      const lottieContainers = document.querySelectorAll<HTMLElement>('.logo-class:not([data-a11y-hidden])');
+      lottieContainers.forEach((container) => {
+        const alt = container.getAttribute('aria-label') || 'Animation';
+
+        // Create placeholder
+        const placeholder = document.createElement('div');
+        placeholder.className = 'a11y-image-placeholder';
+        placeholder.setAttribute('data-a11y-placeholder', 'true');
+        placeholder.setAttribute('role', 'img');
+        placeholder.setAttribute('aria-label', alt);
+        placeholder.style.cssText = `
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 40px;
+          min-width: 40px;
+          padding: 0.5em;
+          background: #f0f0f0;
+          border: 2px dashed #999;
+          border-radius: 4px;
+          text-align: center;
+        `;
+
+        // Create alt text content
+        const altText = document.createElement('span');
+        altText.style.cssText = `
+          font-style: italic;
+          color: #666;
+          padding: 0.25em 0.5em;
+          background: white;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          font-size: 10px;
+        `;
+        altText.textContent = '🎬 ' + alt;
+        placeholder.appendChild(altText);
+
+        // Store reference and replace
+        container.setAttribute('data-a11y-hidden', 'true');
+        container.parentNode?.insertBefore(placeholder, container);
+        container.style.display = 'none';
+      });
+    }
+
+    function initA11yHandlers() {
+      const prefs = (window as any).__a11yPrefs;
+      const root = document.documentElement;
+
+      // Reading Guide
+      if (prefs?.reading?.readingGuide && !document.querySelector('[data-reading-guide]')) {
+        const guide = document.createElement('div');
+        guide.setAttribute('data-reading-guide', 'true');
+        guide.style.cssText = 'position:fixed;left:0;right:0;height:2px;background-color:rgba(255,0,0,0.6);pointer-events:none;z-index:9999;box-shadow:0 0 8px rgba(255,0,0,0.4);';
+        document.body.appendChild(guide);
+        document.addEventListener('mousemove', (e) => {
+          guide.style.top = e.clientY + 'px';
+        }, { passive: true });
+      }
+
+      // Reading Mask cursor tracking
+      if (prefs?.reading?.readingMask) {
+        document.addEventListener('mousemove', (e) => {
+          root.style.setProperty('--cursor-x', e.clientX + 'px');
+          root.style.setProperty('--cursor-y', e.clientY + 'px');
+        }, { passive: true });
+      }
+
+      // Hide images (creates placeholders with alt text)
+      hideImagesOnLoad();
+
+      // Also run after window load to catch lazy-loaded images
+      window.addEventListener('load', hideImagesOnLoad);
+
+      // Set up MutationObserver to catch dynamically added images
+      if (root.getAttribute('data-a11y-images') === 'hide') {
+        const observer = new MutationObserver((mutations) => {
+          let hasNewImages = false;
+          for (const mutation of mutations) {
+            if (mutation.type === 'childList') {
+              for (const node of mutation.addedNodes) {
+                if (node instanceof HTMLElement) {
+                  if (node.tagName === 'IMG' || node.querySelector('img:not([data-a11y-hidden])')) {
+                    hasNewImages = true;
+                    break;
+                  }
+                }
+              }
+            }
+            if (hasNewImages) break;
+          }
+          if (hasNewImages) {
+            hideImagesOnLoad();
+          }
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+      }
+
+      if (prefs) {
+        delete (window as any).__a11yPrefs;
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initA11yHandlers);
+    } else {
+      initA11yHandlers();
+    }
+  })();
+</script>

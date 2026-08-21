@@ -1,0 +1,125 @@
+---
+title: "Solar"
+description: "Cut Your Electric Bill with Solar. We install solar panels that help you save money and power your home using sunlight. These systems work quietly on your roof and can pay off in the long run. We use only top-quality panels, and we offer payment plans to make it easy."
+# Legacy URL. The old site nested both lines of business under /services/;
+# the split gives each its own top-level page, so the old path must 301.
+redirectFrom: "/services/solar"
+# Legacy hero copy: the H1 the old service pages used.
+heading: "Top-Quality Solar Solutions for Your Home"
+# Hero banner behind the service hero — the legacy site's own image.
+bannerImage: "../../assets/koi/solarpanels.jpg"
+# Line-of-business page: two-column hero with quote form + the legacy
+# band sequence. Other collection indexes use the default layout.
+indexLayout: "@/layouts/collections/ServiceIndexLayout.astro"
+hasPage: true
+heroForm: "solar"
+itemsHasPage: false
+itemsRootPath: false
+addToMenu:
+  - menu: "main-menu"
+    order: 2
+  - menu: "footer-menu"
+seo:
+  keywords:
+    - "solar panel installation"
+    - "residential solar panels"
+    - "commercial solar installation"
+    - "solar energy solutions"
+    - "solar financing"
+    - "0 down solar"
+    - "solar tax credit guidance"
+    - "solar battery backup"
+    - "Tesla Powerwall installer"
+    - "Enphase IQ10 installation"
+    - "solar maintenance service"
+    - "net metering setup"
+    - "solar companies New Jersey"
+    - "solar installers NJ"
+    - "solar installation Pennsylvania"
+    - "solar providers New York City"
+---
+
+import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
+import SpanishSection from "@/components/SpanishSection.astro";
+import VideoSection from "@/layouts/VideoSection.astro";
+import KoiRoofers from "@/assets/koi/roof-work-koi.jpg";
+import { query, sortByOrder } from "@/utils/query";
+import { related } from "@/utils/query/snippets";
+
+{/* Legacy order (2025 ServicesLayout): hero+form → benefits → Spanish →
+    testimonials → projects → child services → types → FAQ. */}
+
+{/* Financing and warranty points — the legacy page led with these right
+    under the hero. */}
+<VideoSection video="/notlikekoi.mp4" reverse={true}>
+  <ContentRenderer
+    query={query("benefits").orderBy(sortByOrder())}
+    variant="IconListVariant"
+    columns={1}
+    pretitle="Why Choose Us?"
+    heading="Benefits of Choosing Koi Solar!"
+    headingAlign="left"
+    buttons={[
+      { text: "Request Estimate", link: "/contact-us/", variant: "secondary" },
+    ]}
+    showButtonSection={false}
+    bare={true}
+  />
+</VideoSection>
+
+<SpanishSection />
+
+{/* Reviews from solar customers. */}
+<ContentRenderer
+  query={query("testimonials").orderBy(sortByOrder())}
+  variant="TestimonialShowcaseVariant"
+  pretitle="Testimonials"
+  heading="Hear It Straight from Homeowners"
+/>
+
+{/* Before/after portfolio. */}
+<ContentRenderer
+  query={query("projects").orderBy(sortByOrder())}
+  variant="BeforeAfterVariant"
+  columns={3}
+  pretitle="Recent Projects"
+  title="Our Solar Work"
+/>
+
+{/* The individual solar services. */}
+<ContentRenderer
+  query={query("solar").orderBy(sortByOrder())}
+  variant="ServiceListVariant"
+  title="Explore Our Solar Services"
+  image={KoiRoofers}
+  imageAlt="Koi Roofing and Solar crew on a job site"
+/>
+
+{/* Materials/systems for this line of business. */}
+<ContentRenderer
+  query={related("types", "serviceLines", "solar").orderBy(sortByOrder())}
+  variant="ImageCardVariant"
+  columns={3}
+  title="Types of Solar We Offer"
+/>
+
+{/* FAQ — the legacy service pages closed on this. Scoped to this line of
+    business: the collection also holds per-blog-post and per-landing-page
+    FAQs, which must not leak onto the service pages. */}
+<ContentRenderer
+  query={query("faq")
+    .where((entry) => {
+      const lines = entry.data.serviceLines || [];
+      return lines.some((l) => (l?.id ?? l) === "solar");
+    })
+    .orderBy(sortByOrder())}
+  variant="AccordionVariant"
+/>
+
+  {/* 11 — Gallery (legacy: collection="gallery", marquee + service buttons) */}
+    <ContentRenderer
+      query={query("gallery").orderBy(sortByOrder())}
+      variant="GalleryVariant"
+      title="Whether you need a new roof or want to go solar with NO MONEY DOWN, we make it easy!"
+      video="/roofingandsolarvid-smaller.webm"
+    />

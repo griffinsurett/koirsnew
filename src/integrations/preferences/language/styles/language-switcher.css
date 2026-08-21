@@ -1,0 +1,176 @@
+/* src/styles/language-switcher.css */
+/**
+ * Language Switcher Styles
+ *
+ * Styling for the language dropdown component.
+ * Uses CSS variables for theme compatibility across sites.
+ */
+
+/* ============================================================================
+   LANGUAGE SWITCHER THEMING TOKENS
+   These inherit from the site's theme with sensible fallbacks.
+   ============================================================================ */
+:root {
+  /* Button colors */
+  --int-lang-btn-bg: var(--color-bg, white);
+  --int-lang-btn-bg-hover: var(--color-bg2, rgb(249 250 251));
+  --int-lang-btn-border: var(--color-border-dim, rgb(209 213 219));
+  --int-lang-btn-border-hover: var(--color-muted, rgb(156 163 175));
+  --int-lang-btn-text: var(--color-text, rgb(55 65 81));
+
+  /* Focus/active states - uses site's primary color */
+  --int-lang-focus-color: var(--color-primary, var(--color-accent, rgb(59 130 246)));
+  --int-lang-active-bg: color-mix(in srgb, var(--int-lang-focus-color) 10%, var(--int-lang-btn-bg));
+
+  /* Dropdown colors */
+  --int-lang-dropdown-bg: var(--color-bg, white);
+  --int-lang-dropdown-border: var(--color-border-dim, rgb(209 213 219));
+  --int-lang-dropdown-shadow: rgba(0, 0, 0, 0.1);
+
+  /* Option colors */
+  --int-lang-option-text: var(--color-text, rgb(55 65 81));
+  --int-lang-option-text-muted: var(--color-muted, rgb(107 114 128));
+  --int-lang-option-hover-bg: var(--color-bg2, rgb(243 244 246));
+  --int-lang-option-selected-bg: color-mix(in srgb, var(--int-lang-focus-color) 10%, var(--int-lang-dropdown-bg));
+  --int-lang-option-selected-text: var(--color-primary, var(--color-accent, rgb(29 78 216)));
+}
+
+/* Button */
+.language-switcher-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  background-color: var(--int-lang-btn-bg);
+  border: 2px solid var(--int-lang-btn-border);
+  color: var(--int-lang-btn-text);
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.language-switcher-button:hover {
+  border-color: var(--int-lang-btn-border-hover);
+  background-color: var(--int-lang-btn-bg-hover);
+}
+
+.language-switcher-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--int-lang-btn-bg), 0 0 0 4px var(--int-lang-focus-color);
+}
+
+.language-switcher-button[aria-expanded="true"] {
+  border-color: var(--int-lang-focus-color);
+  background-color: var(--int-lang-active-bg);
+}
+
+/* Dropdown */
+.language-dropdown {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  margin-bottom: 0.5rem;
+  min-width: 200px;
+  max-height: 300px;
+  overflow-y: auto;
+  background-color: var(--int-lang-dropdown-bg);
+  border: 2px solid var(--int-lang-dropdown-border);
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 15px -3px var(--int-lang-dropdown-shadow), 0 4px 6px -4px var(--int-lang-dropdown-shadow);
+  z-index: 50;
+  animation: slide-up 0.2s ease-out;
+}
+
+.language-dropdown[aria-hidden="true"] {
+  display: none;
+}
+
+/* Options */
+.language-option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.625rem 1rem;
+  text-align: left;
+  font-size: 0.875rem;
+  color: var(--int-lang-option-text);
+  transition: background-color 0.15s;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+.language-option:hover,
+.language-option:focus {
+  background-color: var(--int-lang-option-hover-bg);
+  outline: none;
+}
+
+.language-option[aria-selected="true"] {
+  background-color: var(--int-lang-option-selected-bg);
+  color: var(--int-lang-option-selected-text);
+  font-weight: 600;
+}
+
+.language-option-flag {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.language-option-text {
+  flex: 1;
+}
+
+.language-option-native {
+  display: block;
+  margin-top: 0.125rem;
+  color: var(--int-lang-option-text-muted);
+  font-size: 0.75rem;
+}
+
+/* Google Translate UI - Hide Everything */
+.goog-te-banner-frame,
+.goog-te-balloon-frame,
+.goog-te-gadget {
+  display: none !important;
+}
+
+body {
+  top: 0 !important;
+}
+
+.skiptranslate {
+  display: none !important;
+}
+
+iframe.goog-te-menu-frame {
+  display: none !important;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .language-dropdown {
+    left: auto;
+    right: 0;
+    max-width: 280px;
+  }
+}
+
+/* Animation */
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+div.VIpgJd-ZVi9od-aZ2wEe-OiiCO {
+  display: none !important;
+}

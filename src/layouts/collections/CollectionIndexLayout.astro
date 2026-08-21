@@ -1,0 +1,69 @@
+---
+// src/layouts/collections/CollectionIndexLayout.astro
+/**
+ * Default Collection Index Layout
+ *
+ * The default layout for collection index pages (e.g., /blog, /services).
+ * 
+ * Behavior:
+ * - Always shows SecondaryHero with title and description
+ * - Uses featuredImage from _meta.mdx if provided, otherwise default
+ * - If MDX Content exists → Renders it
+ * - If no MDX Content → Renders default grid
+ */
+import type { CollectionKey } from "astro:content";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
+import SecondaryHero from "@/layouts/SecondaryHero.astro";
+import { query } from "@/utils/query";
+import { humanizeSlug } from "@/utils/string";
+
+export interface Props {
+  Content?: any;
+  collectionName: CollectionKey;
+  collectionMeta: any;
+  seoProps: any;
+  hasContent?: boolean;
+  [key: string]: any;
+}
+
+const {
+  Content,
+  collectionName,
+  collectionMeta,
+  seoProps,
+  hasContent = false,
+} = Astro.props;
+
+const { title: pageTitle, description: pageDescription } = seoProps;
+
+// Use featuredImage from _meta.mdx if provided, otherwise undefined (will use default)
+const heroImage = collectionMeta.featuredImage;
+---
+
+<BaseLayout {...seoProps}>
+  <main class="flex-1">
+    {/* Header - Always displayed */}
+    <SecondaryHero
+      eyebrow={humanizeSlug(collectionName)}
+      title={pageTitle}
+      heading={collectionMeta.heading}
+      description={pageDescription}
+      image={heroImage}
+      minHeight="50vh"
+    />
+
+    {/* Content - Either custom MDX or default grid */}
+    <div class="container mx-auto px-4 pb-16">
+      {
+        hasContent && Content ? (
+          /* Custom MDX content from _meta.mdx body */
+          <Content />
+        ) : (
+          /* Default: Grid of collection items */
+          <ContentRenderer query={query(collectionName)} variant="GridVariant" />
+        )
+      }
+    </div>
+  </main>
+</BaseLayout>

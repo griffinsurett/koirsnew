@@ -1,0 +1,1079 @@
+/* ═══════════════════════════════════════════════════════════════════ */
+/*                      SCROLL ANIMATION SYSTEM                         */
+/* ═══════════════════════════════════════════════════════════════════ */
+/*
+ * This file contains TWO animation systems:
+ *
+ * 1. CSS-ONLY ANIMATIONS (data-animate-css)
+ *    - Zero JavaScript required
+ *    - Uses animation-timeline: view()
+ *    - Browser support: Chrome 115+, Safari 17.5+
+ *    - No LCP impact
+ *
+ * 2. JAVASCRIPT-OBSERVED ANIMATIONS (data-animate)
+ *    - Requires IntersectionObserver JS
+ *    - Broader browser support
+ *    - Better for interactive elements
+ *
+ * See README.md for usage guide and when to use each system.
+ */
+
+/* ═══════════════════════════════════════════════════════════════════ */
+/* SECTION 1: CSS-ONLY ANIMATIONS (No JavaScript Required)             */
+/* Uses animation-timeline: view() - Modern CSS API                     */
+/* ═══════════════════════════════════════════════════════════════════ */
+
+/*
+ * Browser support: Chrome 115+, Edge 115+, Safari 17.5+ (2024)
+ * Fallback: Elements appear immediately without animation in older browsers
+ *
+ * Usage:
+ * <div data-animate-css="fade-in">Content</div>
+ */
+
+/* Base configuration for all CSS-only animations */
+[data-animate-css] {
+  --animation-range-start: entry 0%;
+  --animation-range-end: entry 30%;
+
+  /* Start visible for no-JS fallback */
+  opacity: 1;
+  transform: none;
+}
+
+/* Browser support detection */
+@supports (animation-timeline: view()) {
+
+  /* ─────────────────────────────────────────────────────────────── */
+  /* CSS-ONLY FADE ANIMATIONS                                        */
+  /* ─────────────────────────────────────────────────────────────── */
+
+  [data-animate-css="fade-in"] {
+    animation: css-fade-in linear both;
+    animation-timeline: view();
+    animation-range: var(--animation-range-start) var(--animation-range-end);
+  }
+
+  @keyframes css-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  [data-animate-css="fade-in-up"] {
+    animation: css-fade-in-up linear both;
+    animation-timeline: view();
+    animation-range: var(--animation-range-start) var(--animation-range-end);
+  }
+
+  @keyframes css-fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  [data-animate-css="fade-in-down"] {
+    animation: css-fade-in-down linear both;
+    animation-timeline: view();
+    animation-range: var(--animation-range-start) var(--animation-range-end);
+  }
+
+  @keyframes css-fade-in-down {
+    from {
+      opacity: 0;
+      transform: translateY(-30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  [data-animate-css="fade-in-left"] {
+    animation: css-fade-in-left linear both;
+    animation-timeline: view();
+    animation-range: var(--animation-range-start) var(--animation-range-end);
+  }
+
+  @keyframes css-fade-in-left {
+    from {
+      opacity: 0;
+      transform: translateX(-40px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  [data-animate-css="fade-in-right"] {
+    animation: css-fade-in-right linear both;
+    animation-timeline: view();
+    animation-range: var(--animation-range-start) var(--animation-range-end);
+  }
+
+  @keyframes css-fade-in-right {
+    from {
+      opacity: 0;
+      transform: translateX(40px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  [data-animate-css="fade-in-scale"] {
+    animation: css-fade-in-scale linear both;
+    animation-timeline: view();
+    animation-range: var(--animation-range-start) var(--animation-range-end);
+  }
+
+  @keyframes css-fade-in-scale {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  /* ─────────────────────────────────────────────────────────────── */
+  /* CSS-ONLY SCALE ANIMATIONS                                       */
+  /* ─────────────────────────────────────────────────────────────── */
+
+  [data-animate-css="scale-in"] {
+    animation: css-scale-in linear both;
+    animation-timeline: view();
+    animation-range: var(--animation-range-start) var(--animation-range-end);
+  }
+
+  @keyframes css-scale-in {
+    from {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  [data-animate-css="pop-in"] {
+    animation: css-pop-in ease-out both;
+    animation-timeline: view();
+    animation-range: var(--animation-range-start) var(--animation-range-end);
+  }
+
+  @keyframes css-pop-in {
+    0% {
+      opacity: 0;
+      transform: scale(0.3);
+    }
+    50% {
+      transform: scale(1.05);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  [data-animate-css="zoom-in"] {
+    animation: css-zoom-in linear both;
+    animation-timeline: view();
+    animation-range: var(--animation-range-start) var(--animation-range-end);
+  }
+
+  @keyframes css-zoom-in {
+    from {
+      opacity: 0;
+      transform: scale(0.8);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  /* ─────────────────────────────────────────────────────────────── */
+  /* CSS-ONLY SLIDE ANIMATIONS                                       */
+  /* ─────────────────────────────────────────────────────────────── */
+
+  [data-animate-css="slide-up"] {
+    animation: css-slide-up linear both;
+    animation-timeline: view();
+    animation-range: var(--animation-range-start) var(--animation-range-end);
+  }
+
+  @keyframes css-slide-up {
+    from { transform: translateY(50px); }
+    to { transform: translateY(0); }
+  }
+
+  [data-animate-css="slide-down"] {
+    animation: css-slide-down linear both;
+    animation-timeline: view();
+    animation-range: var(--animation-range-start) var(--animation-range-end);
+  }
+
+  @keyframes css-slide-down {
+    from { transform: translateY(-50px); }
+    to { transform: translateY(0); }
+  }
+
+  [data-animate-css="slide-left"] {
+    animation: css-slide-left linear both;
+    animation-timeline: view();
+    animation-range: var(--animation-range-start) var(--animation-range-end);
+  }
+
+  @keyframes css-slide-left {
+    from { transform: translateX(-50px); }
+    to { transform: translateX(0); }
+  }
+
+  [data-animate-css="slide-right"] {
+    animation: css-slide-right linear both;
+    animation-timeline: view();
+    animation-range: var(--animation-range-start) var(--animation-range-end);
+  }
+
+  @keyframes css-slide-right {
+    from { transform: translateX(50px); }
+    to { transform: translateX(0); }
+  }
+
+  /* ─────────────────────────────────────────────────────────────── */
+  /* CSS-ONLY CUSTOM RANGES                                          */
+  /* ─────────────────────────────────────────────────────────────── */
+
+  /* Delayed start - triggers when 20% into viewport */
+  [data-animate-css][data-animate-range="delayed"] {
+    --animation-range-start: entry 20%;
+    --animation-range-end: entry 50%;
+  }
+
+  /* Cover - triggers across entire viewport journey */
+  [data-animate-css][data-animate-range="cover"] {
+    --animation-range-start: cover 0%;
+    --animation-range-end: cover 100%;
+  }
+
+  /* Cover fast - completes quickly in center of viewport */
+  [data-animate-css][data-animate-range="cover-fast"] {
+    --animation-range-start: cover 15%;
+    --animation-range-end: cover 35%;
+  }
+
+  /* Contained - only animates when fully visible */
+  [data-animate-css][data-animate-range="contain"] {
+    --animation-range-start: contain 0%;
+    --animation-range-end: contain 50%;
+  }
+
+  /* Exit - animates when leaving viewport */
+  [data-animate-css][data-animate-range="exit"] {
+    --animation-range-start: exit 0%;
+    --animation-range-end: exit 100%;
+  }
+
+  /* ─────────────────────────────────────────────────────────────── */
+  /* CSS-ONLY SCROLL ZOOM ANIMATIONS                                 */
+  /* ─────────────────────────────────────────────────────────────── */
+
+  [data-animate-css="scroll-zoom"] {
+    animation: css-scroll-zoom linear both;
+    animation-timeline: view();
+    animation-range: entry 0% exit 100%;
+    /* Ensure transform is not blocked */
+    will-change: transform, opacity;
+  }
+
+  @keyframes css-scroll-zoom {
+    0% {
+      transform: scale(0.7);
+      opacity: 0.6;
+    }
+    20% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    80% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(0.7);
+      opacity: 0.6;
+    }
+  }
+
+  [data-animate-css="scroll-zoom-in"] {
+    animation: css-scroll-zoom-in linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 50%;
+  }
+
+  @keyframes css-scroll-zoom-in {
+    from {
+      transform: scale(0.7);
+      opacity: 0.5;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  [data-animate-css="scroll-zoom-out"] {
+    animation: css-scroll-zoom-out linear both;
+    animation-timeline: view();
+    animation-range: cover 50% exit 100%;
+  }
+
+  @keyframes css-scroll-zoom-out {
+    from {
+      transform: scale(1);
+      opacity: 1;
+    }
+    to {
+      transform: scale(0.7);
+      opacity: 0.5;
+    }
+  }
+
+  [data-animate-css="scroll-pulse"] {
+    animation: css-scroll-pulse linear both;
+    animation-timeline: view();
+    animation-range: entry 0% exit 100%;
+  }
+
+  @keyframes css-scroll-pulse {
+    0%, 100% {
+      transform: scale(0.9);
+    }
+    50% {
+      transform: scale(1.05);
+    }
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════ */
+/* SECTION 2: JAVASCRIPT-OBSERVED ANIMATIONS                            */
+/* Works with data-animate and data-visible attributes                  */
+/* Requires IntersectionObserver JS (src/integrations/scroll-animations/index.ts) */
+/* ═══════════════════════════════════════════════════════════════════ */
+
+/*
+ * Browser support: All modern browsers (Chrome 51+, Safari 12.1+, Firefox 55+)
+ * Requires: JavaScript enabled and scroll-animations script loaded
+ *
+ * Usage:
+ * <div data-animate="fade-in" data-animate-once="true">Content</div>
+ */
+
+/* Base state for all animated elements - hidden by default */
+[data-animate] {
+  --animation-duration: 500ms; /* Faster on mobile for better Speed Index */
+  --animation-delay: 0ms;
+  --animation-easing: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Slower animations on desktop */
+@media (min-width: 1024px) {
+  [data-animate] {
+    --animation-duration: 900ms;
+  }
+}
+
+/* Support for delay attribute */
+[data-animate-delay] {
+  transition-delay: var(--animation-delay);
+}
+
+/* ─────────────────────────────────────────────────────────────── */
+/* JS FADE ANIMATIONS (data-attribute based)                       */
+/* ─────────────────────────────────────────────────────────────── */
+
+[data-animate="fade-in"] {
+  opacity: 0;
+  transition: opacity var(--animation-duration) var(--animation-easing);
+}
+[data-animate="fade-in"][data-visible="true"] {
+  opacity: 1;
+}
+
+[data-animate="fade-in-up"] {
+  opacity: 0;
+  transform: translateY(40px);
+  transition:
+    opacity var(--animation-duration) var(--animation-easing),
+    transform var(--animation-duration) var(--animation-easing);
+}
+[data-animate="fade-in-up"][data-visible="true"] {
+  opacity: 1;
+  transform: translateY(0);
+}
+/* Exit scrolling down: fade out upward (element leaves top of viewport) */
+[data-animate="fade-in-up"][data-exit-direction="down"] {
+  opacity: 0;
+  transform: translateY(-40px);
+}
+/* Exit scrolling up: fade out downward (element leaves bottom of viewport) */
+[data-animate="fade-in-up"][data-exit-direction="up"] {
+  opacity: 0;
+  transform: translateY(40px);
+}
+
+[data-animate="fade-in-down"] {
+  opacity: 0;
+  transform: translateY(-20px);
+  transition:
+    opacity var(--animation-duration) var(--animation-easing),
+    transform var(--animation-duration) var(--animation-easing);
+}
+[data-animate="fade-in-down"][data-visible="true"] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+[data-animate="fade-in-left"] {
+  opacity: 0;
+  transform: translateX(-30px);
+  transition:
+    opacity var(--animation-duration) var(--animation-easing),
+    transform var(--animation-duration) var(--animation-easing);
+}
+[data-animate="fade-in-left"][data-visible="true"] {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+[data-animate="fade-in-right"] {
+  opacity: 0;
+  transform: translateX(30px);
+  transition:
+    opacity var(--animation-duration) var(--animation-easing),
+    transform var(--animation-duration) var(--animation-easing);
+}
+[data-animate="fade-in-right"][data-visible="true"] {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+[data-animate="fade-in-scale"] {
+  opacity: 0;
+  transform: scale(0.95);
+  transition:
+    opacity var(--animation-duration) var(--animation-easing),
+    transform var(--animation-duration) var(--animation-easing);
+}
+[data-animate="fade-in-scale"][data-visible="true"] {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ─────────────────────────────────────────────────────────────── */
+/* JS SCALE ANIMATIONS (data-attribute based)                      */
+/* ─────────────────────────────────────────────────────────────── */
+
+[data-animate="scale-in"] {
+  opacity: 0;
+  transform: scale(0.5);
+  transition:
+    opacity var(--animation-duration) var(--animation-easing),
+    transform var(--animation-duration) var(--animation-easing);
+}
+[data-animate="scale-in"][data-visible="true"] {
+  opacity: 1;
+  transform: scale(1);
+}
+
+[data-animate="pop-in"] {
+  opacity: 0;
+  transform: scale(0.3);
+  transition:
+    opacity var(--animation-duration) cubic-bezier(0.68, -0.55, 0.265, 1.55),
+    transform var(--animation-duration) cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+[data-animate="pop-in"][data-visible="true"] {
+  opacity: 1;
+  transform: scale(1);
+}
+
+[data-animate="zoom-in"] {
+  opacity: 0;
+  transform: scale(0.8);
+  transition:
+    opacity var(--animation-duration) var(--animation-easing),
+    transform var(--animation-duration) var(--animation-easing);
+}
+[data-animate="zoom-in"][data-visible="true"] {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ─────────────────────────────────────────────────────────────── */
+/* JS SLIDE ANIMATIONS (data-attribute based)                      */
+/* ─────────────────────────────────────────────────────────────── */
+
+[data-animate="slide-up"] {
+  transform: translateY(40px);
+  transition: transform var(--animation-duration) var(--animation-easing);
+}
+[data-animate="slide-up"][data-visible="true"] {
+  transform: translateY(0);
+}
+
+[data-animate="slide-down"] {
+  transform: translateY(-40px);
+  transition: transform var(--animation-duration) var(--animation-easing);
+}
+[data-animate="slide-down"][data-visible="true"] {
+  transform: translateY(0);
+}
+
+[data-animate="slide-left"] {
+  transform: translateX(-40px);
+  transition: transform var(--animation-duration) var(--animation-easing);
+}
+[data-animate="slide-left"][data-visible="true"] {
+  transform: translateX(0);
+}
+
+[data-animate="slide-right"] {
+  transform: translateX(40px);
+  transition: transform var(--animation-duration) var(--animation-easing);
+}
+[data-animate="slide-right"][data-visible="true"] {
+  transform: translateX(0);
+}
+
+/* ═══════════════════════════════════════════════════════════════════ */
+/* SPECIAL ANIMATIONS (JavaScript-based only)                           */
+/* ═══════════════════════════════════════════════════════════════════ */
+
+/* Symmetric fade + color swap (both directions) */
+.color-text-fade {
+  /* base + tokens */
+  --ctf-color-hidden: currentColor;           /* inherits from parent (e.g., .text-heading) */
+  --ctf-color-visible: var(--color-primary);  /* your highlight */
+  --ctf-color: var(--ctf-color-hidden);
+  --ctf-color-delay: 0ms;
+
+  opacity: 0;
+  color: var(--ctf-color);
+
+  /* fade opacity normally; change color instantly but only after a delay */
+  transition:
+    opacity var(--animation-duration, 600ms) var(--animation-easing, ease) var(--animation-delay, 0ms),
+    color   0ms                              linear                           var(--ctf-color-delay);
+}
+
+/* ENTER: fade to 1, then switch to primary AFTER the fade-in completes */
+.color-text-fade[data-visible="true"] {
+  opacity: 1;
+  --ctf-color: var(--ctf-color-visible);
+  --ctf-color-delay: calc(var(--animation-delay, 0ms) + var(--animation-duration, 600ms));
+}
+
+/* EXIT (reverse): keep primary while fading out, then switch back to base at the end */
+.color-text-fade[data-visible="false"][data-animation-direction="reverse"] {
+  --ctf-color: var(--ctf-color-hidden);
+  --ctf-color-delay: calc(var(--animation-delay, 0ms) + var(--animation-duration, 600ms));
+}
+
+/* Heartbeat animation (for interactive elements) */
+.heartbeat {
+  animation: heartbeat 0.5s ease-in-out forwards;
+}
+
+@keyframes heartbeat {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+/* Circle transition */
+.circle {
+  transition: transform 0.25s ease-in-out;
+}
+
+/* ═══════════════════════════════════════════════════════════════════ */
+/* TAILWIND ANIMATION UTILITIES (Reusable with modifiers)               */
+/* ═══════════════════════════════════════════════════════════════════ */
+/*
+ * These are Tailwind-style utilities that can be used directly in your markup.
+ * They play immediately on load (not scroll-triggered).
+ *
+ * Usage Examples:
+ *   <div class="animate-fade-in">Simple fade in</div>
+ *   <div class="animate-fade-in-up animate-slow">Fade in + slow modifier</div>
+ *   <div class="animate-pop-in animate-delay-200">Pop in with delay</div>
+ *
+ * Available animations:
+ *   - Fades: animate-fade-in, animate-fade-out, animate-fade-in-up/down/left/right
+ *   - Scales: animate-scale-in, animate-scale-out, animate-pop-in, animate-zoom-in
+ *   - Slides: animate-slide-up/down/left/right
+ *   - Special: animate-spin-once, animate-heartbeat
+ *
+ * Available modifiers:
+ *   - Duration: animate-fast (0.2s), animate-normal (0.3s), animate-slow (0.6s), animate-slower (1s)
+ *   - Delay: animate-delay-100, animate-delay-200, animate-delay-300, animate-delay-500
+ */
+
+/* ─────────────────────────────────────────────────────────────── */
+/* ANIMATION KEYFRAMES                                              */
+/* ─────────────────────────────────────────────────────────────── */
+
+/* Fade animations */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(1.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in-down {
+  from {
+    opacity: 0;
+    transform: translateY(-1.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-2rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fade-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(2rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Scale animations */
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes scale-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+}
+
+@keyframes pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes zoom-in {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Slide animations */
+@keyframes slide-up {
+  from { transform: translateY(2.5rem); }
+  to { transform: translateY(0); }
+}
+
+@keyframes slide-down {
+  from { transform: translateY(-2.5rem); }
+  to { transform: translateY(0); }
+}
+
+@keyframes slide-left {
+  from { transform: translateX(-2.5rem); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slide-right {
+  from { transform: translateX(2.5rem); }
+  to { transform: translateX(0); }
+}
+
+/* Special animations */
+@keyframes spin-once {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+/* ─────────────────────────────────────────────────────────────── */
+/* TAILWIND UTILITIES                                               */
+/* ─────────────────────────────────────────────────────────────── */
+
+/* Fade utilities */
+@utility animate-fade-in {
+  animation: fade-in 1.5s ease-out both;
+}
+
+@utility animate-fade-out {
+  animation: fade-out 0.3s ease-out both;
+}
+
+@utility animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out both;
+}
+
+@utility animate-fade-in-down {
+  animation: fade-in-down 0.6s ease-out both;
+}
+
+@utility animate-fade-in-left {
+  animation: fade-in-left 0.6s ease-out both;
+}
+
+@utility animate-fade-in-right {
+  animation: fade-in-right 0.6s ease-out both;
+}
+
+/* Scale utilities */
+@utility animate-scale-in {
+  animation: scale-in 0.4s ease-out both;
+}
+
+@utility animate-scale-out {
+  animation: scale-out 0.3s ease-out both;
+}
+
+@utility animate-pop-in {
+  animation: pop-in 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) both;
+}
+
+@utility animate-zoom-in {
+  animation: zoom-in 0.5s ease-out both;
+}
+
+/* Slide utilities */
+@utility animate-slide-up {
+  animation: slide-up 0.6s ease-out both;
+}
+
+@utility animate-slide-down {
+  animation: slide-down 0.6s ease-out both;
+}
+
+@utility animate-slide-left {
+  animation: slide-left 0.6s ease-out both;
+}
+
+@utility animate-slide-right {
+  animation: slide-right 0.6s ease-out both;
+}
+
+/* Special utilities */
+@utility animate-spin-once {
+  animation: spin-once 1s ease-in-out both;
+}
+
+@utility animate-heartbeat {
+  animation: heartbeat 0.5s ease-in-out forwards;
+}
+
+/* ─────────────────────────────────────────────────────────────── */
+/* DURATION & DELAY MODIFIERS                                       */
+/* ─────────────────────────────────────────────────────────────── */
+
+/* Duration modifiers */
+@utility animate-fast {
+  animation-duration: 0.2s;
+}
+
+@utility animate-normal {
+  animation-duration: 0.4s;
+}
+
+@utility animate-slow {
+  animation-duration: 0.8s;
+}
+
+@utility animate-slower {
+  animation-duration: 1.2s;
+}
+
+/* Delay modifiers */
+@utility animate-delay-100 {
+  animation-delay: 100ms;
+}
+
+@utility animate-delay-200 {
+  animation-delay: 200ms;
+}
+
+@utility animate-delay-300 {
+  animation-delay: 300ms;
+}
+
+@utility animate-delay-500 {
+  animation-delay: 500ms;
+}
+
+@utility animate-delay-1000 {
+  animation-delay: 1000ms;
+}
+
+/* ═══════════════════════════════════════════════════════════════════ */
+/* ACCESSIBILITY: REDUCED MOTION                                         */
+/* ═══════════════════════════════════════════════════════════════════ */
+
+/* System preference: prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  /* Disable CSS-only animations */
+  [data-animate-css] {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* Disable JS-observed animations */
+  [data-animate] {
+    transition: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+    filter: none !important;
+  }
+
+  /* Disable special animations */
+  .color-text-fade {
+    transition: none !important;
+    opacity: 1 !important;
+    color: var(--ctf-color-visible) !important;
+  }
+
+  .heartbeat {
+    animation: none !important;
+  }
+
+  .circle {
+    transition: none !important;
+  }
+
+  /* Disable Tailwind animation utilities */
+  .animate-fade-in,
+  .animate-fade-out,
+  .animate-fade-in-up,
+  .animate-fade-in-down,
+  .animate-fade-in-left,
+  .animate-fade-in-right,
+  .animate-scale-in,
+  .animate-scale-out,
+  .animate-pop-in,
+  .animate-zoom-in,
+  .animate-slide-up,
+  .animate-slide-down,
+  .animate-slide-left,
+  .animate-slide-right,
+  .animate-spin-once,
+  .animate-heartbeat {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* Disable all hover/group-hover transitions */
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
+  }
+}
+
+/* User accessibility toggle: data-a11y-motion="reduced" */
+:root[data-a11y-motion="reduced"] {
+  /* Disable CSS-only animations */
+  [data-animate-css] {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* Disable JS-observed animations */
+  [data-animate] {
+    transition: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+    filter: none !important;
+  }
+
+  /* Disable special animations */
+  .color-text-fade {
+    transition: none !important;
+    opacity: 1 !important;
+    color: var(--ctf-color-visible) !important;
+  }
+
+  .heartbeat {
+    animation: none !important;
+  }
+
+  .circle {
+    transition: none !important;
+  }
+
+  /* Disable Tailwind animation utilities */
+  .animate-fade-in,
+  .animate-fade-out,
+  .animate-fade-in-up,
+  .animate-fade-in-down,
+  .animate-fade-in-left,
+  .animate-fade-in-right,
+  .animate-scale-in,
+  .animate-scale-out,
+  .animate-pop-in,
+  .animate-zoom-in,
+  .animate-slide-up,
+  .animate-slide-down,
+  .animate-slide-left,
+  .animate-slide-right,
+  .animate-spin-once,
+  .animate-heartbeat {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* Disable all hover/group-hover transitions */
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
+  }
+}
+
+/* User accessibility toggle: data-a11y-animations="true" (pause animations) */
+:root[data-a11y-animations="true"] {
+  /* Disable CSS-only animations */
+  [data-animate-css] {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* Disable JS-observed animations */
+  [data-animate] {
+    transition: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+    filter: none !important;
+  }
+
+  /* Disable special animations */
+  .color-text-fade {
+    transition: none !important;
+    opacity: 1 !important;
+    color: var(--ctf-color-visible) !important;
+  }
+
+  .heartbeat {
+    animation: none !important;
+  }
+
+  .circle {
+    transition: none !important;
+  }
+
+  /* Disable Tailwind animation utilities */
+  .animate-fade-in,
+  .animate-fade-out,
+  .animate-fade-in-up,
+  .animate-fade-in-down,
+  .animate-fade-in-left,
+  .animate-fade-in-right,
+  .animate-scale-in,
+  .animate-scale-out,
+  .animate-pop-in,
+  .animate-zoom-in,
+  .animate-slide-up,
+  .animate-slide-down,
+  .animate-slide-left,
+  .animate-slide-right,
+  .animate-spin-once,
+  .animate-heartbeat {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* Disable all hover/group-hover transitions */
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
+  }
+}

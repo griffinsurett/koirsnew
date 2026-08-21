@@ -1,0 +1,61 @@
+[
+  {
+    "title": "0% Interest Financing",
+    "description": "Spread your payments over time with absolutely no interest for qualified homeowners.",
+    "id": "zero-percent-interest-financing",
+    "icon": "@/assets/koi/bank.png",
+    "serviceLines": [
+      "roofing",
+      "solar"
+    ]
+  },
+  {
+    "title": "$0 Down Payment",
+    "description": "Get started on your project today with zero money down—no upfront payment required.",
+    "icon": "@/assets/koi/pocket.png",
+    "id": "zero-down-payment",
+    "serviceLines": [
+      "roofing",
+      "solar"
+    ]
+  },
+  {
+    "title": "No 12-Month Payments",
+    "description": "Enjoy financing options with no payments due for the first 12 months, giving you extra budget flexibility.",
+    "icon": "@/assets/koi/calandar.png",
+    "id": "no-12-month-payments",
+    "serviceLines": [
+      "roofing",
+      "solar"
+    ]
+  },
+  {
+    "title": "50 Year Warranty",
+    "description": "Yes you heard that right!!!! A 50-year warranty!! Ensuring long-lasting protection and peace of mind.",
+    "icon": "@/assets/koi/50-year-warranty.png",
+    "id": "warranty",
+    "serviceLines": [
+      "roofing",
+      "solar"
+    ]
+  },
+  {
+    "title": "Roofing Insurance Done for You",
+    "description": "We handle your roofing insurance claims from start to finish—no stress, no headaches.",
+    "icon": "@/assets/koi/insurance.png",
+    "id": "roofing-insurance-done-for-you",
+    "serviceLines": [
+      "roofing"
+    ]
+  },
+  {
+    "title": "No Credit Check",
+    "description": "Get started today with zero credit check—everyone qualifies for our financing, making home upgrades effortless and inclusive.",
+    "icon": "@/assets/koi/solar-house.webp",
+    "id": "no-credit-check",
+    "serviceLines": [
+      "roofing",
+      "solar"
+    ]
+  }
+]

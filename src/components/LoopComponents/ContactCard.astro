@@ -1,0 +1,81 @@
+---
+// src/components/LoopComponents/ContactCard.astro
+/**
+ * Contact Card Component
+ *
+ * Displays contact information with:
+ * - Icon (defaults based on tags: phone, email, or generic)
+ * - Title (phone number, email address, etc.)
+ * - Optional description
+ * - Clickable link if linkPrefix provided
+ *
+ * Used in ContactVariant to display phone, email, address, etc.
+ */
+
+import Icon from "@/components/Icon";
+
+export interface Props {
+  title: string; // Label (e.g., "Call Us", "Email Us")
+  linkPrefix?: string; // URL prefix (tel:, mailto:, etc.)
+  tags?: string[]; // Used to determine default icon
+  description?: string; // Contact value (phone digits, email address)
+  icon?: any; // Custom icon (overrides default)
+  displayValue?: string; // Optional formatted value for UI
+  url?: string;
+}
+
+const { title, linkPrefix, tags, description, icon, displayValue, url } = Astro.props;
+
+// Smart icon selection based on tags if no custom icon provided
+const defaultIcon = tags?.includes("phone")
+  ? "lu:phone"
+  : tags?.includes("email")
+    ? "lu:mail"
+    : "lu:contact";
+
+const displayIcon = icon || defaultIcon;
+
+const rawValue = description ?? title ?? "";
+const value = displayValue ?? rawValue;
+const showLabel = !!description && !!title;
+
+// Build full link if prefix provided (tel:, mailto:, etc.)
+const href = url ?? (linkPrefix && rawValue ? `${linkPrefix}${rawValue}` : undefined);
+---
+
+<div class="bg-bg rounded-lg shadow-md hover:shadow-lg transition-shadow p-6">
+  <div class="flex items-start gap-4">
+    {/* Icon circle */}
+    <div class="flex-shrink-0">
+      <div
+        class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center"
+      >
+        <Icon icon={displayIcon} size="md" className="text-primary" />
+      </div>
+    </div>
+
+    {/* Contact info */}
+    <div class="flex-1">
+      {/* Label */}
+      {showLabel && (
+        <p class="text-sm uppercase tracking-wide text-text/70">
+          {title}
+        </p>
+      )}
+
+      {/* Value as link or plain text */}
+      {
+        href ? (
+          <a
+            href={href}
+            class="text-lg font-semibold text-heading hover:text-primary transition-colors block"
+          >
+            {value}
+          </a>
+        ) : (
+          <p class="text-lg font-semibold text-heading">{value}</p>
+        )
+      }
+    </div>
+  </div>
+</div>

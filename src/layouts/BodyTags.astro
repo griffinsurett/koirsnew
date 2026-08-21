@@ -1,0 +1,21 @@
+---
+// src/layouts/BodyTags.astro
+/**
+ * Body Tags Component
+ * 
+ * Placeholder for body-level scripts and elements.
+ * Can include:
+ * - Analytics components (Vercel Analytics, Speed Insights)
+ * - Chat widgets
+ * - Cookie consent banners (currently commented out)
+ * - Other scripts that should load in the body
+ * 
+ * Keeps BaseLayout clean by separating body-level concerns.
+ */
+
+import IntBodyScripts from "@/integrations/IntBodyScripts.astro";
+---
+
+<!-- Analytics, tracking scripts, or other body elements can be added here -->
+<!-- Example: Google Analytics, chat widgets, etc. -->
+<IntBodyScripts />

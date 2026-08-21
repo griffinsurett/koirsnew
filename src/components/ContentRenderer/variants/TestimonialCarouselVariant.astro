@@ -1,0 +1,147 @@
+---
+// src/components/ContentRenderer/variants/TestimonialCarouselVariant.astro
+/**
+ * Testimonial Carousel Variant
+ *
+ * Continuous auto-scrolling marquee of testimonial cards (alert-sprinkler
+ * style motion): the track slides horizontally in an infinite loop, pauses
+ * on hover. Uses the same TestimonialCard look and is wired through the
+ * ContentRenderer / testimonials collection.
+ */
+
+import type { BaseVariantProps } from "../ContentRenderer.types";
+import TestimonialCard from "@/components/LoopComponents/TestimonialCard.astro";
+import Button from "@/components/Button/Button";
+import ReviewButton from "@/components/ReviewButton.astro";
+import { shouldShowCollectionCTA } from "../utils/helpers";
+import SectionHeading from "@/components/SectionHeading.astro";
+import JsonLd from "@/components/JsonLd.astro";
+import { buildReviewSchema } from "@/utils/schema/reviewSchema";
+
+interface Props extends BaseVariantProps {
+  /** Seconds for one full loop (lower = faster). */
+  speed?: number;
+  /**
+   * Eyebrow above the heading. Defaults to "Reviews" — the legacy site's
+   * label on this band — but stays overridable so a page can relabel it.
+   */
+  pretitle?: string;
+}
+
+const {
+  items = [],
+  title,
+  heading,
+  pretitle = "Reviews",
+  description,
+  className = "",
+  collectionUrl,
+  collectionTitle,
+  showButtonSection = true,
+  speed = 60,
+  id,
+} = Astro.props as Props;
+
+const safeItems = Array.isArray(items) ? items : [];
+// Duplicate the set so the marquee can loop seamlessly (translateX -50%).
+const loopItems = [...safeItems, ...safeItems];
+// Review + AggregateRating schema from the reviews shown here.
+const reviewSchema = buildReviewSchema(safeItems as any);
+---
+
+<JsonLd schema={reviewSchema} />
+
+<section id={id} class={`testimonials-section overflow-hidden ${className}`}>
+  <div class="container">
+    {(heading || title || description) && (
+      <SectionHeading
+        pretitle={pretitle}
+        heading={heading}
+        title={title}
+        description={description}
+      />
+    )}
+  </div>
+
+  {safeItems.length > 0 && (
+    <div
+      class="testimonial-marquee"
+      style={`--marquee-speed:${speed}s;`}
+      aria-label="Customer testimonials"
+    >
+      <ul class="testimonial-marquee-track">
+        {loopItems.map((item, i) => (
+          <li class="testimonial-marquee-item" aria-hidden={i >= safeItems.length ? "true" : undefined}>
+            <TestimonialCard {...item} />
+          </li>
+        ))}
+      </ul>
+    </div>
+  )}
+
+  {showButtonSection && (
+    <div class="container">
+      <div class="flex flex-wrap items-center justify-center gap-4 mt-12">
+        {shouldShowCollectionCTA(collectionUrl, safeItems.length) && (
+          <Button variant="primary" size="lg" href={collectionUrl} rightIcon="lu:arrow-right">
+            {`Read All ${collectionTitle || "Reviews"}`.trim()}
+          </Button>
+        )}
+        <ReviewButton border={true} class="!py-3" />
+      </div>
+    </div>
+  )}
+</section>
+
+<style>
+  .testimonial-marquee {
+    width: 100%;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  }
+
+  .testimonial-marquee-track {
+    display: flex;
+    align-items: stretch;
+    width: max-content;
+    gap: 30px;
+    padding: 8px 15px;
+    margin: 0;
+    list-style: none;
+    animation: testimonial-marquee-scroll var(--marquee-speed, 60s) linear infinite;
+  }
+
+  .testimonial-marquee-item :global(.testimonial-card) {
+    height: 100%;
+  }
+
+  .testimonial-marquee:hover .testimonial-marquee-track {
+    animation-play-state: paused;
+  }
+
+  .testimonial-marquee-item {
+    flex: 0 0 auto;
+    width: 380px;
+    max-width: 85vw;
+  }
+
+  @keyframes testimonial-marquee-scroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .testimonial-marquee-track {
+      animation: none;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+  }
+
+  /* Held until the band scrolls into view (see scripts/marqueeOnView.ts) so it
+     starts from its first item instead of mid-cycle. */
+  .testimonial-marquee-track.marquee-paused {
+    animation-play-state: paused;
+  }
+</style>

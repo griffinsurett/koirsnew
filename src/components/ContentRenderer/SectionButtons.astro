@@ -1,0 +1,42 @@
+---
+// src/components/ContentRenderer/SectionButtons.astro
+/**
+ * Section Buttons — renders a variant's explicit `buttons` array.
+ *
+ * The legacy SectionVariants took a `buttons` array on any section (the
+ * ServiceBtns pair under the hero, the gallery band, the solar upsell banner).
+ * This is the ContentRenderer equivalent, mapped onto the new Button
+ * component. Legacy `underline` maps to the new `link` variant.
+ */
+import Button from "@/components/Button/Button";
+import type { SectionButton } from "./ContentRenderer.types";
+
+interface Props {
+  buttons?: SectionButton[];
+  class?: string;
+}
+
+const { buttons = [], class: className = "" } = Astro.props as Props;
+
+// Legacy variant name → new Button variant.
+const VARIANT_ALIASES: Record<string, string> = { underline: "link" };
+---
+
+{buttons.length > 0 && (
+  <div
+    class={`flex flex-col md:flex-row items-stretch md:items-center justify-center gap-[var(--spacing-md)] ${className}`}
+  >
+    {buttons.map((btn) => (
+      <Button
+        href={btn.link}
+        variant={(VARIANT_ALIASES[btn.variant ?? ""] ?? btn.variant ?? "primary") as any}
+        size={btn.size ?? "lg"}
+        className="w-full md:w-auto"
+        leftIcon={btn.leftIcon}
+        rightIcon={btn.rightIcon}
+      >
+        {btn.text}
+      </Button>
+    ))}
+  </div>
+)}
