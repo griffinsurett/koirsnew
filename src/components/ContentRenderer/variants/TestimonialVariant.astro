@@ -45,7 +45,9 @@ const columnClasses = {
       <ul class={`grid gap-6 list-none ${columnClasses[columns]}`}>
         {safeItems.map((item: any) => (
           <li>
-            <TestimonialCard {...item} />
+            {/* Static grid, so cards can safely pop in on scroll (unlike the
+                marquee variants, whose tracks translate horizontally). */}
+            <TestimonialCard {...item} animate={true} />
           </li>
         ))}
       </ul>

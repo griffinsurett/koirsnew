@@ -97,12 +97,28 @@ const reviewSchema = buildReviewSchema(safeItems as any);
             class={`showcase-col showcase-col--${col.kind}`}
             aria-hidden={i >= columns.length ? "true" : undefined}
           >
+            {/* Cards animate individually, observed against `.showcase-track`
+                rather than the viewport — the track scrolls horizontally, so a
+                viewport-observed card would never intersect and would sit at
+                opacity 0. Rooting to the track reveals each card as it comes
+                around. */}
             {col.kind === "media" ? (
-              <TestimonialCard {...col.item} fillMedia={true} />
+              <TestimonialCard
+                {...col.item}
+                fillMedia={true}
+                animate={true}
+                animateDelay={i * 100}
+                animateRoot=".showcase-track"
+              />
             ) : (
               <div class="showcase-stack">
-                {col.items.map((item: any) => (
-                  <TestimonialCard {...item} />
+                {col.items.map((item: any, j: number) => (
+                  <TestimonialCard
+                    {...item}
+                    animate={true}
+                    animateDelay={i * 100 + j * 80}
+                    animateRoot=".showcase-track"
+                  />
                 ))}
               </div>
             )}

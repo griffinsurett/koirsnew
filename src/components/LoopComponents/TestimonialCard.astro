@@ -31,6 +31,15 @@ export interface Props {
   externalLink?: string;
   /** Let the media fill the leftover card height (fixed-height contexts). */
   fillMedia?: boolean;
+  /** Pop the card in on scroll. */
+  animate?: boolean;
+  /** Milliseconds to delay this card's reveal, for a staggered set. */
+  animateDelay?: number;
+  /** CSS selector of a scrolling ancestor to observe against instead of the
+   *  viewport. Required inside the marquee tracks: those translate/scroll
+   *  horizontally, so a viewport-observed card parked off to the side would
+   *  stay at opacity 0 forever. */
+  animateRoot?: string;
 }
 
 const {
@@ -45,6 +54,9 @@ const {
   googleReview = false,
   externalLink,
   fillMedia = false,
+  animate = false,
+  animateDelay = 0,
+  animateRoot,
 } = Astro.props as Props;
 
 const quote = (content ?? description ?? "").trim();
@@ -58,6 +70,10 @@ const hasMedia = Boolean(video || poster);
 ---
 
 <article
+  data-animate={animate ? "pop-in" : undefined}
+  data-animate-once={animate ? "true" : undefined}
+  data-animate-delay={animate ? String(animateDelay) : undefined}
+  data-animate-root={animate ? animateRoot : undefined}
   class:list={[
     "testimonial-card relative rounded overflow-hidden shadow-xs bg-primary text-bg flex flex-col w-full",
     { "tc-has-media": hasMedia, "tc-fixed": fillMedia, "tc-video-only": Boolean(video) },

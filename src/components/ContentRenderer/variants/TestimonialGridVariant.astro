@@ -56,9 +56,9 @@ const reviewSchema = buildReviewSchema(safeItems as any);
       class={`review-grid grid ${columnClasses[columns]} gap-[30px] list-none`}
       style={`--review-card-height:${cardHeight}`}
     >
-      {safeItems.map((item: any) => (
+      {safeItems.map((item: any, index: number) => (
         <li>
-          <TestimonialCard {...item} fillMedia={true} />
+          <TestimonialCard {...item} fillMedia={true} animate={true} animateDelay={index * 100} />
         </li>
       ))}
     </ul>

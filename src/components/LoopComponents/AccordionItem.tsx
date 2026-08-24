@@ -11,6 +11,15 @@
  * Ported from the legacy `AccordionItem.jsx`; measured values from the built
  * 2025 site: 1px top border, 24px/32px header padding, 24px question, 36px
  * glyph, both at font-weight 300.
+ *
+ * Scroll animation: the legacy row carried the `slide-up` class, whose keyframes
+ * were opacity 0→1 plus a translateY — that is exactly `fade-in-up` in the
+ * current system (the system's own `slide-up` moves WITHOUT fading, so it is
+ * NOT the equivalent). `animateDelay` staggers the rows.
+ *
+ * These are plain attributes rather than an effect: the observer's
+ * MutationObserver picks the rows up when React mounts them, so a hydrated
+ * (`client:visible`) accordion animates without any extra wiring.
  */
 import type { ReactNode } from "react";
 
@@ -24,6 +33,10 @@ export interface AccordionItemProps {
   onToggle: () => void;
   headerClassName?: string;
   headerSlot?: ReactNode;
+  /** Reveal this row on scroll (matches the legacy `slide-up`). */
+  animate?: boolean;
+  /** Milliseconds to delay this row's reveal, for a staggered list. */
+  animateDelay?: number;
 }
 
 export default function AccordionItem({
@@ -36,9 +49,14 @@ export default function AccordionItem({
   onToggle,
   headerClassName = "",
   headerSlot,
+  animate = false,
+  animateDelay = 0,
 }: AccordionItemProps) {
   return (
     <article
+      data-animate={animate ? "fade-in-up" : undefined}
+      data-animate-once={animate ? "true" : undefined}
+      data-animate-delay={animate ? String(animateDelay) : undefined}
       className={`group border-t border-border transition-colors duration-500 ease-in-out ${className}`}
     >
       {/* Header — the whole row is the control, as in the legacy markup. */}

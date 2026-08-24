@@ -78,7 +78,9 @@ const backgroundMedia = {
     {/* Hero content */}
     <div class="relative container mx-auto px-4 py-16 md:py-24 z-10">
       <div class="max-w-6xl mx-auto text-center text-bg">
+        {/* No scroll animation: LCP heading, above the fold. */}
         <SectionHeading
+          animate={false}
           headingTag="h1"
           tone="dark"
           align="center"

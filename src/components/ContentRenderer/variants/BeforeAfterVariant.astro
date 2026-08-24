@@ -74,9 +74,9 @@ const itemBasis = {
 
     {safeItems.length > 0 && !isCarousel && (
       <ul class={`grid ${columnClasses[columns]} gap-[30px] list-none`}>
-        {safeItems.map((item) => (
+        {safeItems.map((item, index) => (
           <li>
-            <BeforeAfterCard {...item} />
+            <BeforeAfterCard {...item} animate={true} animateDelay={index * 120} />
           </li>
         ))}
       </ul>
@@ -103,9 +103,18 @@ const itemBasis = {
         </button>
 
         <ul class="ba-track flex gap-[30px] list-none overflow-x-auto scroll-smooth snap-x snap-mandatory" data-ba-track>
-          {safeItems.map((item) => (
+          {safeItems.map((item, index) => (
             <li class={`ba-slide snap-start shrink-0 ${itemBasis}`}>
-              <BeforeAfterCard {...item} />
+              {/* Observed against `.ba-track`, not the viewport: this is a
+                  horizontal scroller, so slides parked off to the right never
+                  intersect the viewport. Rooting them to the track reveals the
+                  visible ones now and the rest as they are scrolled in. */}
+              <BeforeAfterCard
+                {...item}
+                animate={true}
+                animateDelay={index * 120}
+                animateRoot=".ba-track"
+              />
             </li>
           ))}
         </ul>

@@ -58,8 +58,9 @@ const gridClasses = isTwoCardLayout
     {
       items.length > 0 && (
         <div class={`grid ${columnClasses[effectiveColumns]} ${gridClasses}`}>
-          {items.map((item) => (
-            <ImageCard {...item} compact={isTwoCardLayout} />
+          {/* Static grid — cards pop in one after another. */}
+          {items.map((item, index) => (
+            <ImageCard {...item} compact={isTwoCardLayout} animateDelay={index * 120} />
           ))}
         </div>
       )

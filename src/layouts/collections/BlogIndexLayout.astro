@@ -115,6 +115,8 @@ const totalPosts = feedPosts.length;
         <section aria-label="Blog posts" class="space-y-8">
           <h2
             data-feed-heading
+            data-animate="fade-in"
+            data-animate-once="true"
             class="text-3xl md:text-4xl font-bold text-primary"
           >
             Recent Posts
@@ -126,10 +128,19 @@ const totalPosts = feedPosts.length;
               data-pagination-feed={blogPaginationId}
               data-page-size={pageSize}
             >
-              {feedPosts.map((post) => (
+              {/* Cards pop in as the feed scrolls. Safe despite pagination and
+                  tag filtering hiding some cards: both run once at load
+                  (`DOMContentLoaded` / `is:inline`) and set `display:none`,
+                  which takes the card out of layout so it is never observed;
+                  changing page is a real navigation, so every load starts from
+                  a clean observe pass over only the visible cards. */}
+              {feedPosts.map((post, index) => (
                 <article
                   data-pagination-item
                   data-post-tags={post.tags.join("|")}
+                  data-animate="fade-in-up"
+                  data-animate-once="true"
+                  data-animate-delay={String((index % pageSize) * 100)}
                   class="bg-bg rounded-xl overflow-hidden shadow-md"
                 >
                   {post.featuredImageSrc && (

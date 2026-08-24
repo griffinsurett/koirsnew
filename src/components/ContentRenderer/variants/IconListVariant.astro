@@ -7,6 +7,10 @@
  * Ports the legacy `listSection` (2-up grid — the benefits/financing rows) and
  * `listOfBoxes` (single stacked column with the icon trailing — the "what we
  * look for" style lists). `layout="stacked"` selects the latter.
+ *
+ * Rows reveal ONE AT A TIME on scroll: each gets `fade-in-up` with a delay
+ * stepped by its index, so the list builds top-to-bottom rather than the whole
+ * block appearing at once. `animate={false}` opts a band out.
  */
 import type { BaseVariantProps } from "../ContentRenderer.types";
 import SectionHeading from "@/components/SectionHeading.astro";
@@ -25,6 +29,10 @@ interface Props extends BaseVariantProps {
   /** Render bare (no <section> padding / container) for use as a slot inside
    *  another layout such as VideoSection. */
   bare?: boolean;
+  /** Reveal the rows one at a time on scroll (default on). */
+  animate?: boolean;
+  /** Milliseconds between consecutive rows. */
+  staggerMs?: number;
 }
 
 const {
@@ -40,6 +48,8 @@ const {
   headingAlign = "center",
   centerOnMobile = true,
   bare = false,
+  animate = true,
+  staggerMs = 150,
   showButtonSection = true,
   showHeadingSection = true,
   pretitle,
@@ -80,8 +90,11 @@ const listClass =
 
     {safeItems.length > 0 && (
       <ul class={`list-none ${listClass}`}>
-        {safeItems.map((item: any) => (
+        {safeItems.map((item: any, index: number) => (
           <li
+            data-animate={animate ? "fade-in-up" : undefined}
+            data-animate-once={animate ? "true" : undefined}
+            data-animate-delay={animate ? String(index * staggerMs) : undefined}
             class:list={[
               "flex gap-4",
               centerOnMobile

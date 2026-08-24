@@ -18,6 +18,16 @@
  *
  * Class overrides (pretitleClass / headingClass / descriptionClass) let dark
  * bands recolor without forking the structure (e.g. `!text-bg`).
+ *
+ * ── Scroll animation ──────────────────────────────────────────────────────
+ * The header parts fade in on scroll via `data-animate` (the JS-observed
+ * scroll-animation system, same as FariasDemolition/certified-bag-chasers).
+ * Because every section and every ContentRenderer variant renders its header
+ * through this component, wiring it here animates the whole site's headings —
+ * no per-page attributes. Parts stagger top-to-bottom via `data-animate-delay`.
+ *
+ * `animate={false}` opts a header out (used by the hero, which must not have
+ * its LCP text gated behind an IntersectionObserver).
  */
 type Segmented = { before?: string; text?: string; after?: string };
 
@@ -56,6 +66,8 @@ interface Props {
    *  description) without forking the structure. */
   tone?: "light" | "dark";
   taglineClass?: string;
+  /** Fade the header parts in on scroll. Off for above-the-fold headers. */
+  animate?: boolean;
 }
 
 const {
@@ -75,6 +87,7 @@ const {
   align = "center",
   gradient = true,
   tone = "light",
+  animate = true,
 } = Astro.props as Props;
 
 const isDark = tone === "dark";
@@ -86,6 +99,14 @@ const toneTagline = isDark ? "!text-text-light" : "";
 const gradientClass = !gradient && !isDark ? "!bg-none !bg-clip-border !text-heading" : "";
 
 const HeadingTag = headingTag;
+
+// Staggered fade-in for the header parts. `once` so a heading settles after its
+// first reveal instead of re-animating every time it scrolls back into view.
+// Spread onto each part; returns nothing when `animate` is false.
+const anim = (delayMs: number) =>
+  animate
+    ? { "data-animate": "fade-in", "data-animate-once": "true", "data-animate-delay": String(delayMs) }
+    : {};
 
 // Normalize to a segmented shape so one branch renders everything.
 const seg: Segmented | undefined =
@@ -111,10 +132,17 @@ const alignClass =
 {
   hasHeader && (
     <div class={`section-header ${alignClass} ${className}`.trim()}>
-      {pretitle && <span class={`section-pretitle ${pretitleClass}`.trim()}>{pretitle}</span>}
+      {pretitle && (
+        <span {...anim(0)} class={`section-pretitle ${pretitleClass}`.trim()}>
+          {pretitle}
+        </span>
+      )}
 
       {seg && (
-        <HeadingTag class={`section-title ${gradientClass} ${toneHeading} ${headingClass}`.trim()}>
+        <HeadingTag
+          {...anim(pretitle ? 100 : 0)}
+          class={`section-title ${gradientClass} ${toneHeading} ${headingClass}`.trim()}
+        >
           {seg.before !== undefined && <span>{seg.before}</span>}
           {seg.before !== undefined && seg.text !== undefined && <Fragment>{" "}</Fragment>}
           {seg.text !== undefined && <span class={emphasisClass}>{seg.text}</span>}
@@ -124,18 +152,30 @@ const alignClass =
       )}
 
       {tagline && (
-        <p class={`section-tagline ${toneTagline} ${taglineClass}`.trim()}>{tagline}</p>
+        <p {...anim(200)} class={`section-tagline ${toneTagline} ${taglineClass}`.trim()}>
+          {tagline}
+        </p>
       )}
 
       {description && (
         Array.isArray(description) ? (
           description
             .filter(Boolean)
-            .map((para) => (
-              <p class={`section-description ${toneDescription} ${descriptionClass}`.trim()}>{para}</p>
+            .map((para, i) => (
+              <p
+                {...anim(250 + i * 100)}
+                class={`section-description ${toneDescription} ${descriptionClass}`.trim()}
+              >
+                {para}
+              </p>
             ))
         ) : (
-          <p class={`section-description ${toneDescription} ${descriptionClass}`.trim()}>{description}</p>
+          <p
+            {...anim(250)}
+            class={`section-description ${toneDescription} ${descriptionClass}`.trim()}
+          >
+            {description}
+          </p>
         )
       )}
     </div>

@@ -85,9 +85,15 @@ const media = resolveImageMetadata(image);
             media ? "lg:w-2/3" : "",
           ]}
         >
-          {safeItems.map((item: any) => (
+          {safeItems.map((item: any, index: number) => (
             <li>
-              <article class="flex flex-col items-start justify-start">
+              {/* Static grid — rows reveal one at a time as the band scrolls in. */}
+              <article
+                data-animate="fade-in-up"
+                data-animate-once="true"
+                data-animate-delay={String(index * 120)}
+                class="flex flex-col items-start justify-start"
+              >
                 <h3 class="h4 text-left text-primary m-0">
                   {item.title ?? item.data?.title}
                 </h3>

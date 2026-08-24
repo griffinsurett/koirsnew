@@ -102,12 +102,81 @@ These are **user-instructed decisions, not drift.** Don't "helpfully" re-enable 
 | **Accessibility panel** | commented out | Legacy site has none. **Overrides the template's "keep it on" rule** |
 | **Language switcher** | commented out | Legacy site is English-only |
 | **Dark mode** | light only | Already inert in the template; keep the hooks, don't build a palette |
-| **Scroll animations** | commented out | The old animation library isn't used going forward |
+| **Scroll animations** | **ON** (re-enabled) | See "Scroll animations" below — reverses plan §7.9 |
 
-**Commented out ≠ deleted.** Everything under `src/integrations/preferences/` and
-`src/integrations/scroll-animations/` stays on disk; restoring any of them is uncommenting the
-mount point. **There are three mount points** for the preferences UIs, not one:
-`PreferencesLayout.astro`, `IntHeadScripts.astro`, `IntBodyScripts.astro`.
+**Commented out ≠ deleted.** Everything under `src/integrations/preferences/` stays on disk;
+restoring any of them is uncommenting the mount point. **There are three mount points** for the
+preferences UIs, not one: `PreferencesLayout.astro`, `IntHeadScripts.astro`, `IntBodyScripts.astro`.
+
+---
+
+## Scroll animations — ON
+
+Re-enabled by user instruction, **reversing plan §7.9's "no animations" departure**. Same library
+and methodology as `../FariasDemolition` and `../certified-bag-chasers`: the in-repo
+`src/integrations/scroll-animations/` **JS-observed** system (IntersectionObserver flipping
+`data-visible`), not the CSS-only `animation-timeline` path. The TS/JS is byte-identical across
+all three projects; only `animations.css` carries per-project tweaks.
+
+Mounted in `Theme.astro` — the stylesheet import plus the `observer` import in the client script.
+
+**Animations live on shared components, never on page markup.** That's the whole methodology:
+`SectionHeading` (every section header on the site) and the `LoopComponents/*Card` files. Wiring
+one component animates every page that uses it, so **do not add `data-animate` to a page**.
+
+- `SectionHeading` — staggered `fade-in` on pretitle → heading → tagline → description.
+  Pass **`animate={false}`** for above-the-fold headers; the three heroes already do, because
+  gating an LCP heading behind an IntersectionObserver delays LCP. The homepage About band also
+  opts out (user request).
+- `MediaBand` — the full-bleed copy-over-photo bands ("Our goal is simple", ¡Hablamos Español!,
+  the closing CTAs) fade up as **one whole section**, background media included: the
+  `<section>` itself carries `data-animate`, and its inner `SectionHeading` gets
+  `animate={false}` so the parts don't animate again inside an animating wrapper. Don't
+  "fix" that by re-enabling the inner heading.
+
+  Three details keep a full-bleed band from flashing the page background behind it while it
+  animates — 2025 avoided this for free because its version was a **scroll-scrubbed** CSS
+  animation (`animation-timeline: view()`), which was already well advanced by the time the band
+  was on screen. The JS observer is trigger-based, so it needs all three:
+  1. the section paints the band's own tint (`overlayClass` minus `opacity-*`) as its background,
+     so anything visible mid-fade is the band's colour, not the navy `body`;
+  2. `data-animate-root-margin="0px 0px 25% 0px"` + `data-animate-threshold="0"` start the reveal
+     while the band is still below the fold (the global default `-50px` delays it until the band
+     is already on screen);
+  3. `section[data-animate="fade-in-up"]` uses `translateY(1rem)` instead of the global 40px —
+     a 40px lift on a full-viewport-width section opens a visible strip of the page behind it.
+- Cards — `pop-in` on the card root, `once` so a card settles after its first reveal.
+
+### ⚠️ Items inside a horizontal scroller need `data-animate-root`
+
+An observed element starts at `opacity: 0` and reveals when it **intersects its observer root**,
+which defaults to the viewport. An item parked off to the side of a horizontally scrolling track
+never intersects the viewport, so a plain `data-animate` there leaves it invisible **forever** —
+silently hiding real content.
+
+The fix is **not** to animate the container instead. Add
+**`data-animate-root="<ancestor selector>"`** so the item is observed against the track it lives
+in; the visible ones reveal immediately and the rest reveal as they scroll in. The observer
+resolves the selector with `el.closest()`.
+
+| Context | Root to use |
+|---|---|
+| `BeforeAfterVariant` carousel slides | `.ba-track` |
+| `TestimonialShowcaseVariant` cards | `.showcase-track` |
+| `TestimonialCarouselVariant` cards | `.testimonial-marquee-track` |
+| `GalleryVariant` tiles | `.gallery-marquee-track` |
+
+Cards in **static grids** need no root — the viewport default is correct there.
+
+The blog index feed is also safe without a root: pagination and tag filtering both run once at
+load and set `display:none`, which takes a card out of layout so it is never observed, and paging
+is a real navigation, so each load re-observes only the visible cards.
+
+Verify after touching any of this: scroll a page top-to-bottom, then scroll each carousel through,
+and confirm **zero** elements are left at `opacity: 0` with a non-zero box.
+
+`prefers-reduced-motion` is honored in `animations.css`. `components/Video/lazyVideoScrollAnimationPlugin.ts`
+is still imported nowhere — enabling the observer did not wire it up.
 
 > ⚠️ **The consent script is also the tracker gate.** With it off, analytics tags must load as
 > plain `<script>` — **not** `type="text/plain" data-consent="…"`, which would never unblock.
@@ -127,6 +196,12 @@ the scroll-animation observer but is imported nowhere. Video lazy-loading does n
 collections. Upstream it filters `.mdx`/`.md` only, so `FileLoad()` collections get **no
 `redirectFrom` and no path-alias redirects** — which would silently break the 577 service-area
 URLs. Pages still build either way, which is why it's easy to miss.
+
+Also local to this project: **`data-animate-root` support in
+`src/integrations/scroll-animations/observer.ts`**. Upstream the observer always observes against
+the viewport, which makes the animation system unusable for anything inside a horizontal
+scroller. The change passes an `el.closest(selector)` root through to
+`createIntersectionObserver`, which already accepted a `root` option. **Carry this upstream too.**
 
 **Carry this upstream to `../greastro` in a future refactor**, along with the same bug in
 `robots-llms.integration.ts` (its independent scan also reads `.mdx` only, so JSON collections

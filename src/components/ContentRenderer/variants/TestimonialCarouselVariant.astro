@@ -72,7 +72,13 @@ const reviewSchema = buildReviewSchema(safeItems as any);
       <ul class="testimonial-marquee-track">
         {loopItems.map((item, i) => (
           <li class="testimonial-marquee-item" aria-hidden={i >= safeItems.length ? "true" : undefined}>
-            <TestimonialCard {...item} />
+            {/* Rooted to the track — see TestimonialShowcaseVariant. */}
+            <TestimonialCard
+              {...item}
+              animate={true}
+              animateDelay={i * 100}
+              animateRoot=".testimonial-marquee-track"
+            />
           </li>
         ))}
       </ul>

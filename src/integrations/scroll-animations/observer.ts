@@ -8,6 +8,8 @@
  * - Add `data-animate` attribute to any element
  * - Optionally add `data-animate-once="true"` for one-time animations
  * - Optionally add `data-animate-delay="200"` for staggered animations (ms)
+ * - Optionally add `data-animate-root="<selector>"` to observe against a
+ *   scrolling ancestor (a carousel/marquee track) instead of the viewport
  * - CSS classes handle the actual animation (e.g., .animate-fade-in)
  *
  * The observer adds/removes `data-visible="true"` which CSS uses to trigger animations.
@@ -156,8 +158,18 @@ class ScrollAnimationObserver {
       : this.defaultThreshold;
     const rootMargin = el.dataset.animateRootMargin || this.defaultRootMargin;
 
+    // `data-animate-root="<selector>"` observes the element against a scrolling
+    // ANCESTOR instead of the viewport. Needed for items inside a horizontal
+    // scroller (a carousel/marquee track): those parked off to the side never
+    // intersect the viewport, so a viewport-observed item would sit at
+    // opacity 0 forever. Observing against the track makes the visible ones
+    // reveal and the rest reveal as they scroll in.
+    const rootSelector = el.dataset.animateRoot;
+    const root = rootSelector ? el.closest(rootSelector) : null;
+
     const { disconnect } = createIntersectionObserver(el, {
       threshold,
+      root,
       rootMargin,
       once,
       onEnter: () => {

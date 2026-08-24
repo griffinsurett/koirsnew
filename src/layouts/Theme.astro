@@ -14,9 +14,11 @@
  */
 
 import "../styles/global.css";
-// Animations intentionally disabled (AGENTS.md §7.9) — the legacy library
-// is no longer used. Uncomment both lines to restore motion.
-// import "../integrations/scroll-animations/styles/animations.css";
+// Scroll/view animations, restored per user request (reverses KOI-REBUILD-PLAN
+// §7.9's "no animations" departure). Same library and methodology as
+// FariasDemolition and certified-bag-chasers: the JS-observed system, driven by
+// `data-animate` attributes on shared components rather than per-page markup.
+import "../integrations/scroll-animations/styles/animations.css";
 ---
 
 <!-- Favicons - multiple sizes for different contexts -->
@@ -55,5 +57,5 @@ import "../styles/global.css";
 <!-- Scroll animations (deferred to avoid blocking initial render) -->
 <script>
   // Import observer directly to avoid pulling in React via index barrel exports
-  // import "@/integrations/scroll-animations/observer";
+  import "@/integrations/scroll-animations/observer";
 </script>

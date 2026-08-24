@@ -94,9 +94,20 @@ const backgroundMedia = (image || video)
         style={`--gallery-marquee-speed:${speed}s;`}
         aria-label="Project and job-site photos"
       >
+        {/* Tiles animate individually, observed against
+            `.gallery-marquee-track` rather than the viewport: the track scrolls
+            horizontally forever, so a viewport-observed tile would never
+            intersect and would sit at opacity 0. */}
         <ul class="gallery-marquee-track">
           {loopTiles.map((tile: any, i: number) => (
-            <li class="gallery-marquee-item" aria-hidden={i >= tiles.length ? "true" : undefined}>
+            <li
+              class="gallery-marquee-item"
+              aria-hidden={i >= tiles.length ? "true" : undefined}
+              data-animate="pop-in"
+              data-animate-once="true"
+              data-animate-delay={String((i % tiles.length) * 90)}
+              data-animate-root=".gallery-marquee-track"
+            >
               {tile.meta ? (
                 <Image
                   src={tile.meta}

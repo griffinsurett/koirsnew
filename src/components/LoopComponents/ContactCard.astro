@@ -43,7 +43,11 @@ const showLabel = !!description && !!title;
 const href = url ?? (linkPrefix && rawValue ? `${linkPrefix}${rawValue}` : undefined);
 ---
 
-<div class="bg-bg rounded-lg shadow-md hover:shadow-lg transition-shadow p-6">
+<div
+  data-animate="pop-in"
+  data-animate-once="true"
+  class="bg-bg rounded-lg shadow-md hover:shadow-lg transition-shadow p-6"
+>
   <div class="flex items-start gap-4">
     {/* Icon circle */}
     <div class="flex-shrink-0">

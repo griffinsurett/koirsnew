@@ -74,7 +74,9 @@ const backgroundMedia = {
         <div
           class="w-9/10 lg:w-6/11 mx-auto lg:mx-0 sticky-section self-start flex flex-col items-center lg:items-stretch justify-center lg:justify-end py-[var(--spacing-sm)] lg:py-0 text-center lg:text-left"
         >
+          {/* No scroll animation: LCP heading, above the fold. */}
           <SectionHeading
+            animate={false}
             headingTag="h1"
             tone="dark"
             align="responsive"

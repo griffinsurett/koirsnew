@@ -4,23 +4,16 @@
  * Homepage — the one hand-composed page (everything else generates from
  * collections).
  *
- * ── STATUS: Phase 3.5 ─────────────────────────────────────────────────────
- * Wired with EXISTING starter variants only (GridVariant, ListVariant,
- * AccordionVariant, TestimonialVariant, ContactVariant, BlogVariant) so the
- * content-parity diff against the legacy site can run before any styling.
- * Deliberately unstyled — real variants and the brand skin land in the UI
- * phases.
- *
  * Band order below reproduces the legacy homepage exactly (KOI-REBUILD-PLAN
- * §3). Each band names its legacy variant so the mapping stays traceable when
- * the real variants get built.
+ * §3). Each band names its legacy variant so the mapping stays traceable.
  *
- * Four content types have no starter variant that can display them
- * (testimonial video, project before/after, gallery tiles, icons) — they're
- * asserted present via query here and get their real display in the UI phases.
+ * The bands beneath the About section live in <MainPageLayout />; the four
+ * content types that starter variants could not display (testimonial video,
+ * project before/after, gallery tiles, icons) now render through their real
+ * variants — TestimonialShowcaseVariant, BeforeAfterVariant, GalleryVariant
+ * and IconListVariant respectively.
  */
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import Video from "@/components/Video/Video.astro";
 import VideoSection from "@/layouts/VideoSection.astro";
 import MainPageLayout from "@/layouts/MainPageLayout.astro";
 import SectionHeading from "@/components/SectionHeading.astro";
@@ -64,7 +57,9 @@ import GoogleRating from "@/components/GoogleRating.astro";
 
     {/* 2 — About: the Koi intro video on the left, copy on the right. */}
     <VideoSection video="/Sherell-Testimonial.mp4" autoplay muted>
+      {/* No scroll animation on this band's copy — user request. */}
       <SectionHeading
+        animate={false}
         align="responsive"
         title={`About ${siteData.title}`}
         tagline='"Some start at the bottom we go to the top"'

@@ -13,16 +13,10 @@
  * heading, `text-lg md:text-3xl italic` description), so this composes it
  * rather than re-implementing the band.
  */
-import { getCollection } from "astro:content";
-import { formatPhoneNumber } from "@/utils/string";
+import { getPhoneContact } from "@/utils/contactLinks";
 import MediaBand from "@/components/MediaBand.astro";
 
-const contact = await getCollection("contact-us");
-const phoneEntry = contact.find((entry: any) =>
-  entry.data?.tags?.includes("phone")
-);
-const rawPhone = phoneEntry?.data?.value ?? "";
-const phoneDisplay = rawPhone ? formatPhoneNumber(rawPhone) : "";
+const phone = await getPhoneContact();
 ---
 
 <MediaBand
@@ -30,11 +24,11 @@ const phoneDisplay = rawPhone ? formatPhoneNumber(rawPhone) : "";
   description="Nuestro equipo está listo para atenderle en su idioma. ¡Llámanos ahora!"
   video="/roofingandsolarvid-smaller.webm"
   overlayClass="bg-primary opacity-80"
-  buttons={rawPhone
+  buttons={phone
     ? [
         {
-          text: `Llámanos ${phoneDisplay}`,
-          link: `tel:${rawPhone}`,
+          text: `Llámanos ${phone.displayValue}`,
+          link: phone.url,
           variant: "secondary",
           leftIcon: "fa6:phone",
         },

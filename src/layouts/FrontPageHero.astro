@@ -132,7 +132,10 @@ const backgroundMedia = {
         (h-[13vh] xl:h-[17vh]) so the stack optically centers in the visible
         area instead of sitting behind the nav. */}
     <div class="relative w-full lg:w-4/6 mx-auto flex flex-col items-center justify-center text-center text-bg z-10 lg:gap-[var(--spacing-sm)] pt-[13vh] xl:pt-[17vh] px-6 md:px-0">
+      {/* No scroll animation: this is the LCP heading, above the fold.
+          Gating it behind the IntersectionObserver would delay LCP. */}
       <SectionHeading
+        animate={false}
         headingTag="h1"
         tone="dark"
         pretitle={eyebrow}

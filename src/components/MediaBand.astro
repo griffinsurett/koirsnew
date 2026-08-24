@@ -8,6 +8,11 @@
  * the mission statement band, the closing bands on service pages). These carry
  * no collection items — they're copy + CTA — so this is a plain component
  * rather than a ContentRenderer variant, same as SpanishSection.
+ *
+ * Scroll animation: OFF for now (user request). A full-bleed band is awkward to
+ * reveal with the trigger-based observer — it briefly exposed the page behind
+ * it. The `animate` prop is kept so it can be switched back on, but nothing
+ * passes it today.
  */
 import type { SectionButton } from "@/components/ContentRenderer/ContentRenderer.types";
 import BackgroundMedia from "@/components/BackgroundMedia.astro";
@@ -32,6 +37,8 @@ interface Props {
   video?: string;
   /** Tint over the media so the copy stays legible. */
   overlayClass?: string;
+  /** Fade the whole band (background media included) up on scroll. */
+  animate?: boolean;
 }
 
 const {
@@ -45,6 +52,7 @@ const {
   video,
   imageClass = "",
   overlayClass = "bg-primary opacity-80",
+  animate = false,
   id,
 } = Astro.props as Props;
 
@@ -59,11 +67,17 @@ const backgroundMedia = (image || video)
 
 ---
 
-<section id={id} class={`relative overflow-hidden py-16 md:py-24 ${className}`}>
+<section
+  id={id}
+  data-animate={animate ? "fade-in-up" : undefined}
+  data-animate-once={animate ? "true" : undefined}
+  class={`relative overflow-hidden py-16 md:py-24 ${className}`}
+>
   {backgroundMedia && <BackgroundMedia backgroundMedia={backgroundMedia} />}
 
   <div class="relative z-10 container mx-auto px-4 text-center text-bg">
     <SectionHeading
+      animate={false}
       heading={heading}
       title={title}
       description={description}

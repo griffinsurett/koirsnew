@@ -724,6 +724,16 @@ re-enable and what else it depends on.
 
 ## 7.9 No animations — a deliberate visual departure
 
+> ### ⛔ SUPERSEDED — animations are ON as of 2026-08-24
+> The user asked for view animations back, using the same library and methodology as
+> FariasDemolition and certified-bag-chasers. The two `Theme.astro` imports below are
+> **uncommented**, and `data-animate` is wired into the shared components
+> (`SectionHeading` + `LoopComponents/*Card`) rather than into page markup.
+> **See the "Scroll animations — ON" section of `AGENTS.md` for the current rules**,
+> including the three contexts that must never be animated (marquee tracks, the
+> before/after carousel, the paginated blog feed).
+> The rest of this section is kept as the record of the original decision.
+
 **Decision: motion is dropped entirely.** The old animation library isn't used going forward, so
 its classes are **stripped during migration, not translated**. This is the one place the port
 knowingly changes what a user perceives — recorded here so it reads as a decision, not an

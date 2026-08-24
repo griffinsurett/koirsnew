@@ -11,8 +11,16 @@
  */
 import { Image } from "astro:assets";
 
-const { title, beforeImage, afterImage, featuredImage, url, hasPage } =
-  Astro.props as Record<string, any>;
+// `animate` is opt-in: in the carousel the cards live in a horizontally
+// overflow-scrolled track, so off-screen slides never intersect the viewport
+// and an observed card would stay at opacity 0. The static grid opts in.
+// `animate` is opt-in; `animateRoot` observes the card against a scrolling
+// ancestor (the carousel's `.ba-track`) instead of the viewport, so slides
+// parked off-screen still reveal as they scroll into the track.
+const {
+  title, beforeImage, afterImage, featuredImage, url, hasPage,
+  animate = false, animateDelay = 0, animateRoot,
+} = Astro.props as Record<string, any>;
 
 const unwrap = (img: any) =>
   !img ? null : typeof img === "string" ? null : img.src ? img : null;
@@ -27,7 +35,12 @@ const Tag = isLink ? "a" : "div";
 const linkProps = isLink ? { href: url } : {};
 ---
 
-<article class="before-after-card group relative overflow-hidden rounded shadow hover:shadow-lg transition-shadow flex flex-col h-96">
+<article
+  data-animate={animate ? "pop-in" : undefined}
+  data-animate-once={animate ? "true" : undefined}
+  data-animate-delay={animate ? String(animateDelay) : undefined}
+  data-animate-root={animate ? animateRoot : undefined}
+  class="before-after-card group relative overflow-hidden rounded shadow hover:shadow-lg transition-shadow flex flex-col h-96">
   <Tag class="flex flex-col h-full w-full" {...linkProps}>
     {hasBoth ? (
       <>

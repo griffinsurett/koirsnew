@@ -17,6 +17,8 @@ export interface Props {
   ctaText?: string;
   /** Uses a shorter image and wider copy measure in a two-card layout. */
   compact?: boolean;
+  /** Milliseconds to delay this card's pop-in, so a grid reveals in sequence. */
+  animateDelay?: number;
 }
 
 const {
@@ -26,6 +28,7 @@ const {
   featuredImage,
   ctaText = "Learn More",
   compact = false,
+  animateDelay = 0,
 } = Astro.props as Props;
 
 // Resolve to ImageMetadata so <Image> can emit a responsive srcset. A plain
@@ -38,7 +41,13 @@ const imageAspectClass = compact ? "aspect-video" : "aspect-[4/3]";
 const descriptionWidthClass = compact ? "max-w-[560px]" : "max-w-[360px]";
 ---
 
-<Tag href={url} class="group flex flex-col text-center">
+<Tag
+  href={url}
+  data-animate="pop-in"
+  data-animate-once="true"
+  data-animate-delay={String(animateDelay)}
+  class="group flex flex-col text-center"
+>
   {
     (imgMeta || imgSrc) && (
       <div class={`relative overflow-hidden rounded-2xl ${imageAspectClass} shadow-[var(--shadow-md)] transition-shadow duration-300 group-hover:shadow-[var(--shadow-lg)]`}>
