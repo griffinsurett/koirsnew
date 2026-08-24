@@ -2,8 +2,26 @@
 title: "Projects"
 heading: "Discover Koi Roofing and Solar's Rooftop Masterpieces"
 description: "Before-and-after transformations from recent roofing and solar installs."
-# The legacy site had no /projects index — projects only appeared as a homepage
-# band. Keep it that way so no new URL appears.
-hasPage: false
+# Projects now has a dedicated portfolio index. Individual projects remain
+# collection content rather than generating thin detail pages.
+hasPage: true
 itemsHasPage: false
+addToMenu:
+  - menu: "main-menu"
+    parent: "about-us-0"
+    order: 300
 ---
+
+import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
+import { query, sortByOrder } from "@/utils/query";
+
+<ContentRenderer
+  query={query("projects").orderBy(sortByOrder())}
+  variant="BeforeAfterVariant"
+  columns={3}
+  grid={true}
+  showButtonSection={false}
+  pretitle="Recent Projects"
+  heading="Discover Koi Roofing and Solar's Rooftop Masterpieces"
+  description="Explore every roofing and solar transformation in our project portfolio."
+/>

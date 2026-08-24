@@ -119,6 +119,7 @@
   --color-secondary-500: var(--color-secondary);
   --color-secondary-600: oklch(from var(--color-secondary) calc(l - 0.08) c h);
   --color-secondary-700: oklch(from var(--color-secondary) calc(l - 0.15) c h);
+
 }
 
 
@@ -131,11 +132,10 @@ body {
      KOI base styling — ported from the legacy site.
      ═══════════════════════════════════════════════════════════════════════ */
 
-  /* 2025 parity: the legacy site set `font-thin` on <main>, so ALL body copy
-     inherited weight 100 — that airy weight is the brand voice, not a default.
-     Applied here (rather than per-page <main>) so it holds site-wide. */
+  /* Keep Koi's airy typography while maintaining stronger legibility than
+     the legacy weight-100 treatment. */
   main {
-    @apply font-thin;
+    @apply font-light;
   }
 
   /* Legal documents need normal weight for sustained reading — they opt out
@@ -229,7 +229,7 @@ body {
     font-family: var(--font-heading);
   }
 
-  /* Koi's type scale. The airy feel comes from font-thin + wide tracking on
+  /* Koi's type scale. The airy feel comes from font-light + wide tracking on
      the display sizes — that combination IS the brand's voice, so the weights
      are not "corrected" to something heavier. */
   /* Explicit font-family utilities — needed because headings default to
@@ -238,8 +238,8 @@ body {
   .font-base { font-family: var(--font-base); }
   .font-heading { font-family: var(--font-heading); }
 
-  .h1 { @apply text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-thin tracking-wider; }
-  .h2 { @apply text-3xl md:text-4xl lg:text-5xl font-thin tracking-wide; }
+  .h1 { @apply text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-light tracking-wider; }
+  .h2 { @apply text-3xl md:text-4xl lg:text-5xl font-light tracking-wide; }
   .h3 { @apply text-2xl md:text-2xl lg:text-3xl font-medium tracking-wide; }
   .h4 { @apply text-xl md:text-xl lg:text-2xl font-medium tracking-wide; }
   .h5 { @apply text-lg md:text-lg lg:text-xl font-medium; }
@@ -311,7 +311,7 @@ body {
      The gradient is the brand's default, not an opt-in. Pass
      `headingClass="!bg-none !text-bg"` (or similar) for dark bands. */
   .section-title {
-    @apply text-3xl md:text-4xl lg:text-5xl font-thin tracking-wide capitalize
+    @apply text-3xl md:text-4xl lg:text-5xl font-light tracking-wide capitalize
            bg-gradient-to-r from-primary to-secondary inline-block
            text-transparent bg-clip-text leading-tight;
   }

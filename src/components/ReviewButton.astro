@@ -9,6 +9,8 @@ import { siteData } from "@/content/siteData";
 
 interface Props {
   label?: string;
+  /** Light pill for dark surfaces; dark-primary pill for light surfaces. */
+  tone?: "light" | "dark";
   /** "bare" = no border (for dark backgrounds); "bordered" = hairline (for light). */
   border?: boolean;
   class?: string;
@@ -16,18 +18,22 @@ interface Props {
 
 const {
   label = "Leave us a Review",
+  tone = "light",
   border = false,
   class: className = "",
 } = Astro.props as Props;
 
 const href = (siteData as any).googleReviewsUrl ?? "/testimonials";
+const toneClass = tone === "dark"
+  ? "bg-primary text-bg hover:bg-secondary"
+  : "bg-bg text-primary hover:bg-bg/90";
 ---
 
 <a
   href={href}
   target="_blank"
   rel="noopener noreferrer"
-  class={`inline-flex items-center gap-2.5 self-start rounded-full bg-white py-2.5 px-5 text-sm font-bold text-[var(--color-primary)] shadow-[var(--shadow-md)] transition-transform hover:-translate-y-0.5 ${border ? "border border-[var(--color-border)]" : ""} ${className}`}
+  class={`inline-flex items-center justify-center gap-2.5 self-start rounded-full py-3 px-6 text-base font-bold shadow-[var(--shadow-md)] transition-all hover:-translate-y-0.5 ${toneClass} ${border ? "border border-[var(--color-border)]" : ""} ${className}`}
   aria-label="Leave us a review on Google"
 >
   <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">

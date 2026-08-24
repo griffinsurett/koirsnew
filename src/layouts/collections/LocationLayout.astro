@@ -12,7 +12,7 @@ import SectionHeading from "@/components/SectionHeading.astro";
 import SectionButtons from "@/components/ContentRenderer/SectionButtons.astro";
 import JsonLd from "@/components/JsonLd.astro";
 import { siteData, businessData } from "@/content/siteData";
-import { buildAreaServedFor } from "@/utils/schema/placeSchema";
+import { ancestorsOf, buildAreaServedFor, loadAreaIndex } from "@/utils/schema/placeSchema";
 import { BUSINESS_ID, BUSINESS_TYPE } from "@/utils/schema/businessSchema";
 import type { CollectionLayoutProps } from "./types";
 
@@ -21,6 +21,18 @@ const data = (entry?.data ?? {}) as Record<string, any>;
 const place = data.title ?? "";
 const tags: string[] = Array.isArray(data.tags) ? data.tags : [];
 const areaServed = entry?.id ? await buildAreaServedFor(entry.id) : undefined;
+const { byId } = await loadAreaIndex();
+const areaNode = entry?.id ? byId.get(entry.id) : undefined;
+const ancestors = areaNode ? ancestorsOf(areaNode, byId) : [];
+const parent = ancestors[0];
+const root = ancestors.at(-1);
+const regionLabel = root?.abbr || root?.title;
+const locationQualifier = [parent?.title, regionLabel]
+  .filter((value, index, values) => value && values.indexOf(value) === index)
+  .join(", ");
+const locationContext = [place, parent?.title, regionLabel]
+  .filter((value, index, values) => value && values.indexOf(value) === index)
+  .join(", ");
 const localBusinessSchema = areaServed?.length
   ? {
       "@context": "https://schema.org",
@@ -35,6 +47,12 @@ const locationSeo = {
   ...seoProps,
   seo: {
     ...(seoProps as any).seo,
+    // Same-named municipalities exist in different counties. Include the
+    // hierarchy in search metadata while leaving the visible page copy clean.
+    metaTitle: parent
+      ? `${place} Roofing & Solar | ${locationQualifier}`
+      : `${place} Roofing & Solar Services`,
+    metaDescription: `Professional roofing and solar services in ${locationContext || place}. Koi Roofing and Solar offers inspections, installation, repairs, financing, and free estimates.`,
     keywords: [place, ...tags].filter(Boolean),
   },
 };

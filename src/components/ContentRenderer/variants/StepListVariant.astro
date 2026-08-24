@@ -5,7 +5,7 @@
  * page's "How Solar Installation Works" section.
  *
  * Legacy markup, ported verbatim:
- *   • wrapper — `max-w-4xl mx-auto mt-xl`
+ *   • wrapper — `max-w-[56rem] mx-auto mt-xl`
  *   • row     — `flex gap-md mb-lg`
  *   • badge   — `flex-shrink-0 w-12 h-12 bg-primary text-accent rounded-full
  *               flex items-center justify-center font-bold text-xl`
@@ -51,20 +51,25 @@ const steps = Array.isArray(items) ? items : [];
     )}
 
     {steps.length > 0 && (
-      <ol class="max-w-4xl mx-auto list-none p-0 m-0">
+      <!--
+        Use the explicit 56rem value here. Koi's legacy `--spacing-4xl: 6rem`
+        token makes Tailwind v4 resolve `max-w-4xl` to 6rem instead of the
+        framework's usual 56rem container width.
+      -->
+      <ol class="w-full max-w-[56rem] mx-auto list-none p-0 m-0">
         {steps.map((step: any, i: number) => (
-          <li class="flex gap-[var(--spacing-md)] mb-[var(--spacing-lg)] last:mb-0 text-left">
+          <li class="w-full flex flex-col sm:flex-row items-start gap-3 sm:gap-[var(--spacing-md)] mb-[var(--spacing-xl)] last:mb-0 text-left">
             <div
-              class="flex-shrink-0 w-12 h-12 bg-primary text-accent rounded-full flex items-center justify-center font-bold text-xl"
+              class="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-primary text-accent rounded-full flex items-center justify-center font-bold text-lg sm:text-xl"
               aria-hidden="true"
             >
               {step.step ?? i + 1}
             </div>
-            <div>
+            <div class="w-full min-w-0 flex-1">
               {step.title && (
                 <h3 class="h4 text-primary font-bold mb-[var(--spacing-xs)]">{step.title}</h3>
               )}
-              {step.description && <p class="text-text">{step.description}</p>}
+              {step.description && <p class="text-text text-base sm:text-lg break-words">{step.description}</p>}
             </div>
           </li>
         ))}

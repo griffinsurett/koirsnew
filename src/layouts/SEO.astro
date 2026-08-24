@@ -98,8 +98,9 @@ const makeAbsolute = (url: string): string => {
 const absoluteOgImage = makeAbsolute(finalOgImageUrl);
 const absoluteTwitterImage = makeAbsolute(finalTwitterImageUrl);
 
-// Determine schema type based on content
-const schemaType = !publishDate ? "WebSite" : "Article";
+// Only the root URL is the WebSite entity. Regular routes are WebPage nodes,
+// while dated editorial content gets the more specific BlogPosting type.
+const schemaType = publishDate ? "BlogPosting" : canonicalPath === "/" ? "WebSite" : "WebPage";
 
 /**
  * Structured data for search engines (JSON-LD)
@@ -109,7 +110,7 @@ const structuredData = {
   "@context": "https://schema.org",
   "@type": schemaType,
   "name": finalOgTitle,
-  "headline": finalOgTitle,
+  ...(publishDate && { "headline": finalOgTitle }),
   "description": finalOgDescription,
   "image": absoluteOgImage,
   "url": finalCanonicalUrl,
@@ -124,19 +125,18 @@ const structuredData = {
       "height": 60
     }
   },
-  "author": {
-    "@type": publishDate ? "Person" : "Organization",
-    "name": authorName,
-  },
+  ...(publishDate && {
+    "author": { "@type": "Person", "name": authorName },
+  }),
   // Article-specific fields
   ...(publishDate && {
     "datePublished": new Date(publishDate).toISOString(),
     "dateModified": new Date(publishDate).toISOString(),
   }),
-  "mainEntityOfPage": {
+  ...(publishDate && { "mainEntityOfPage": {
     "@type": "WebPage",
     "@id": finalCanonicalUrl
-  }
+  }}),
 };
 
 // Site-wide schema — the business entity (from siteData.businessType) and

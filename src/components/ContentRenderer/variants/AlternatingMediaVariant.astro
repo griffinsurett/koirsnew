@@ -11,7 +11,7 @@
  *   • image    — `w-full lg:w-1/2 h-full`, object-cover, group-hover:scale-105
  *   • copy     — `w-full lg:w-1/2 h-full p-lg`, centered on desktop
  *   • title    — `.h3 text-primary`
- *   • body     — `lg:text-lg text-text font-thin lg:px-xl`
+ *   • body     — `lg:text-lg text-text font-light lg:px-xl`
  *   • rhythm   — rows stack with `gap-[var(--spacing-lg)]`
  *
  * Direction alternates per row (`lg:flex-row` / `lg:flex-row-reverse`), which
@@ -94,7 +94,7 @@ const rows = (Array.isArray(items) ? items : []).map((item: any, i: number) => (
               <div class="w-full lg:w-1/2 h-full p-[var(--spacing-lg)] flex flex-col items-start lg:items-center text-left lg:text-center gap-[var(--spacing-sm)] justify-center">
                 {row.title && <h3 class="h3 text-primary">{row.title}</h3>}
                 {row.description && (
-                  <p class="lg:text-lg text-text font-thin lg:px-[var(--spacing-xl)]">
+                  <p class="lg:text-lg text-text font-light lg:px-[var(--spacing-xl)]">
                     {row.description}
                   </p>
                 )}

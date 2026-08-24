@@ -3,14 +3,14 @@
  * AccordionItem — the 2025 Koi FAQ row, ported verbatim.
  *
  * The legacy treatment is a borderless list, not a stack of cards: each row is
- * separated only by a hairline `border-t`, the question sits in `.h4 font-thin`
+ * separated only by a hairline `border-t`, the question sits in `.h4 font-light`
  * on the left with a large thin +/− on the right that tints accent on hover,
  * and the body animates open via max-height + opacity + padding (not a mount /
  * unmount) so the row slides rather than popping.
  *
  * Ported from the legacy `AccordionItem.jsx`; measured values from the built
  * 2025 site: 1px top border, 24px/32px header padding, 24px question, 36px
- * glyph, both at font-weight 100.
+ * glyph, both at font-weight 300.
  */
 import type { ReactNode } from "react";
 
@@ -50,14 +50,14 @@ export default function AccordionItem({
         className={`w-full flex justify-between items-center gap-[var(--spacing-md)] py-[var(--spacing-lg)] px-[var(--spacing-xl)] cursor-pointer select-none text-left ${headerClassName}`}
       >
         {headerSlot ? (
-          <span className="h4 font-thin">{headerSlot}</span>
+          <span className="h4 font-light">{headerSlot}</span>
         ) : (
-          <span className="h4 font-thin">{title}</span>
+          <span className="h4 font-light">{title}</span>
         )}
 
         <span
           aria-hidden="true"
-          className="ml-2 text-4xl font-thin leading-none transition-colors duration-500 ease-in-out group-hover:text-accent"
+          className="ml-2 text-4xl font-light leading-none transition-colors duration-500 ease-in-out group-hover:text-secondary"
         >
           {isExpanded ? "−" : "+"}
         </span>

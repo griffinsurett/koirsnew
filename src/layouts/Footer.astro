@@ -23,6 +23,7 @@ import { Image } from "astro:assets";
 import BackgroundMedia from "@/components/BackgroundMedia.astro";
 import KoiLogo from "@/assets/koi/logowwords.png";
 import FooterBg from "@/assets/koi/koi_team2.JPG";
+import ReviewButton from "@/components/ReviewButton.astro";
 
 const contactLinks = await getContactLinks();
 
@@ -72,7 +73,7 @@ const footerContactItemClass =
     <div class="footer-top flex justify-center items-center text-center xl:text-left media-border">
       <div class="top-footer-wrap flex items-center justify-between py-[var(--spacing-md)] flex-col xl:flex-row w-full xl:gap-4">
         {/* Brand column — legacy classes: `lg:w-3/4 xl:w-1/4`, logo `h-35`,
-            description `text-lg font-thin text-text-light`, socials beneath it
+            description `text-lg font-light text-text-light`, socials beneath it
             in amber with `h-6` icons. */}
         <div class="w-full text-center xl:text-left lg:w-3/4 xl:w-1/4 flex flex-col items-center xl:items-start justify-center mb-[var(--spacing-md)] lg:mt-0">
           <a href="/">
@@ -84,14 +85,17 @@ const footerContactItemClass =
               loading="lazy"
             />
           </a>
-          <p class="text-lg font-thin text-text-light">{siteData.description}</p>
+          <p class="text-lg font-light text-text-light">{siteData.description}</p>
           <ContentRenderer
             query={query("social-media")}
             variant="SocialMediaVariant"
             size="md"
             alignment="left"
-            className="!text-bg hover:!text-accent justify-center xl:justify-start gap-[var(--spacing-md)] mt-[var(--spacing-md)]"
+            className="!text-bg [&_a:hover]:!text-accent justify-center xl:justify-start gap-[var(--spacing-md)] mt-[var(--spacing-md)]"
           />
+          <div class="w-full flex justify-center xl:justify-start mt-[var(--spacing-md)]">
+            <ReviewButton tone="light" />
+          </div>
         </div>
 
     {/* ── Menu columns, ported from the 2025 footer ─────────────────────────
@@ -173,21 +177,26 @@ const footerContactItemClass =
           />
         </div>
 
-        {/* Contact Us — hours + the contact links, as the legacy 4th column. */}
-        <div class="w-full lg:w-auto flex flex-col justify-start items-center xl:items-start text-center xl:text-left xl:ml-8">
+        {/* Business hours and contact information share the final column, but
+            remain separate labeled groups so the address, email, and phone
+            are not visually presented as part of the operating schedule. */}
+        <div class="w-full lg:w-auto flex flex-col justify-start items-center xl:items-start text-center xl:text-left xl:ml-8 gap-[var(--spacing-lg)]">
           <div class={footerContactItemClass}>
             <p class="h4 font-medium pr-[var(--spacing-sm)] mb-0">Business Hours:</p>
             {businessHours.map((h) => (
               <div>{h.days}: {h.hours}</div>
             ))}
           </div>
-          {contactLinks.map((c) => (
-            <div class={footerContactItemClass}>
-              <a href={c.href} class="text-bg hover:text-accent">
-                {c.displayValue ?? c.value}
-              </a>
-            </div>
-          ))}
+          <div class="flex flex-col justify-start items-center xl:items-start gap-[var(--spacing-sm)]">
+            <p class="h4 font-medium pr-[var(--spacing-sm)] mb-0">Contact Info:</p>
+            {contactLinks.map((c) => (
+              <div class="text-base">
+                <a href={c.href} class="text-bg hover:text-accent">
+                  {c.displayValue ?? c.value}
+                </a>
+              </div>
+            ))}
+          </div>
         </div>
         </div>
         </div>
@@ -203,13 +212,13 @@ const footerContactItemClass =
           bar    "footer-bottom flex justify-center items-center
                   p-[var(--spacing-sm)] w-full"
           inner  "w-full max-w-7xl flex flex-col lg:flex-row justify-between
-                  items-center lg:items-center gap-4 text-sm font-thin"
+                  items-center lg:items-center gap-4 text-sm font-light"
           links  "text-accent hover:text-secondary hover:underline"
 
         Every fact comes from the content layer (siteData + contact-us) rather
         than being retyped, so the bar can't drift from the rest of the site. */}
     <div class="footer-bottom flex justify-center items-center p-[var(--spacing-sm)] w-full">
-      <div class="w-full flex flex-col lg:flex-row justify-between items-center lg:items-center gap-4 text-sm font-thin">
+      <div class="w-full flex flex-col lg:flex-row justify-between items-center lg:items-center gap-4 text-sm font-light">
         {/* Left: copyright, credits, legal links. Three rows in the same
             `flex flex-col py-4 gap-4` as the right column so the two sides
             balance instead of one being tight and the other spaced. */}

@@ -24,7 +24,7 @@ export default function Textarea({
   label,
   required = false,
   containerClassName = "mb-[var(--spacing-md)] w-full flex flex-col text-left",
-  labelClassName = "text-primary mb-[var(--spacing-xs)] font-thin text-left",
+  labelClassName = "text-primary mb-[var(--spacing-xs)] font-light text-left",
   textareaClassName = "border border-[var(--color-border)] transition-colors duration-300 py-[var(--spacing-sm)] px-[var(--spacing-md)] w-full bg-bg placeholder:text-[var(--color-primary)] text-primary rounded-md resize-vertical",
   showLabel = true,
   rows = 4,

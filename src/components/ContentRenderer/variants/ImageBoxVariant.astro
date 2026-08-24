@@ -12,7 +12,7 @@
  *   • row    — `lg:h-[50vh]`, rounded, shadow → shadow-lg on hover
  *   • halves — image `lg:w-1/2`, text `lg:w-1/2`, alternating via odd/even
  *   • title  — `.h3`, centered on desktop / left on mobile
- *   • copy   — `lg:text-lg text-text font-thin`
+ *   • copy   — `lg:text-lg text-text font-light`
  *   • image  — `object-cover`, scales to 105% on row hover
  *
  * NOTE the legacy title class was `h3 text-bg` (near-white) because the card
@@ -86,7 +86,7 @@ const safeItems = Array.isArray(items) ? items : [];
                   <div class="w-full lg:w-1/2 p-[var(--spacing-md)] flex flex-col items-start lg:items-center text-left lg:text-center gap-[var(--spacing-sm)] lg:gap-0 justify-center">
                     <h3 class="h3 text-heading">{data.title}</h3>
                     {data.description && (
-                      <p class="lg:text-lg text-text font-thin lg:px-[var(--spacing-xl)]">
+                      <p class="lg:text-lg text-text font-light lg:px-[var(--spacing-xl)]">
                         {data.description}
                       </p>
                     )}

@@ -1,7 +1,25 @@
 ---
-title: "Testimonials"
-heading: "Hear It Straight from Homeowners"
+title: "Customer Reviews"
+heading: "Customer Reviews"
 description: "Reviews from Koi Roofing & Solar customers across New Jersey and New York."
-hasPage: false
+hasPage: true
 itemsHasPage: false
+addToMenu:
+  - menu: "main-menu"
+    parent: "about-us-0"
+    order: 400
+  - menu: "footer-menu"
+    order: 60
 ---
+
+import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
+import { query, sortByOrder } from "@/utils/query";
+
+<ContentRenderer
+  query={query("testimonials").orderBy(sortByOrder())}
+  variant="TestimonialGridVariant"
+  columns={3}
+  pretitle="Testimonials"
+  heading="Hear It Straight from Homeowners"
+  description="Roofing and solar experiences shared by Koi customers across New Jersey and New York."
+/>

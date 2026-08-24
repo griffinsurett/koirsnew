@@ -18,6 +18,10 @@ interface Props {
   centered?: boolean;
   posterTime?: number;
   showCaption?: boolean;
+  autoplay?: boolean;
+  controls?: boolean;
+  loop?: boolean;
+  muted?: boolean;
   class?: string;
 }
 
@@ -29,6 +33,10 @@ const {
   centered = true,
   posterTime = 1,
   showCaption = true,
+  autoplay = false,
+  controls = true,
+  loop = false,
+  muted = false,
   class: className = "w-full max-w-[380px] mx-auto lg:mx-0",
 } = Astro.props as Props;
 
@@ -50,5 +58,9 @@ try {
     videoAspect={videoAspect}
     centered={centered}
     showCaption={showCaption}
+    autoplay={autoplay}
+    controls={controls}
+    loop={loop}
+    muted={muted}
   />
 </div>

@@ -13,7 +13,7 @@ export const siteData = {
   // schema.org LocalBusiness subtype — drives the whole business graph.
   businessType: "RoofingContractor",
   googleReviewsUrl:
-    "https://www.google.com/search?q=Koi+Roofing+and+Solar+Elizabeth+NJ#lrd=,1,,,",
+    "https://www.google.com/search?q=koi+roofing+and+solar&oq=koi+roofi&gs_lcrp=EgZjaHJvbWUqBggAECMYJzIGCAAQIxgnMgYIARBFGDkyBggCECMYJzIHCAMQABiABDIHCAQQABiABDIGCAUQRRg8MgYIBhBFGD0yBggHEEUYPdIBCDE3MjhqMGo3qAIAsAIA&sourceid=chrome&source=chrome.ob&ie=UTF-8#lrd=0x2903d6f1a3801a15:0x578db040fca379b6,3,,,,",
   // Site-wide local-SEO terms. Feed the business schema's `keywords` and the
   // default <meta name="keywords">, so both stay in one place.
   keywords: [

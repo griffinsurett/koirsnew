@@ -7,8 +7,8 @@
  * layout, which owns the per-page service content.
  */
 import { siteData } from "@/content/siteData";
-import { query, sortByOrder } from "@/utils/query";
 import { BUSINESS_ID, BUSINESS_TYPE } from "./businessSchema";
+import { buildRootAreaServed } from "./placeSchema";
 
 interface ServiceSchemaOptions {
   /** Service name (e.g. "Commercial Roof Repairs"). */
@@ -26,7 +26,7 @@ export async function buildServiceSchema(
   const { name, description, serviceType, url } = options;
   if (!name) return null;
 
-  const areas = await query("service-areas").orderBy(sortByOrder()).all();
+  const areaServed = await buildRootAreaServed();
 
   return {
     "@context": "https://schema.org",
@@ -39,7 +39,10 @@ export async function buildServiceSchema(
       "@id": BUSINESS_ID,
       name: siteData.legalName || siteData.title,
     },
-    areaServed: areas.map((a: any) => ({ "@type": "State", name: a.data?.title })),
+    // The collection contains states/regions, counties, and towns. The three
+    // roots express the real service footprint without mislabeling every
+    // municipality as a State or bloating every page's JSON-LD.
+    areaServed,
     url,
   };
 }

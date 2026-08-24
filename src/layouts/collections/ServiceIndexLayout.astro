@@ -24,6 +24,9 @@ import { related } from "@/utils/query/snippets";
 import { humanizeSlug } from "@/utils/string";
 import GoogleRating from "@/components/GoogleRating.astro";
 import SpanishSection from "@/components/SpanishSection.astro";
+import JsonLd from "@/components/JsonLd.astro";
+import { siteData } from "@/content/siteData";
+import { buildServiceSchema } from "@/utils/schema/serviceSchema";
 
 export interface Props {
   Content?: any;
@@ -55,9 +58,16 @@ const HERO_FORMS: Record<string, any> = {
   quote: QuoteForm,
 };
 const HeroForm = HERO_FORMS[collectionMeta.heroForm] ?? QuoteForm;
+const serviceSchema = await buildServiceSchema({
+  name: `${pageTitle} Services`,
+  description: pageDescription,
+  serviceType: pageTitle,
+  url: `${siteData.url}/${collectionName}`,
+});
 ---
 
 <BaseLayout {...seoProps}>
+  <JsonLd schema={serviceSchema} />
   <main class="flex-1">
     {/* Two-column hero: copy + quote form, matching the legacy ServicesLayout. */}
     <ServiceHero

@@ -1,0 +1,82 @@
+---
+/**
+ * Testimonial Grid Variant — the collection-index counterpart to the homepage
+ * showcase. It deliberately reuses TestimonialCard so video, image-backed,
+ * Google, and text-only reviews retain one canonical presentation system.
+ */
+import type { BaseVariantProps } from "../ContentRenderer.types";
+import TestimonialCard from "@/components/LoopComponents/TestimonialCard.astro";
+import JsonLd from "@/components/JsonLd.astro";
+import SectionHeading from "@/components/SectionHeading.astro";
+import ReviewButton from "@/components/ReviewButton.astro";
+import { buildReviewSchema } from "@/utils/schema/reviewSchema";
+
+interface Props extends BaseVariantProps {
+  columns?: 1 | 2 | 3;
+  pretitle?: string;
+  cardHeight?: string;
+}
+
+const {
+  items = [],
+  title,
+  heading,
+  description,
+  className = "",
+  columns = 3,
+  pretitle,
+  cardHeight = "520px",
+  id,
+} = Astro.props as Props;
+
+const safeItems = Array.isArray(items) ? items : [];
+const columnClasses = {
+  1: "grid-cols-1",
+  2: "grid-cols-1 md:grid-cols-2",
+  3: "grid-cols-1 md:grid-cols-2 lg:grid-cols-3",
+};
+const reviewSchema = buildReviewSchema(safeItems as any);
+---
+
+<JsonLd schema={reviewSchema} />
+
+<section id={id} class={`bg-bg py-16 md:py-24 ${className}`}>
+  <div class="container">
+    {(pretitle || heading || title || description) && (
+      <SectionHeading
+        pretitle={pretitle}
+        heading={heading}
+        title={title}
+        description={description}
+        class="py-8"
+      />
+    )}
+
+    <ul
+      class={`review-grid grid ${columnClasses[columns]} gap-[30px] list-none`}
+      style={`--review-card-height:${cardHeight}`}
+    >
+      {safeItems.map((item: any) => (
+        <li>
+          <TestimonialCard {...item} fillMedia={true} />
+        </li>
+      ))}
+    </ul>
+
+    <div class="flex justify-center pt-12">
+      <ReviewButton tone="dark" />
+    </div>
+  </div>
+</section>
+
+<style>
+  .review-grid > li {
+    height: var(--review-card-height);
+    min-width: 0;
+  }
+
+  .review-grid > li > :global(*) {
+    height: 100%;
+    min-height: 0;
+  }
+</style>

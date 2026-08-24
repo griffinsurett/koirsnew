@@ -21,7 +21,6 @@ import Button from "@/components/Button/Button";
 import BackgroundMedia from "@/components/BackgroundMedia.astro";
 import SectionHeading from "@/components/SectionHeading.astro";
 import { ctaData } from "@/content/siteData";
-import DefaultImg from "@/assets/koi/roofingandsolarvid-poster.jpg";
 import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
 import { query } from "@/utils/query";
 
@@ -76,11 +75,17 @@ const {
 
 // Prepare optimized background media
 const backgroundMedia = {
-  image: {
-    src: image || DefaultImg,
-    imageClass: "bg-cover bg-center",
-    aboveTheFold: true, // Front page hero is always LCP
-  },
+  // An explicitly supplied image remains a valid poster override. With no
+  // image, BackgroundMedia derives the poster from frame zero of the video.
+  ...(image
+    ? {
+        image: {
+          src: image,
+          imageClass: "bg-cover bg-center",
+          aboveTheFold: true,
+        },
+      }
+    : {}),
   video: video
     ? {
         src: video.src,
@@ -136,7 +141,7 @@ const backgroundMedia = {
         class="!mb-0 !max-w-none"
         pretitleClass="top-heading !font-bold !text-accent !mb-0"
         headingClass="h1 !text-3xl md:!text-4xl lg:!text-5xl xl:!text-6xl !tracking-wider !text-bg py-[var(--spacing-sm)] "
-        descriptionClass="!text-lg lg:!text-2xl !font-thin"
+        descriptionClass="!text-lg lg:!text-2xl !font-light"
       />
 
       {/* CTA Buttons */}
@@ -181,4 +186,3 @@ const backgroundMedia = {
   {/* Optional slot for additional content below hero */}
   <slot />
 </section>
-

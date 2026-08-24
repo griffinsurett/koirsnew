@@ -1,6 +1,7 @@
 ---
 // src/components/BackgroundMedia.astro
 import { getImage } from "astro:assets";
+import { generateVideoPoster } from "@/utils/videoThumbnails";
 
 export interface Props {
   backgroundMedia: {
@@ -73,6 +74,26 @@ if (backgroundMedia?.image?.src) {
     responsiveImages = { mobile: { src }, tablet: { src }, desktop: { src } };
   }
 }
+
+// When a video has no explicit image override, use the shared build-time
+// thumbnail pipeline to extract frame zero. This avoids maintaining a second,
+// manually selected hero image while still giving the browser an immediate
+// poster before video playback begins.
+let generatedVideoPoster: string | undefined;
+if (backgroundMedia?.video?.src && !responsiveImages) {
+  try {
+    generatedVideoPoster = (
+      await generateVideoPoster(backgroundMedia.video.src, {
+        timecodeSeconds: 0,
+      })
+    ).src;
+  } catch (error) {
+    console.warn(
+      `[BackgroundMedia] Failed to generate poster for ${backgroundMedia.video.src}:`,
+      error,
+    );
+  }
+}
 ---
 
 {backgroundMedia?.video?.src ? (
@@ -84,7 +105,7 @@ if (backgroundMedia?.image?.src) {
     playsinline={backgroundMedia.video.playsInline !== false}
     controls={backgroundMedia.video.controls || false}
     preload={backgroundMedia.video.preload || "metadata"}
-    poster={responsiveImages?.mobile?.src || ""}
+    poster={responsiveImages?.mobile?.src || generatedVideoPoster}
     aria-hidden="true"
   >
     <source

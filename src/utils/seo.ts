@@ -48,6 +48,13 @@ export async function resolveAuthor(author: any): Promise<string | undefined> {
   // Handle array (get first)
   const authorRef = Array.isArray(author) ? author[0] : author;
 
+  // Content collections commonly store references as a plain entry ID.
+  if (typeof authorRef === "string") {
+    const authorEntry = await find("authors", authorRef);
+    const data = authorEntry?.data as any;
+    return data?.title || data?.name;
+  }
+
   // Use query system instead of references.ts
   if (isCollectionReference(authorRef)) {
     const authorEntry = await find(authorRef.collection, authorRef.id);
@@ -55,6 +62,10 @@ export async function resolveAuthor(author: any): Promise<string | undefined> {
       const data = authorEntry.data as any;
       return data.title || data.name;
     }
+  }
+
+  if (typeof authorRef === "object") {
+    return authorRef.title || authorRef.name;
   }
 
   return undefined;
@@ -87,6 +98,21 @@ export async function buildItemSEOProps(
   const itemAddToLLMs = itemData.llms?.addToLLMs;
   const addToLLMs = itemAddToLLMs !== undefined ? itemAddToLLMs : collectionItemsAddToLLMs;
 
+  // Index-page identity must not leak into each item. For example, the Blog
+  // collection's title describes /blog, not every individual article.
+  const {
+    metaTitle: _metaTitle,
+    metaDescription: _metaDescription,
+    ogTitle: _ogTitle,
+    ogDescription: _ogDescription,
+    ogImage: _ogImage,
+    canonicalUrl: _canonicalUrl,
+    twitterTitle: _twitterTitle,
+    twitterDescription: _twitterDescription,
+    twitterImage: _twitterImage,
+    ...inheritableCollectionSEO
+  } = collectionMeta?.seo ?? {};
+
   return {
     title: itemData.title,
     description: itemData.description,
@@ -95,8 +121,9 @@ export async function buildItemSEOProps(
     publishDate: itemData.publishDate,
     addToLLMs,
     seo: {
-      // Collection SEO defaults
-      ...collectionMeta?.seo,
+      // Share generic collection policy (keywords, robots, card type), but
+      // derive page-specific identity from the item itself.
+      ...inheritableCollectionSEO,
       // Item SEO overrides
       ...itemData.seo,
     },

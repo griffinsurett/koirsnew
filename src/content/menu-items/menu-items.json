@@ -23,16 +23,6 @@
     "menu": "main-menu"
   },
   {
-    "id": "projects-nav",
-    "title": "Projects",
-    "description": "Before-and-after roofing and solar transformations",
-    "url": "/#projects",
-    "parent": "about-us-0",
-    "order": 300,
-    "openInNewTab": false,
-    "menu": "main-menu"
-  },
-  {
     "id": "internship-program",
     "title": "Internship Program",
     "description": "KOI's 2026 Home Improvement Internship Program",

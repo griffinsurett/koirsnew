@@ -29,6 +29,10 @@ interface VideoCardProps {
   /** Render the name/role caption over the poster. Off hides it while keeping
    *  `name` for the aria-label. */
   showCaption?: boolean;
+  autoplay?: boolean;
+  controls?: boolean;
+  loop?: boolean;
+  muted?: boolean;
 }
 
 const ASPECT_CLASSES: Record<NonNullable<VideoCardProps['videoAspect']>, string> = {
@@ -49,13 +53,17 @@ const VideoCard = ({
   videoAspect = 'portrait',
   centered = false,
   showCaption = true,
+  autoplay = false,
+  controls = true,
+  loop = false,
+  muted = false,
 }: VideoCardProps) => {
   const isNatural = videoAspect === 'natural';
   const [isPlaying, setIsPlaying] = useState(false);
   // Latches true on the first play and stays true — used to swap the custom
   // overlay button for the native controls. (isPlaying flips back on pause, so
   // it can't drive that swap or the overlay would return every time you pause.)
-  const [hasStarted, setHasStarted] = useState(false);
+  const [hasStarted, setHasStarted] = useState(autoplay);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   // Video is rendered with lazy={true}, so its src lives in data-video-src and
@@ -124,9 +132,9 @@ const VideoCard = ({
       className={cardClasses}
       onClick={handlePlayClick}
       onKeyDown={handleKeyDown}
-      role="button"
-      tabIndex={0}
-      aria-label={name ? `${name} — play video` : 'Play video'}
+      role={autoplay ? undefined : "button"}
+      tabIndex={autoplay ? undefined : 0}
+      aria-label={autoplay ? name || undefined : name ? `${name} — play video` : 'Play video'}
       aria-pressed={isPlaying}
     >
       {/* Optimized shared Video component. lazy={true} defers the mp4 entirely —
@@ -139,10 +147,10 @@ const VideoCard = ({
         wrapperClass={isNatural ? 'relative z-0' : 'absolute inset-0 z-0'}
         className={isNatural ? 'w-full h-auto' : 'w-full h-full object-cover'}
         lazy={true}
-        autoPlay={false}
-        loop={false}
-        muted={false}
-        controls={hasStarted}
+        autoPlay={autoplay}
+        loop={loop}
+        muted={autoplay ? muted : false}
+        controls={autoplay ? controls : hasStarted}
         playsInline
         onEnded={handleVideoEnd}
         onPlay={handleVideoPlay}

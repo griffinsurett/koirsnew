@@ -45,8 +45,6 @@ const { ...seoProps } = Astro.props;
     {/* Additional head tags (analytics scripts, etc.) */}
     <HeadTags />
 
-    {/* Optional noindex for unpublished content */}
-    {seoProps.noindex && <meta name="robots" content="noindex,nofollow" />}
   </head>
 
   <body class="antialiased">

@@ -16,6 +16,8 @@
  */
 import { query, sortByOrder } from "@/utils/query";
 
+let areaIndexPromise: Promise<{ byId: Map<string, AreaNode>; all: AreaNode[] }> | undefined;
+
 export interface AreaNode {
   id: string;
   title: string;
@@ -42,14 +44,17 @@ export async function loadAreaIndex(): Promise<{
   byId: Map<string, AreaNode>;
   all: AreaNode[];
 }> {
-  const entries = await query("service-areas").orderBy(sortByOrder()).all();
-  const all: AreaNode[] = entries.map((e: any) => ({
-    id: e.id,
-    title: e.data?.title,
-    parent: typeof e.data?.parent === "string" ? e.data.parent : undefined,
-    abbr: e.data?.abbr,
-  }));
-  return { byId: new Map(all.map((a) => [a.id, a])), all };
+  areaIndexPromise ??= (async () => {
+    const entries = await query("service-areas").orderBy(sortByOrder()).all();
+    const all: AreaNode[] = entries.map((e: any) => ({
+      id: e.id,
+      title: e.data?.title,
+      parent: typeof e.data?.parent === "string" ? e.data.parent : undefined,
+      abbr: e.data?.abbr,
+    }));
+    return { byId: new Map(all.map((a) => [a.id, a])), all };
+  })();
+  return areaIndexPromise;
 }
 
 /** Ancestors nearest-first (county, then state). Cycle-safe. */
