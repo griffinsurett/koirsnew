@@ -24,6 +24,10 @@ interface Props {
   id?: string;
   /** Background image (Astro asset or public path). */
   image?: any;
+  /** object-position for the background image. Defaults to centre; pass
+   *  "object-top" when the subject sits high in the frame (e.g. a group
+   *  photo, where a centred crop cuts the faces off). */
+  imageClass?: string;
   /** Background video (public path). */
   video?: string;
   /** Tint over the media so the copy stays legible. */
@@ -39,6 +43,7 @@ const {
   buttonsClassName = "",
   image,
   video,
+  imageClass = "",
   overlayClass = "bg-primary opacity-80",
   id,
 } = Astro.props as Props;
@@ -46,7 +51,7 @@ const {
 
 const backgroundMedia = (image || video)
   ? {
-      ...(image ? { image: { src: image, imageClass: "object-cover" } } : {}),
+      ...(image ? { image: { src: image, imageClass } } : {}),
       ...(video ? { video: { src: video, preload: "metadata" } } : {}),
       overlayClass,
     }
@@ -66,6 +71,11 @@ const backgroundMedia = (image || video)
       headingClass="uppercase py-[var(--spacing-sm)]"
       descriptionClass="!text-lg md:!text-3xl !font-thin italic"
     />
+
+    {/* Optional body between the heading and the CTAs — for bands that carry
+        structured content (a hours list, a stat row) rather than just a
+        description string. Inherits the band's light `text-bg` colour. */}
+    <slot />
 
     <SectionButtons buttons={buttons} class={`my-[var(--spacing-lg)] mt-[var(--spacing-md)] ${buttonsClassName}`} />
   </div>

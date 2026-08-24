@@ -28,18 +28,24 @@
  */
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
-import SecondaryHero from "@/layouts/SecondaryHero.astro";
+import ServiceHero from "@/layouts/ServiceHero.astro";
+import GoogleRating from "@/components/GoogleRating.astro";
 import SpanishSection from "@/components/SpanishSection.astro";
 import MediaBand from "@/components/MediaBand.astro";
+import Banner from "@/components/Banner.astro";
+import VideoSection from "@/layouts/VideoSection.astro";
 import RoofingForm from "@/components/Form/forms/RoofingForm.astro";
 import SolarForm from "@/components/Form/forms/SolarForm.astro";
+import QuoteForm from "@/components/Form/forms/QuoteForm.astro";
 import { query, sortByOrder, normalizeReference } from "@/utils/query";
-import { siteData, serviceBtns } from "@/content/siteData";
+import { related } from "@/utils/query/snippets";
+import { siteData } from "@/content/siteData";
+import goalBg from "@/assets/koi/koi_team1.jpg";
+import KoiRoofers from "@/assets/koi/roof-work-koi.jpg";
 import type { CollectionLayoutProps } from "./types";
 
 const {
   entry,
-  Content,
   seoProps = {},
 } = Astro.props as CollectionLayoutProps;
 
@@ -56,28 +62,119 @@ const faqQuery = pageId
       .orderBy(sortByOrder())
   : null;
 const faqCount = faqQuery ? (await faqQuery.all()).length : 0;
+
+/** Hero inquiry form — the same HERO_FORMS mapping ServiceIndexLayout uses for
+ *  the /roofing and /solar pages, so a Monmouth page gets the identical form
+ *  its line of business does.
+ *
+ *  Driven by `serviceLines`, the field that already says which line a page
+ *  belongs to, rather than a second per-entry form field that could drift out
+ *  of sync with it: a roofing topic gets RoofingForm, a solar topic SolarForm. */
+const HERO_FORMS: Record<string, any> = {
+  roofing: RoofingForm,
+  solar: SolarForm,
+  quote: QuoteForm,
+};
+/** "roofing" | "solar" — this page's line of business, from `serviceLines`.
+ *  Typed as a CollectionKey so it can be passed straight to query(). */
+const serviceLine = (normalizeReference(data.serviceLines)[0]?.id ?? "roofing") as
+  | "roofing"
+  | "solar";
+const HeroForm = HERO_FORMS[serviceLine] ?? QuoteForm;
+
+/** `sections[].kind` -> the variant that renders it. Ported from the 2025
+ *  landing pages: the zig-zag image rows, the bordered icon grid, and the
+ *  solar page's numbered process list. */
+const SECTION_VARIANTS: Record<string, string> = {
+  mediaCards: "AlternatingMediaVariant",
+  featureCards: "FeatureCardVariant",
+  steps: "StepListVariant",
+  // The four-up image cards the /roofing and /solar pages use for their
+  // "Types of … We Offer" band — image-forward tiles rather than icon cards.
+  imageCards: "ImageCardVariant",
+};
+
+/** "Roofing" / "Solar" — for the headings that name the line of business. */
+const lineLabel = serviceLine === "solar" ? "Solar" : "Roofing";
+
+/** The closing cross-sell banner ("Ready to Add Solar to Your New Roof?").
+ *  Its copy is per-page, so it lives in `sections` like the rest — pulled out
+ *  here because it renders inside the gallery band rather than in sequence. */
+const closingBanner = (data.sections ?? []).find((s: any) => s.kind === "closingBanner");
+
+/** In-sequence bands, minus the closing banner rendered separately above. */
+const pageSections = (data.sections ?? []).filter((s: any) => s.kind !== "closingBanner");
 ---
 
 <BaseLayout {...seoProps}>
   <main class="flex-1">
-    {/* Hero — the legacy pages opened on a full primaryHero with the inquiry
-        form beside the copy (solar pages get the solar qualifiers). */}
-    <SecondaryHero
-      eyebrow={siteData.title}
-      title={data.title}
-      description={data.description}
-      image={data.featuredImage}
-      minHeight="60vh"
-    >
-      <Fragment slot="aside">
-        {pageId?.startsWith("solar") ? <SolarForm /> : <RoofingForm />}
-      </Fragment>
-    </SecondaryHero>
+    {/* Hero — the legacy pages opened on the two-column hero: amber eyebrow,
+        the human headline as the H1, the description, and the inquiry form
+        beside the copy over a brightness-50 banner tinted navy at 60%. That is
+        exactly ServiceHero (the /roofing + /solar hero), so these pages use it
+        rather than the plain centered SecondaryHero.
 
-    {Content && (
-      <div class="container mx-auto px-4 py-12">
-        <Content />
-      </div>
+        `heading` carries the legacy headline; `title` stays the full SEO
+        string for <title>/meta. */}
+    <ServiceHero
+      id={`${pageId}-quote`}
+      eyebrow={data.eyebrow}
+      title={data.title}
+      heading={data.heading}
+      description={data.description}
+      image={data.bannerImage ?? data.featuredImage}
+    >
+      <GoogleRating
+        slot="belowDescription"
+        count="50+"
+        tone="dark"
+        class="justify-center lg:justify-start"
+      />
+      <HeroForm slot="aside" />
+    </ServiceHero>
+
+    {/* ── Page-specific bands, ported from the 2025 landing pages ──────────
+        These are the sections that make each landing page distinct: two
+        topic/service lists with a CTA banner between them, then the "Why
+        Choose" grid. Copy, images and item counts come from the entry's
+        `sections` array, so one layout serves all six pages.
+
+        This replaces rendering the raw MDX body, which dumped bare markdown
+        headings onto the navy page background with no bands at all. */}
+    {pageSections.map((section: any) =>
+      section.kind === "banner" ? (
+        <MediaBand
+          heading={section.heading}
+          description={section.description}
+          image={section.image}
+          buttons={[
+            { text: "Get A Free Quote!", link: `#${pageId}-quote`, variant: "tertiary" },
+            {
+              text: "Call Us",
+              contact: "phone",
+              variant: "secondary",
+              leftIcon: "fa6:phone",
+            },
+          ]}
+        />
+      ) : (
+        <ContentRenderer
+          items={
+            /* ImageCard reads `featuredImage`; the sections schema calls the
+               field `image` (as the other card kinds do), so map it here
+               rather than duplicating the field in content. */
+            section.kind === "imageCards"
+              ? section.items.map((it: any) => ({ ...it, featuredImage: it.image }))
+              : section.items
+          }
+          variant={SECTION_VARIANTS[section.kind]}
+          heading={section.heading}
+          description={section.description}
+          columns={section.columns}
+          titleSize={section.titleSize}
+          centered={section.centered}
+        />
+      )
     )}
 
     {/* ── Legacy MainPageLayout band sequence ───────────────────────────────
@@ -86,20 +183,35 @@ const faqCount = faqQuery ? (await faqQuery.all()).length : 0;
         media1 → benefits → Spanish → testimonials → services → projects →
         faq → gallery. */}
 
-    {/* legacy: variant="media1" — mission copy over the roofing/solar video */}
+    {/* legacy: variant="media1" — mission copy, now over the team photo
+        rather than the roofing/solar video. */}
     <MediaBand
       heading="Our goal is simple:"
       description={'"Make Roofing and Solar an enjoyable, trustworthy, and inspiring experience for everyone."'}
-      video="/roofingandsolarvid-smaller.webm"
-      overlayClass="bg-primary opacity-80"
+      image={goalBg}
+      imageClass="object-top"
+      overlayClass="bg-primary opacity-95"
     />
 
-    {/* legacy: collection="benefits" — financing and warranty points */}
-    <ContentRenderer
-      query={query("benefits").orderBy(sortByOrder())}
-      variant="GridVariant"
-      columns={3}
-    />
+    {/* legacy: collection="benefits" — financing and warranty points.
+        Same IconListVariant-beside-video treatment as the homepage and the
+        roofing/solar pages, so benefits read identically site-wide. */}
+    <VideoSection video="/notlikekoi.mp4" reverse={true}>
+      <ContentRenderer
+        query={query("benefits").orderBy(sortByOrder())}
+        variant="IconListVariant"
+        columns={1}
+        pretitle="Why Choose Us?"
+        heading={`Benefits of Choosing Koi ${lineLabel}!`}
+        headingAlign="responsive"
+        description=""
+        buttons={[
+          { text: "Request Estimate", link: "/contact-us/", variant: "secondary" },
+        ]}
+        showButtonSection={false}
+        bare={true}
+      />
+    </VideoSection>
 
     {/* legacy: <SpanishSection /> */}
     <SpanishSection />
@@ -108,27 +220,39 @@ const faqCount = faqQuery ? (await faqQuery.all()).length : 0;
     <ContentRenderer
       query={query("testimonials").orderBy(sortByOrder())}
       variant="TestimonialShowcaseVariant"
-      title="Hear It Straight from Homeowners"
+      pretitle="Testimonials"
+      heading="Hear It Straight from Homeowners"
     />
 
-    {/* legacy: collection="services" query="parent" — the two lines of business */}
+    {/* This page's OWN line of business only — a roofing landing page must not
+        advertise the solar service list (and vice versa). Same
+        ServiceListVariant the /roofing and /solar pages use. */}
     <ContentRenderer
-      query={query("roofing").orderBy(sortByOrder())}
-      variant="GridVariant"
-      columns={3}
-    />
-    <ContentRenderer
-      query={query("solar").orderBy(sortByOrder())}
-      variant="GridVariant"
-      columns={3}
+      query={query(serviceLine).orderBy(sortByOrder())}
+      variant="ServiceListVariant"
+      heading={`Explore Our ${lineLabel} Services`}
+      image={KoiRoofers}
+      imageAlt="Koi Roofing and Solar crew on a job site"
     />
 
-    {/* legacy: collection="projects" — before/after portfolio */}
+    {/* Materials/systems for this line — the NEW site's ImageCardVariant
+        treatment (as on /roofing and /solar), deliberately not the 2025
+        markup: this is the one section where the current design wins. */}
     <ContentRenderer
-      query={query("projects").orderBy(sortByOrder())}
+      query={related("types", "serviceLines", serviceLine).orderBy(sortByOrder())}
+      variant="ImageCardVariant"
+      columns={4}
+      title={`Types of ${lineLabel} We Offer`}
+    />
+
+    {/* legacy: collection="projects" — before/after portfolio, scoped to this
+        page's line so a roofing page shows roofing work. */}
+    <ContentRenderer
+      query={related("projects", "serviceLines", serviceLine).orderBy(sortByOrder())}
       variant="BeforeAfterVariant"
-      columns={2}
-      title={`Discover ${siteData.title}'s Roofing Masterpieces`}
+      columns={3}
+      pretitle="Recent Projects"
+      heading={`Discover ${siteData.title}'s ${lineLabel} Masterpieces`}
     />
 
     {/* legacy: collection="faq" query="getAll" */}
@@ -140,13 +264,46 @@ const faqCount = faqQuery ? (await faqQuery.all()).length : 0;
       />
     )}
 
-    {/* legacy: collection="gallery" — marquee + service buttons closed the page */}
+    {/* legacy: collection="gallery" — marquee + CTA closed the page. The CTAs
+        point at THIS page's own hero form rather than the generic service
+        buttons, matching how /roofing and /solar close. */}
     <ContentRenderer
       query={query("gallery").orderBy(sortByOrder())}
       variant="GalleryVariant"
       title="Whether you need a new roof or want to go solar with NO MONEY DOWN, we make it easy!"
       video="/roofingandsolarvid-smaller.webm"
-      buttons={serviceBtns}
-    />
+      buttons={[
+        {
+          text: "Get a Free Quote",
+          link: `#${pageId}-quote`,
+          variant: "tertiary",
+          className: "w-full md:w-auto lg:min-w-[320px]",
+        },
+        {
+          text: "Call Us",
+          contact: "phone",
+          variant: "secondary",
+          leftIcon: "fa6:phone",
+          className: "w-full md:w-auto lg:min-w-[320px]",
+        },
+      ]}
+    >
+      {/* Cross-sell to the OTHER line of business — the legacy pages closed on
+          exactly this banner, and its copy is per-page content. */}
+      {closingBanner && (
+        <Banner
+          slot="after-gallery"
+          title={closingBanner.heading}
+          description={closingBanner.description}
+          buttons={[
+            {
+              text: serviceLine === "solar" ? "Explore Roofing Options" : "Explore Solar Options",
+              link: serviceLine === "solar" ? "/roofing/" : "/solar/",
+              variant: "secondary",
+            },
+          ]}
+        />
+      )}
+    </ContentRenderer>
   </main>
 </BaseLayout>

@@ -1,0 +1,76 @@
+---
+// src/components/ContentRenderer/variants/StepListVariant.astro
+/**
+ * Step List Variant — the numbered process list from the 2025 solar landing
+ * page's "How Solar Installation Works" section.
+ *
+ * Legacy markup, ported verbatim:
+ *   • wrapper — `max-w-4xl mx-auto mt-xl`
+ *   • row     — `flex gap-md mb-lg`
+ *   • badge   — `flex-shrink-0 w-12 h-12 bg-primary text-accent rounded-full
+ *               flex items-center justify-center font-bold text-xl`
+ *   • title   — `.h4 text-primary font-bold mb-xs`
+ *   • body    — `text-text`
+ *
+ * The number comes from each item's `step` when set, otherwise from its
+ * position, so a reordered list renumbers itself.
+ */
+import type { BaseVariantProps } from "../ContentRenderer.types";
+import SectionHeading from "@/components/SectionHeading.astro";
+import SectionButtons from "../SectionButtons.astro";
+
+interface Props extends BaseVariantProps {
+  pretitle?: string;
+}
+
+const {
+  items = [],
+  title,
+  heading,
+  pretitle,
+  description,
+  className = "",
+  buttons = [],
+  buttonsClassName = "",
+  id,
+} = Astro.props as Props;
+
+const steps = Array.isArray(items) ? items : [];
+---
+
+<section id={id} class={`bg-bg text-text py-[var(--spacing-3xl)] ${className}`}>
+  <div class="container mx-auto px-4">
+    {(heading || title || pretitle || description) && (
+      <SectionHeading
+        pretitle={pretitle}
+        heading={heading}
+        title={title}
+        description={description}
+        class="pb-[var(--spacing-xl)]"
+      />
+    )}
+
+    {steps.length > 0 && (
+      <ol class="max-w-4xl mx-auto list-none p-0 m-0">
+        {steps.map((step: any, i: number) => (
+          <li class="flex gap-[var(--spacing-md)] mb-[var(--spacing-lg)] last:mb-0 text-left">
+            <div
+              class="flex-shrink-0 w-12 h-12 bg-primary text-accent rounded-full flex items-center justify-center font-bold text-xl"
+              aria-hidden="true"
+            >
+              {step.step ?? i + 1}
+            </div>
+            <div>
+              {step.title && (
+                <h3 class="h4 text-primary font-bold mb-[var(--spacing-xs)]">{step.title}</h3>
+              )}
+              {step.description && <p class="text-text">{step.description}</p>}
+            </div>
+          </li>
+        ))}
+      </ol>
+    )}
+
+    <SectionButtons buttons={buttons} class={`mt-[var(--spacing-xl)] ${buttonsClassName}`} />
+  </div>
+</section>

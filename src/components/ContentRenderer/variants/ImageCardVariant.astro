@@ -29,19 +29,21 @@ const {
 } = Astro.props as Props;
 
 const columnClasses = {
+  1: "grid-cols-1",
   2: "grid-cols-1 md:grid-cols-2",
   3: "grid-cols-1 md:grid-cols-2 lg:grid-cols-3",
   4: "grid-cols-1 md:grid-cols-2 lg:grid-cols-4",
 };
 
-// An even item count divides cleanly into 2 columns, which leaves no orphan on
-// the last row — 4 items as 2x2 reads better than 3+1. Odd counts keep the
-// requested column count. Only applies when the caller asked for 3+.
+// Never render more columns than cards. This keeps a two-card collection at
+// two columns while allowing four or more cards to use the requested four-
+// column desktop grid.
 const itemCount = Array.isArray(items) ? items.length : 0;
-const effectiveColumns =
-  columns > 2 && itemCount > 0 && itemCount % 2 === 0 && itemCount % 3 !== 0
-    ? 2
-    : columns;
+const effectiveColumns = Math.min(columns, Math.max(itemCount, 1)) as 1 | 2 | 3 | 4;
+const isTwoCardLayout = itemCount === 2;
+const gridClasses = isTwoCardLayout
+  ? "max-w-[1400px] mx-auto gap-10 lg:gap-20"
+  : "gap-8";
 ---
 
 <section id={id} class={`bg-bg py-[100px] ${className}`}>
@@ -55,9 +57,9 @@ const effectiveColumns =
 
     {
       items.length > 0 && (
-        <div class={`grid gap-8 ${columnClasses[effectiveColumns]}`}>
+        <div class={`grid ${columnClasses[effectiveColumns]} ${gridClasses}`}>
           {items.map((item) => (
-            <ImageCard {...item} />
+            <ImageCard {...item} compact={isTwoCardLayout} />
           ))}
         </div>
       )

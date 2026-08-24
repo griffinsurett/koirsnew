@@ -42,8 +42,6 @@ import { siteData } from "@/content/siteData";
 
 interface Props {
   title: string;
-  /** Main H1 override (falls back to `title`). String or `{ before, text, after }`. */
-  heading?: string | { before?: string; text?: string; after?: string };
   description: string;
   lastUpdated: string;
   effectiveDate?: string;
@@ -53,7 +51,6 @@ interface Props {
 
 const {
   title,
-  heading,
   description,
   lastUpdated,
   effectiveDate,
@@ -69,8 +66,6 @@ const fullTitle = `${title} — ${siteData.title}`;
   <main class="flex-1">
     <SecondaryHero
       title={title}
-      heading={heading}
-      description={description}
       minHeight="45vh"
     />
 

@@ -96,21 +96,22 @@ const handleSubmit = async () => {
       inputClassName="w-full px-4 py-3 bg-surface border-0 rounded-md focus:outline-none focus:ring-2 focus:ring-MainDark"
     />
 
-    <Checkbox
-      name="privacy"
-      required
-      containerClassName="mb-6"
-      checkboxClassName="w-4 h-4 text-MainDark border-surface rounded"
-    >
-      I have read and agree to the{" "}
-      <Button
-        variant="link"
-        href="/privacy-policy"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Privacy Policy
-      </Button>
+    {/* The same two consent boxes ContactForm uses, in place of the single
+        "agree to the Privacy Policy" tick. These are the ones that carry legal
+        weight — SMS/TCPA consent is required for texting leads. */}
+    <Checkbox name="smsConsent" required containerClassName="mb-4">
+      By checking this box, I consent to receive transactional messages related
+      to my account, orders, or services I have requested. These messages may
+      include appointment reminders, order confirmations, and account
+      notifications among others. Message frequency may vary. Message &amp; Data
+      rates may apply. Reply STOP to opt out.
+    </Checkbox>
+
+    <Checkbox name="marketingConsent" containerClassName="mb-6">
+      By checking this box, I consent to receive marketing and promotional
+      messages, including special offers, discounts, new product information,
+      and other similar updates. Message frequency may vary. Message &amp; Data
+      rates may apply. Reply STOP to opt out.
     </Checkbox>
 
     <Button variant="primary" type="submit" className="w-full">

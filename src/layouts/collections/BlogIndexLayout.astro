@@ -13,7 +13,7 @@ import SecondaryHero from "@/layouts/SecondaryHero.astro";
 import QueryParamPagination from "@/components/Pagination/QueryParamPagination.astro";
 import { prepareCollectionEntries } from "@/utils/collections";
 import { find, query, sortByDate } from "@/utils/query";
-import { humanizeSlug, normalizeRef } from "@/utils/string";
+import { normalizeRef, capitalizeWords } from "@/utils/string";
 import { getImageSrc } from "./helpers/layoutHelpers";
 
 export interface Props {
@@ -33,7 +33,7 @@ const {
   hasContent = false,
 } = Astro.props as Props;
 
-const { title: pageTitle, description: pageDescription } = seoProps;
+const { title: pageTitle } = seoProps;
 const heroImage = collectionMeta.featuredImage;
 
 const authorNameCache = new Map<string, string>();
@@ -94,25 +94,31 @@ const recentPosts = feedPosts.slice(0, 6);
 const blogPaginationId = "blog-index-feed";
 const pageSize = 10;
 const totalPosts = feedPosts.length;
+
 ---
 
 <BaseLayout {...seoProps}>
   <main class="flex-1">
     <SecondaryHero
-      eyebrow={humanizeSlug(collectionName)}
       title={pageTitle}
-      heading={collectionMeta.heading}
-      description={pageDescription}
       image={heroImage}
       minHeight="50vh"
     />
 
-    <div class="container mx-auto px-4 pb-16 pt-10">
+    {/* Light band. `bg-bg` is required, not cosmetic: the site body sits on
+        navy and each band paints its own background. */}
+    <div class="bg-bg text-text">
+      <div class="container mx-auto px-4 pb-16 pt-10">
       {hasContent && Content ? <div class="mb-10"><Content /></div> : null}
 
       <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,2fr)_320px] gap-10">
         <section aria-label="Blog posts" class="space-y-8">
-          <h2 class="text-3xl md:text-4xl font-bold text-heading">Recent Posts</h2>
+          <h2
+            data-feed-heading
+            class="text-3xl md:text-4xl font-bold text-primary"
+          >
+            Recent Posts
+          </h2>
 
           {feedPosts.length > 0 ? (
             <div
@@ -123,7 +129,8 @@ const totalPosts = feedPosts.length;
               {feedPosts.map((post) => (
                 <article
                   data-pagination-item
-                  class="bg-bg border border-surface rounded-xl overflow-hidden shadow-sm"
+                  data-post-tags={post.tags.join("|")}
+                  class="bg-bg rounded-xl overflow-hidden shadow-md"
                 >
                   {post.featuredImageSrc && (
                     <a href={post.url} class="block">
@@ -158,8 +165,10 @@ const totalPosts = feedPosts.length;
                         <span>By {post.authorNames.slice(0, 1).join(", ")}</span>
                       )}
 
+                      {/* Tags are stored lowercase (they're identifiers), so
+                          they're capitalized here at the display layer only. */}
                       {post.tags.length > 0 && (
-                        <span>{post.tags.slice(0, 2).join(", ")}</span>
+                        <span>{post.tags.slice(0, 2).map(capitalizeWords).join(", ")}</span>
                       )}
                     </div>
 
@@ -192,14 +201,14 @@ const totalPosts = feedPosts.length;
           />
         </section>
 
-        <aside aria-label="Recent blog posts" class="space-y-4 lg:sticky lg:top-28 h-max">
-          <div class="bg-bg border border-surface rounded-xl p-5">
+        <aside aria-label="Recent blog posts" class="space-y-4 lg:sticky-section h-max">
+          <div class="bg-bg rounded-xl p-5 shadow-md">
             <h3 class="text-2xl font-bold text-heading mb-4">Recent Posts</h3>
 
             {recentPosts.length > 0 ? (
               <ul class="space-y-4">
                 {recentPosts.map((post) => (
-                  <li class="pb-3 border-b border-surface last:border-b-0 last:pb-0">
+                  <li class="pb-3 border-b border-primary/20 last:border-b-0 last:pb-0">
                     <a href={post.url} class="text-heading hover:text-primary transition-colors">
                       {post.title}
                     </a>
@@ -217,6 +226,50 @@ const totalPosts = feedPosts.length;
           </div>
         </aside>
       </div>
+      </div>
     </div>
   </main>
 </BaseLayout>
+
+{/* Category / tag filtering for the sidebar links (/blog?category=solar,
+    /blog?tag=maintenance). Both filter on the posts' own tags — a category id
+    IS a tag, which is why the sidebar needs no second field on each post.
+
+    Runs `is:inline` so it executes before the pagination module initializes:
+    pagination selects `[data-pagination-item]`, so removing that attribute
+    from non-matching posts filters the feed AND repaginates the remainder,
+    rather than the two fighting over which cards are visible. */}
+<script is:inline>
+  (() => {
+    const params = new URLSearchParams(window.location.search);
+    const wanted = (params.get("category") || params.get("tag") || "")
+      .trim()
+      .toLowerCase();
+    if (!wanted) return;
+
+    const posts = document.querySelectorAll("[data-post-tags]");
+    let shown = 0;
+
+    posts.forEach((post) => {
+      const tags = (post.getAttribute("data-post-tags") || "")
+        .toLowerCase()
+        .split("|")
+        .filter(Boolean);
+
+      if (tags.includes(wanted)) {
+        shown++;
+      } else {
+        // Drop it out of the paginated set entirely, not just visually.
+        post.removeAttribute("data-pagination-item");
+        post.setAttribute("hidden", "");
+        post.style.display = "none";
+      }
+    });
+
+    const heading = document.querySelector("[data-feed-heading]");
+    if (heading) {
+      const label = wanted.replace(/\b\w/g, (c) => c.toUpperCase());
+      heading.textContent = shown ? `Posts tagged “${label}”` : "No matching posts";
+    }
+  })();
+</script>

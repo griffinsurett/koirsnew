@@ -40,6 +40,7 @@ seo:
 ---
 
 import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
+import Banner from "@/components/Banner.astro";
 import SpanishSection from "@/components/SpanishSection.astro";
 import VideoSection from "@/layouts/VideoSection.astro";
 import KoiRoofers from "@/assets/koi/roof-work-koi.jpg";
@@ -99,7 +100,7 @@ import { related } from "@/utils/query/snippets";
 <ContentRenderer
   query={related("types", "serviceLines", "solar").orderBy(sortByOrder())}
   variant="ImageCardVariant"
-  columns={3}
+  columns={4}
   title="Types of Solar We Offer"
 />
 
@@ -122,4 +123,28 @@ import { related } from "@/utils/query/snippets";
       variant="GalleryVariant"
       title="Whether you need a new roof or want to go solar with NO MONEY DOWN, we make it easy!"
       video="/roofingandsolarvid-smaller.webm"
-    />
+      buttons={[
+        {
+          text: "Get a Free Quote",
+          link: "#solar-quote",
+          variant: "tertiary",
+          className: "w-full md:w-auto lg:min-w-[320px]",
+        },
+        {
+          text: "Call Us",
+          contact: "phone",
+          variant: "secondary",
+          leftIcon: "fa6:phone",
+          className: "w-full md:w-auto lg:min-w-[320px]",
+        },
+      ]}
+    >
+      <Banner
+        slot="after-gallery"
+        title="Is Your Roof Ready for Solar?"
+        description="A durable, leak-free roof is the foundation of any solar installation. Upgrade to a weather-resistant roof today and get a streamlined solar install when you’re ready."
+        buttons={[
+          { text: "Get a Roofing Quote", link: "/roofing/", variant: "secondary" },
+        ]}
+      />
+    </ContentRenderer>

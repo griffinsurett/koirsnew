@@ -87,7 +87,12 @@ if (backgroundMedia?.image?.src) {
     poster={responsiveImages?.mobile?.src || ""}
     aria-hidden="true"
   >
-    <source src={backgroundMedia.video.src} type="video/mp4" />
+    <source
+      src={backgroundMedia.video.src}
+      type={backgroundMedia.video.src.toLowerCase().includes(".webm")
+        ? "video/webm"
+        : "video/mp4"}
+    />
     Your browser does not support the video tag.
   </video>
 ) : responsiveImages ? (

@@ -15,6 +15,8 @@ export interface Props {
   url?: string;
   featuredImage?: any;
   ctaText?: string;
+  /** Uses a shorter image and wider copy measure in a two-card layout. */
+  compact?: boolean;
 }
 
 const {
@@ -23,6 +25,7 @@ const {
   url,
   featuredImage,
   ctaText = "Learn More",
+  compact = false,
 } = Astro.props as Props;
 
 // Resolve to ImageMetadata so <Image> can emit a responsive srcset. A plain
@@ -31,12 +34,14 @@ const imgMeta = resolveImageMetadata(featuredImage);
 const imgSrc = typeof featuredImage === "string" ? featuredImage : "";
 
 const Tag = url ? "a" : "div";
+const imageAspectClass = compact ? "aspect-video" : "aspect-[4/3]";
+const descriptionWidthClass = compact ? "max-w-[560px]" : "max-w-[360px]";
 ---
 
 <Tag href={url} class="group flex flex-col text-center">
   {
     (imgMeta || imgSrc) && (
-      <div class="relative overflow-hidden rounded-2xl aspect-[4/3] shadow-[var(--shadow-md)] transition-shadow duration-300 group-hover:shadow-[var(--shadow-lg)]">
+      <div class={`relative overflow-hidden rounded-2xl ${imageAspectClass} shadow-[var(--shadow-md)] transition-shadow duration-300 group-hover:shadow-[var(--shadow-lg)]`}>
         {imgMeta ? (
           <Image
             src={imgMeta}
@@ -65,7 +70,7 @@ const Tag = url ? "a" : "div";
     </h3>
     {
       description && (
-        <p class="text-text text-base leading-relaxed max-w-[360px]">
+        <p class={`text-text text-base leading-relaxed ${descriptionWidthClass}`}>
           {description}
         </p>
       )

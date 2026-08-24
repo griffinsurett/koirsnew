@@ -196,6 +196,19 @@ body {
     @apply text-base !text-bg/80;
   }
 
+  /* Resume upload dropzone — ported from the 2025 careers form. The legacy
+     rule used a `transition-default` utility that doesn't exist here, so the
+     transition is inlined. */
+  .dropzone {
+    @apply border-2 border-dashed border-[var(--color-border)] rounded-md bg-bg
+           p-[var(--spacing-lg)] text-center w-full flex flex-col items-center
+           justify-center gap-[var(--spacing-xs)] transition-all duration-200;
+  }
+
+  .dropzone.is-dragging {
+    @apply border-primary bg-white/80 shadow-md;
+  }
+
   .legal-document {
     @apply font-normal;
   }
@@ -377,6 +390,12 @@ body {
 @layer utilities {
   /* Pins a column while a taller sibling scrolls past it — the 2025 service
      hero pinned its copy column this way. top-40 clears the fixed header. */
+  /* Ported from the 2025 site: the hairline rule the footer used between its
+     top (brand + menus) and bottom (copyright + legal) halves. */
+  .media-border {
+    @apply border-b border-bg/50;
+  }
+
   .sticky-section {
     @apply lg:sticky lg:top-35;
   }

@@ -4,83 +4,249 @@
  * Internship Program — like /careers, a single bespoke page with its own form,
  * so it stays a page rather than a one-entry collection (plan §9.3).
  *
- * ── STATUS: Phase 3.5 stub ────────────────────────────────────────────────
- * Real copy, no styling. The program's step/benefit lists move into collections
- * during the design phase.
+ * Ported from the 2025 `src/pages/internship-program.astro`, section for
+ * section, with the legacy heading classes preserved:
+ *   hero → "Grow. Earn. Lead." intro → Why We Created This Program (copy +
+ *   photo, sticky) → How the Program Works (listSection) → interns photo →
+ *   Program Journey band → Primary Position (listSection) → Training Areas
+ *   (accordion) → Ready to Apply? (InternshipForm)
+ *
+ * Legacy heading classes, kept rather than defaulted:
+ *   eyebrow  "top-heading text-accent uppercase"   -> amber, not the blue default
+ *   H2 hero  "h1 heading-primary"                  -> gradient
+ *   sections "h2 text-primary"                     -> solid navy, NOT the gradient
+ *   subhead  "h4 text-secondary uppercase"
+ *
+ * This replaces a Phase-3.5 stub that rendered bare <h1>/<h2> tags with no
+ * styling and the copy duplicated.
+ *
+ * The three data consts stay inline exactly as the legacy page had them: they
+ * are page-specific narrative content, not sibling entries (plan §9.3).
+ *
+ * Legacy `fade-in` / `slide-left` / `scale-up` animation classes are dropped,
+ * consistent with motion being off site-wide (plan §06).
  */
 import BaseLayout from "@/layouts/BaseLayout.astro";
+import SecondaryHero from "@/layouts/SecondaryHero.astro";
+import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
+import MediaBand from "@/components/MediaBand.astro";
+import SectionHeading from "@/components/SectionHeading.astro";
 import InternshipForm from "@/components/Form/forms/InternshipForm.astro";
+import { Image } from "astro:assets";
+import { siteData } from "@/content/siteData";
+import InternsOnSite from "@/assets/koi/koi_team1.jpg";
+import LeadershipInAction from "@/assets/koi/koi_team2.JPG";
 
 const title = "KOI Home Improvement Internship Program";
 const description =
   "KOI's 2026 Home Improvement Internship Program gives college students a field-based education in leadership, sales, and revenue generation across NJ, NY, and PA.";
+
+/** Legacy `programDetails` — verbatim. */
+const programDetails = [
+  { title: "Dates", description: "May 25 – August 28, 2026" },
+  { title: "Work Territories", description: "New Jersey, New York, Pennsylvania" },
+  {
+    title: "Housing Provided",
+    description: "Available for traveling interns (limited slots)",
+  },
+  {
+    title: "Format",
+    description: "Field-based internship with real customer interaction",
+  },
+];
+
+/** Legacy `primaryHighlights` — verbatim. */
+const primaryHighlights = [
+  {
+    title: "Rapid Communication",
+    description: "Learn confident door approaches that break the ice in seconds.",
+  },
+  {
+    title: "Qualify Real Prospects",
+    description:
+      "Identify homeowners who are serious about roofing and solar upgrades.",
+  },
+  {
+    title: "Set Appointments",
+    description: "Book meetings for KOI closers and keep the pipeline full.",
+  },
+  {
+    title: "Shadow Top Performers",
+    description:
+      "Ride along with executives to see elite sales execution up close.",
+  },
+];
+
+/** Legacy `trainingFocus` — verbatim. Rendered as the Training Areas accordion. */
+const trainingFocus = [
+  {
+    title: "Professional Communication",
+    description: "Build confidence, presence, and clarity in every interaction.",
+  },
+  {
+    title: "Sales Psychology & Objections",
+    description:
+      "Understand why customers hesitate and how to move them forward.",
+  },
+  {
+    title: "Finance & Profit Models",
+    description: "See how real revenue is generated and managed inside KOI.",
+  },
+  {
+    title: "Leadership & Teamwork",
+    description:
+      "Operate in fast-paced crews that rely on each other to win.",
+  },
+  {
+    title: "Personal Branding",
+    description: "Create a reputation that attracts referrals and future roles.",
+  },
+];
 ---
 
-<BaseLayout title={title} description={description}>
+<BaseLayout title={`${title} | ${siteData.title}`} description={description}>
   <main class="flex-1">
-    <h1>{title}</h1>
-    <p>
-      KOI built this internship for students who want real skills, real
-      leadership experience, and the ability to create income anywhere.
-    </p>
-    <p>
-      Over the summer, interns progress from communication fundamentals to
-      confidently generating qualified leads alongside KOI sales pros. By August,
-      top performers walk away with real-world sales experience, referrals, and a
-      clear understanding of how high-performing roofing and solar companies
-      operate.
-    </p>
+    <SecondaryHero title={title} minHeight="50vh" />
 
-    <p>KOI's 2026 Home Improvement Internship Program gives college students a field-based education in leadership, sales, and revenue generation across NJ, NY, and PA.</p>
-    <h2>Summer 2026 | May 25 – August 28</h2>
-    <h2>Grow. Earn. Lead.</h2>
-    <p>KOI built this internship for students who want real skills, real leadership experience, and the ability to create income anywhere.</p>
-    <h2>Why We Created This Program</h2>
-    <h2>How the Program Works</h2>
-    <h2>Program Journey</h2>
-    <h2>Call 732-362-6476</h2>
-    <h2>Email Customer Support</h2>
-    <p>Over the summer, interns progress from communication fundamentals to confidently generating qualified leads alongside KOI sales pros. By August, top performers walk away with real-world sales experience, referrals, and a clear understanding of how high-performing roofing and solar companies operate.</p>
-    <h2>Primary Position</h2>
-    <h2>Door Knocker / Appointment Setter (Intro Sales)</h2>
-    <h2>Ready to Apply?</h2>
-    <h2>Tell us about yourself and why you want to grow with KOI this summer.</h2>
+    {/* Intro — legacy eyebrow `top-heading text-accent uppercase` over the
+        `h1 heading-primary` H2, description `text-xl text-text`. */}
+    <section class="bg-bg text-text py-[var(--spacing-3xl)]">
+      <div class="container mx-auto px-4 text-center">
+        <SectionHeading
+          pretitle="Summer 2026 | May 25 – August 28"
+          pretitleClass="!text-accent"
+          title="Grow. Earn. Lead."
+          headingClass="h1"
+          description="KOI built this internship for students who want real skills, real leadership experience, and the ability to create income anywhere."
+          descriptionClass="!text-xl !text-text"
+        />
+      </div>
+    </section>
 
-    <p>College teaches business theory — KOI teaches revenue. Real leadership starts with communication, sales, and negotiation skills. Our interns don’t fetch coffee—they learn income skills and contribute from day one.</p>
-    <p>Our mission: Build young leaders who can generate income anywhere.</p>
-    <ul>
-      <li>College teaches business theory — KOI teaches revenue.</li>
-      <li>Leadership comes from mastering communication, sales, and negotiation.</li>
-      <li>Students deserve income skills, not busywork.</li>
-      <li>KOI interns don’t just observe business—they produce results.</li>
-    </ul>
-    <h3>Dates</h3>
-    <p>May 25 – August 28, 2026</p>
-    <h3>Work Territories</h3>
-    <p>New Jersey, New York, Pennsylvania</p>
-    <h3>Housing Provided</h3>
-    <p>Available for traveling interns (limited slots)</p>
-    <h3>Format</h3>
-    <p>Field-based internship with real customer interaction</p>
-    <h3>Rapid Communication</h3>
-    <p>Learn confident door approaches that break the ice in seconds.</p>
-    <h3>Qualify Real Prospects</h3>
-    <p>Identify homeowners who are serious about roofing and solar upgrades.</p>
-    <h3>Set Appointments</h3>
-    <p>Book meetings for KOI closers and keep the pipeline full.</p>
-    <h3>Shadow Top Performers</h3>
-    <p>Ride along with executives to see elite sales execution up close.</p>
-    <h3>Professional Communication</h3>
-    <p>Build confidence, presence, and clarity in every interaction.</p>
-    <h3>Sales Psychology & Objections</h3>
-    <p>Understand why customers hesitate and how to move them forward.</p>
-    <h3>Finance & Profit Models</h3>
-    <p>See how real revenue is generated and managed inside KOI.</p>
-    <h3>Leadership & Teamwork</h3>
-    <p>Operate in fast-paced crews that rely on each other to win.</p>
-    <h3>Personal Branding</h3>
-    <p>Create a reputation that attracts referrals and future roles.</p>
+    {/* Why We Created This Program — copy left (sticky), photo right. */}
+    <section class="bg-bg text-text pb-[var(--spacing-3xl)]">
+      <div class="container mx-auto px-4">
+        <SectionHeading
+          title="Why We Created This Program"
+          gradient={false}
+          headingClass="!text-primary"
+          class="pb-[var(--spacing-xl)]"
+        />
 
-    <InternshipForm />
+        <div class="flex flex-col lg:flex-row justify-center items-start gap-[var(--spacing-xl)]">
+          <div class="w-full lg:w-2/3 text-left space-y-[var(--spacing-md)] sticky-section">
+            <p class="text-lg text-text">
+              College teaches business theory — <span
+                class="text-secondary font-semibold">KOI teaches revenue</span
+              >. Real leadership starts with communication, sales, and
+              negotiation skills. Our interns don’t fetch coffee—they learn
+              income skills and contribute from day one.
+            </p>
+
+            <ul class="list-disc pl-6 text-lg text-text space-y-1">
+              <li>College teaches business theory — KOI teaches revenue.</li>
+              <li>
+                Leadership comes from mastering communication, sales, and
+                negotiation.
+              </li>
+              <li>Students deserve income skills, not busywork.</li>
+              <li>
+                KOI interns don’t just observe business—they produce results.
+              </li>
+            </ul>
+
+            <p class="text-lg text-text">
+              Our mission: <span class="text-secondary font-semibold"
+                >Build young leaders who can generate income anywhere.</span
+              >
+            </p>
+          </div>
+
+          <div class="w-full lg:w-1/2 sticky-section">
+            <Image
+              src={LeadershipInAction}
+              alt="KOI leadership in action"
+              class="w-full h-auto object-cover rounded-2xl"
+              loading="lazy"
+              decoding="async"
+              widths={[480, 800, 1200]}
+              sizes="(min-width: 1024px) 50vw, 100vw"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {/* How the Program Works — the legacy `listSection`. */}
+    <ContentRenderer
+      items={programDetails}
+      variant="ListSectionVariant"
+      heading="How the Program Works"
+      headingClass="!text-primary"
+      gradient={false}
+    />
+
+    {/* The legacy page dropped a half-width interns photo here. */}
+    <section class="bg-bg py-[var(--spacing-lg)]">
+      <div class="container mx-auto px-4">
+        <Image
+          src={InternsOnSite}
+          alt="KOI interns on site"
+          class="w-full lg:w-1/2 mx-auto h-auto object-cover rounded-2xl"
+          loading="lazy"
+          decoding="async"
+          widths={[480, 800, 1200]}
+          sizes="(min-width: 1024px) 50vw, 100vw"
+        />
+      </div>
+    </section>
+
+    {/* legacy: variant="media2" — the Program Journey band. Its `buttons` were
+        set but `buttonsSectionClass="hidden"` hid them, so none render here. */}
+    <MediaBand
+      heading="Program Journey"
+      description="Over the summer, interns progress from communication fundamentals to confidently generating qualified leads alongside KOI sales pros. By August, top performers walk away with real-world sales experience, referrals, and a clear understanding of how high-performing roofing and solar companies operate."
+      video="/roofingandsolarvid-smaller.webm"
+      overlayClass="bg-primary opacity-80"
+    />
+
+    {/* Primary Position — the legacy `listSection` with its blue subhead. */}
+    <ContentRenderer
+      items={primaryHighlights}
+      variant="ListSectionVariant"
+      heading="Primary Position"
+      headingClass="!text-primary"
+      gradient={false}
+      pretitle="Door Knocker / Appointment Setter (Intro Sales)"
+      pretitleClass="h4 uppercase"
+    />
+
+    {/* Training Areas — the legacy `faqs` variant (accordion). faqSchema off:
+        these are training topics, not FAQs, and must not emit FAQPage markup. */}
+    <ContentRenderer
+      items={trainingFocus}
+      variant="AccordionVariant"
+      heading="Training Areas"
+      headingClass="!text-primary"
+      gradient={false}
+      faqSchema={false}
+    />
+
+    {/* Ready to Apply? — the internship form, with its resume dropzone. */}
+    <section class="bg-bg text-text py-[var(--spacing-3xl)]">
+      <div class="container mx-auto px-4">
+        <SectionHeading
+          title="Ready to Apply?"
+          gradient={false}
+          headingClass="!text-primary"
+          description="Tell us about yourself and why you want to grow with KOI this summer."
+          descriptionClass="!text-lg !text-text"
+          class="pb-[var(--spacing-lg)]"
+        />
+        <div class="w-full flex justify-center">
+          <InternshipForm />
+        </div>
+      </div>
+    </section>
   </main>
 </BaseLayout>

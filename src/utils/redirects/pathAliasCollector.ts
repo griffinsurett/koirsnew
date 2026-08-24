@@ -67,6 +67,20 @@ export function collectPathAliasRedirects(
         type: 'path-alias',
       });
     }
+
+    const legacyPrefixes = Array.isArray(meta.itemsRedirectFromPrefixes)
+      ? meta.itemsRedirectFromPrefixes
+      : [];
+    const targetPath = useRootPath ? rootPath : collectionPath;
+
+    for (const prefix of legacyPrefixes) {
+      redirects.push({
+        from: normalizePath(`${prefix}/${slug}`),
+        to: normalizePath(targetPath),
+        source: `${collectionName}/${slug} (legacy-prefix)`,
+        type: 'path-alias',
+      });
+    }
   }
 
   return redirects;

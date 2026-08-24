@@ -127,6 +127,12 @@ const backgroundMedia = (image || video)
         />
       </div>
     )}
+
+    {Astro.slots.has("after-gallery") && (
+      <div class="container mx-auto px-4">
+        <slot name="after-gallery" />
+      </div>
+    )}
   </div>
 </section>
 

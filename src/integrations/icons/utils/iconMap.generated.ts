@@ -2,8 +2,8 @@
 // Do not edit manually. Run "npm run generate:icons" (or node src/integrations/icons/utils/generate-icon-map.mjs) to regenerate.
 
 import type { IconType } from 'react-icons';
-import { LuActivity, LuArrowRight, LuBookOpen, LuChevronLeft, LuChevronRight, LuClipboardCheck, LuCloudLightning, LuContact, LuDroplets, LuGlobe, LuHammer, LuHouse, LuImage, LuLayoutGrid, LuMail, LuMapPin, LuPhone, LuPlugZap, LuReceipt, LuSettings, LuSun, LuTriangleAlert } from 'react-icons/lu';
 import { FaArrowRightLong, FaArrowsUpDownLeftRight, FaBullseye, FaClockRotateLeft, FaCompass, FaEye, FaFeather, FaFileLines, FaHeadset, FaLayerGroup, FaLifeRing, FaLink, FaPalette, FaPhone, FaRobot, FaRotateLeft, FaScaleBalanced, FaShieldHalved, FaStar, FaUniversalAccess, FaWandMagicSparkles, FaXmark } from 'react-icons/fa6';
+import { LuActivity, LuArrowRight, LuBookOpen, LuChevronLeft, LuChevronRight, LuClipboardCheck, LuCloudLightning, LuContact, LuDroplets, LuGlobe, LuHammer, LuHouse, LuImage, LuLayoutGrid, LuMail, LuMapPin, LuPhone, LuPlugZap, LuReceipt, LuSettings, LuSun, LuTriangleAlert } from 'react-icons/lu';
 
 export const iconMap = {
   'fa6:arrow-right-long': FaArrowRightLong,

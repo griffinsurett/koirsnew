@@ -133,8 +133,16 @@ const phone = await getPhoneContact();
     color: var(--color-primary);
   }
 
+  /* At rest (over the hero) the links are cream, so amber is the hover. */
   .header-navigation .menu-desktop > ul > li > a:hover,
-  .header-navigation .menu-desktop > ul > li > button:hover,
+  .header-navigation .menu-desktop > ul > li > button:hover {
+    color: var(--color-accent);
+    background-color: transparent;
+  }
+
+  /* Scrolled — on the light bar the links are navy, and amber-on-cream reads
+     weakly. Use the same secondary blue the submenu links hover to, so the
+     whole nav shares one hover colour once the header goes light. */
   #site-header.is-scrolled .header-navigation .menu-desktop > ul > li > a:hover,
   #site-header.is-scrolled
     .header-navigation
@@ -142,19 +150,27 @@ const phone = await getPhoneContact();
     > ul
     > li
     > button:hover {
-    color: var(--color-accent);
+    color: var(--color-secondary);
     background-color: transparent;
   }
 
-  /* Current page — amber and bold, at rest and scrolled. */
-  .header-navigation .menu-desktop > ul > li > a[aria-current="page"],
+  /* Current page — amber and bold at rest, over the hero. */
+  .header-navigation .menu-desktop > ul > li > a[aria-current="page"] {
+    color: var(--color-accent);
+    font-weight: 700;
+    background-color: transparent;
+  }
+
+  /* Scrolled — the secondary blue, matching the hover colour on the light bar
+     so the whole nav uses one accent once the header goes light. Stays bold,
+     which is what still marks it as the current page. */
   #site-header.is-scrolled
     .header-navigation
     .menu-desktop
     > ul
     > li
     > a[aria-current="page"] {
-    color: var(--color-accent);
+    color: var(--color-secondary);
     font-weight: 700;
     background-color: transparent;
   }
@@ -200,6 +216,15 @@ const phone = await getPhoneContact();
     white-space: nowrap;
   }
 
+  /* Below xl the CTA collapses to a bare tel: icon, which ships `text-accent`
+     so it reads gold over the hero. On the light scrolled bar gold-on-cream is
+     weak, so it flips to the secondary blue — same flip as the nav links and
+     the hamburger. Scoped to the icon-only link (`.xl\:hidden`) so the desktop
+     amber Button is untouched. */
+  #site-header.is-scrolled .header-phone a.xl\:hidden {
+    color: var(--color-secondary);
+  }
+
   /* Hamburger follows the same light→dark flip as the links. The control
      renders as a <label> (checkbox-driven drawer), not a <button>, and ships
      with `text-text` — override both element types. */
@@ -211,9 +236,13 @@ const phone = await getPhoneContact();
   #site-header.is-scrolled .header-navigation .menu-mobile label {
     color: var(--color-primary);
   }
-  /* Its hover state also hardcodes a colour; keep it on the flip. */
+  /* Its hover state also hardcodes a colour; keep it on the flip — amber over
+     the hero, secondary blue on the light bar, same as the desktop links. */
   .header-navigation .menu-mobile label:hover {
     color: var(--color-accent);
+  }
+  #site-header.is-scrolled .header-navigation .menu-mobile label:hover {
+    color: var(--color-secondary);
   }
 </style>
 

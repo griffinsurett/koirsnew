@@ -10,7 +10,21 @@ import SectionHeading from "@/components/SectionHeading.astro";
 import Button from "@/components/Button/Button";
 import { shouldShowCollectionCTA } from "../utils/helpers";
 
-type Props = BaseVariantProps;
+interface Props extends BaseVariantProps {
+  /** Classes for the <nav> that wraps the links. Defaults to the horizontal
+   *  wrap used in-page; the footer columns pass a vertical stack instead. */
+  listClassName?: string;
+  /** Classes for each link. Lets the footer use the legacy
+   *  `hover:text-accent text-base uppercase` item styling. */
+  itemClassName?: string;
+  /** Section padding. `py-16` is right in-page but far too tall inside a
+   *  footer column, so callers can override it. */
+  sectionClassName?: string;
+  /** Suppress the heading block entirely. ContentRenderer injects the
+   *  collection's `_meta.heading` when none is passed, which is unwanted where
+   *  the caller supplies its own label (e.g. the footer columns). */
+  showHeadingSection?: boolean;
+}
 
 const {
   items = [],
@@ -20,15 +34,19 @@ const {
   className = "",
   collectionUrl,
   collectionTitle,
+  listClassName = "flex flex-wrap gap-2 list-none",
+  itemClassName = "text-bg",
+  sectionClassName = "py-16",
+  showHeadingSection = true,
   id,
 } = Astro.props as Props;
 
 const viewAllText = `See Complete ${collectionTitle || "List"}`;
 ---
 
-<section id={id} class={`py-16 ${className}`}>
+<section id={id} class={`${sectionClassName} ${className}`}>
   {
-    (title || description) && (
+    showHeadingSection && (title || heading || description) && (
       <div class="mb-12">
         <SectionHeading heading={heading} title={title} description={description} />
       </div>
@@ -37,9 +55,9 @@ const viewAllText = `See Complete ${collectionTitle || "List"}`;
 
   {
     items.length > 0 && (
-      <nav class="flex flex-wrap gap-2 list-none">
+      <nav class={listClassName}>
         {items.map((item) => (
-            <Button href={item.url} className="text-bg" variant="link">
+            <Button href={item.url} className={itemClassName} variant="link">
               {item.title}
             </Button>
         ))}

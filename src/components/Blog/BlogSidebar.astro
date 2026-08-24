@@ -1,0 +1,212 @@
+---
+// src/components/Blog/BlogSidebar.astro
+/**
+ * Blog Sidebar — the quote form plus Latest Posts, Categories and Tags, from
+ * the 2025 post template.
+ *
+ * ── ONE PANEL, NOT FOUR CARDS ─────────────────────────────────────────────
+ * The whole sidebar is a single shadowed panel; the sections sit inside it
+ * divided by rules. (The 2025 site gave each block its own card, but four
+ * stacked shadows read as clutter beside a single-column article.)
+ *
+ * ── PORTED, NOT COPIED ────────────────────────────────────────────────────
+ * The legacy sidebar hardcoded all three lists in the post template. Here:
+ *
+ *   • Categories come from the `categories` collection, whose ids match
+ *     existing blog tags, so the links filter the index for real.
+ *   • Tags are DERIVED from the posts' own `tags` arrays rather than retyped,
+ *     so a tag can't appear in the sidebar without a post behind it.
+ *   • Latest Posts is a live query, excluding the post being read.
+ *
+ * Colours are the legacy ones: navy #232f49 sections, white text, amber
+ * (#feae00) hover with a left rule, and translucent-white tag pills.
+ */
+import { query, sortByDate, sortByOrder } from "@/utils/query";
+import { capitalizeWords } from "@/utils/string";
+
+interface Props {
+  /** Id of the post being read, so it's excluded from Latest Posts. */
+  currentPostId?: string;
+  /** How many recent posts to list. Legacy showed 4. */
+  limit?: number;
+}
+
+const { currentPostId, limit = 4 } = Astro.props as Props;
+
+const allPosts = await query("blog")
+  .orderBy(sortByDate("publishDate", "desc"))
+  .all();
+
+const latestPosts = allPosts
+  .filter((p: any) => p.id !== currentPostId)
+  .slice(0, limit)
+  .map((p: any) => ({
+    id: p.id,
+    title: String(p.data?.title ?? ""),
+    url: `/blog/${p.id}`,
+  }));
+
+const categories = await query("categories").orderBy(sortByOrder()).all();
+
+/** Every tag actually in use, most-used first — derived, never hardcoded. */
+const tagCounts = new Map<string, number>();
+for (const post of allPosts) {
+  for (const tag of (post as any).data?.tags ?? []) {
+    tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
+  }
+}
+const tags = [...tagCounts.entries()]
+  .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+  .map(([tag]) => tag);
+---
+
+{/* Not sticky: the panel is taller than most viewports, so pinning it made
+    the page awkward to scroll. It scrolls with the article. */}
+<aside aria-label="Blog sidebar" class="blog-sidebar h-max">
+  {/* Quote form sits on the light panel background. */}
+  <div class="blog-sidebar__form">
+    <slot />
+  </div>
+
+  {latestPosts.length > 0 && (
+    <section class="blog-sidebar__panel">
+      <h2>Latest Posts</h2>
+      <ul class="blog-sidebar__links">
+        {latestPosts.map((post) => (
+          <li>
+            <a href={post.url}>{post.title}</a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+
+  {categories.length > 0 && (
+    <section class="blog-sidebar__panel">
+      <h2>Categories</h2>
+      <ul class="blog-sidebar__links">
+        {categories.map((category: any) => (
+          <li>
+            <a href={`/blog/?category=${category.id}`}>
+              {category.data?.title ?? category.id}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+
+  {tags.length > 0 && (
+    <section class="blog-sidebar__panel">
+      <h2>Tags</h2>
+      <ul class="blog-sidebar__tags">
+        {tags.map((tag) => (
+          <li>
+            <a href={`/blog/?tag=${encodeURIComponent(tag)}`}>
+              {capitalizeWords(tag)}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+</aside>
+
+<style>
+  /* One panel with one shadow. Written as scoped CSS rather than utilities
+     because Tailwind's @source in global.css doesn't cover src/components —
+     classes used only here are never generated. */
+  .blog-sidebar {
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgb(0 0 0 / 0.08);
+    background: var(--color-bg);
+  }
+
+  .blog-sidebar__form {
+    padding: 1.25rem;
+  }
+
+  /* Legacy navy sections. Separated by a rule instead of a gap, so the whole
+     thing reads as one panel. */
+  .blog-sidebar__panel {
+    background: var(--color-primary);
+    color: var(--color-bg);
+    padding: 1.5rem;
+  }
+
+  .blog-sidebar__panel + .blog-sidebar__panel {
+    border-top: 1px solid rgb(255 255 255 / 0.12);
+  }
+
+  .blog-sidebar__panel h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 1.25rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid rgb(255 255 255 / 0.2);
+  }
+
+  .blog-sidebar__links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Legacy link treatment: amber left-rule that slides in on hover. */
+  .blog-sidebar__links a {
+    display: block;
+    color: #fff;
+    text-decoration: none;
+    font-size: 0.975rem;
+    line-height: 1.5;
+    padding: 0.75rem 0 0.75rem 0.75rem;
+    margin-left: -0.75rem;
+    border-left: 3px solid transparent;
+    border-bottom: 1px solid rgb(255 255 255 / 0.1);
+    transition: background-color 0.3s ease, border-color 0.3s ease,
+      padding-left 0.3s ease;
+  }
+
+  .blog-sidebar__links li:last-child a {
+    border-bottom: 0;
+  }
+
+  .blog-sidebar__links a:hover,
+  .blog-sidebar__links a:focus-visible {
+    background: rgb(255 255 255 / 0.1);
+    border-left-color: var(--color-accent);
+    padding-left: 1.125rem;
+  }
+
+  /* Translucent-white pills, as the legacy tags-list. */
+  .blog-sidebar__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.625rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .blog-sidebar__tags a {
+    display: inline-block;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8125rem;
+    color: #fff;
+    text-decoration: none;
+    background: rgb(255 255 255 / 0.2);
+    border: 1px solid rgb(255 255 255 / 0.3);
+    border-radius: 20px;
+    transition: background-color 0.3s ease, transform 0.3s ease,
+      box-shadow 0.3s ease;
+  }
+
+  .blog-sidebar__tags a:hover,
+  .blog-sidebar__tags a:focus-visible {
+    background: rgb(255 255 255 / 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgb(0 0 0 / 0.2);
+  }
+</style>

@@ -10,6 +10,7 @@
  */
 import Button from "@/components/Button/Button";
 import type { SectionButton } from "./ContentRenderer.types";
+import { getPhoneContact } from "@/utils/contactLinks";
 
 interface Props {
   buttons?: SectionButton[];
@@ -20,18 +21,27 @@ const { buttons = [], class: className = "" } = Astro.props as Props;
 
 // Legacy variant name → new Button variant.
 const VARIANT_ALIASES: Record<string, string> = { underline: "link" };
+const phone = buttons.some((button) => button.contact === "phone")
+  ? await getPhoneContact()
+  : undefined;
+const resolvedButtons = buttons
+  .map((button) => ({
+    ...button,
+    link: button.contact === "phone" ? phone?.url : button.link,
+  }))
+  .filter((button): button is SectionButton & { link: string } => Boolean(button.link));
 ---
 
-{buttons.length > 0 && (
+{resolvedButtons.length > 0 && (
   <div
     class={`flex flex-col md:flex-row items-stretch md:items-center justify-center gap-[var(--spacing-md)] ${className}`}
   >
-    {buttons.map((btn) => (
+    {resolvedButtons.map((btn) => (
       <Button
         href={btn.link}
         variant={(VARIANT_ALIASES[btn.variant ?? ""] ?? btn.variant ?? "primary") as any}
         size={btn.size ?? "lg"}
-        className="w-full md:w-auto"
+        className={btn.className ?? "w-full md:w-auto"}
         leftIcon={btn.leftIcon}
         rightIcon={btn.rightIcon}
       >

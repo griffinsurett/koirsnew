@@ -55,7 +55,7 @@ const href = url ?? (linkPrefix && rawValue ? `${linkPrefix}${rawValue}` : undef
     </div>
 
     {/* Contact info */}
-    <div class="flex-1">
+    <div class="flex-1 min-w-0">
       {/* Label */}
       {showLabel && (
         <p class="text-sm uppercase tracking-wide text-text/70">
@@ -68,12 +68,12 @@ const href = url ?? (linkPrefix && rawValue ? `${linkPrefix}${rawValue}` : undef
         href ? (
           <a
             href={href}
-            class="text-lg font-semibold text-heading hover:text-primary transition-colors block"
+            class="text-lg font-semibold text-heading hover:text-primary transition-colors block break-words"
           >
             {value}
           </a>
         ) : (
-          <p class="text-lg font-semibold text-heading">{value}</p>
+          <p class="text-lg font-semibold text-heading break-words">{value}</p>
         )
       }
     </div>

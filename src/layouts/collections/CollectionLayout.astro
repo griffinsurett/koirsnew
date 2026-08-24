@@ -11,7 +11,6 @@
  */
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import SecondaryHero from '@/layouts/SecondaryHero.astro';
-import { humanizeSlug } from '@/utils/string';
 import type { CollectionLayoutProps } from './types';
 
 const { 
@@ -30,10 +29,7 @@ const data = entry?.data || {};
   <main class="flex-1">
     {/* Hero section - always displayed */}
     <SecondaryHero
-      eyebrow={humanizeSlug(entry?.id ?? "")}
       title={data.title}
-      heading={data.heading}
-      description={data.description}
       image={data.bannerImage}
       publishDate={data.publishDate}
       author={data.author}

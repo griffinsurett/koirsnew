@@ -21,7 +21,7 @@ import Button from "@/components/Button/Button";
 import BackgroundMedia from "@/components/BackgroundMedia.astro";
 import SectionHeading from "@/components/SectionHeading.astro";
 import { ctaData } from "@/content/siteData";
-import DefaultImg from "@/assets/background.jpg";
+import DefaultImg from "@/assets/koi/roofingandsolarvid-poster.jpg";
 import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
 import { query } from "@/utils/query";
 
@@ -60,7 +60,10 @@ const {
   title = "Welcome",
   description,
   image,
-  video,
+  video = {
+    src: "/roofingandsolarvid-smaller.webm",
+    preload: "metadata",
+  },
   primaryCTA = {
     text: ctaData.text,
     link: ctaData.link,
@@ -74,7 +77,7 @@ const {
 // Prepare optimized background media
 const backgroundMedia = {
   image: {
-    // src: image || DefaultImg,
+    src: image || DefaultImg,
     imageClass: "bg-cover bg-center",
     aboveTheFold: true, // Front page hero is always LCP
   },
@@ -178,5 +181,4 @@ const backgroundMedia = {
   {/* Optional slot for additional content below hero */}
   <slot />
 </section>
-
 

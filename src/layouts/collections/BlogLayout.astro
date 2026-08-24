@@ -1,83 +1,155 @@
 ---
 // src/layouts/collections/BlogLayout.astro
 /**
- * Blog Layout - Specialized Layout for Blog Posts
+ * Blog Layout — the single-post page.
  *
- * Alternative layout optimized for blog content.
- * Simpler than CollectionLayout with:
- * - Featured image above content
- * - Traditional blog post structure
- * - Author info at top
+ * Selected via `itemsLayout` in src/content/blog/_meta.mdx.
  *
- * Specify in _meta.mdx with: itemsLayout: "BlogLayout"
+ * ── WHY THIS CHANGED ──────────────────────────────────────────────────────
+ * This was still the greastro starter layout: a bare `container` with the
+ * featured image, an <h1> and the prose body. No Koi hero, no site bands, and
+ * — the substantive gap — no FAQ section, so the 50 per-post Q&A pairs sitting
+ * in the `faq` collection rendered nowhere and emitted no FAQPage schema.
+ *
+ * Now it uses the same components as every other page type:
+ *   • SecondaryHero  — the shared inner-page banner (as legal + blog index),
+ *                      which already renders post date / author / reading time
+ *   • AccordionVariant for the post's FAQs, which is what makes
+ *     buildFaqSchema emit real FAQPage markup for the questions shown
+ *   • the closing testimonials → gallery bands the other layouts end on
+ *
+ * The legacy post page ran SecondaryHero + content + a sidebar quote form; the
+ * hero and content match it, and the quote form is the QuoteForm aside.
  */
-
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import { getAuthorName, getImageSrc } from "./helpers/layoutHelpers";
+import SecondaryHero from "@/layouts/SecondaryHero.astro";
+import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
+import QuoteForm from "@/components/Form/forms/QuoteForm.astro";
+import BlogSidebar from "@/components/Blog/BlogSidebar.astro";
+import { find, query, sortByOrder, normalizeReference } from "@/utils/query";
+import { serviceBtns } from "@/content/siteData";
+import { normalizeRef } from "@/utils/string";
 import type { CollectionLayoutProps } from "./types";
 
 const {
   entry,
-  collection,
-  collectionMeta,
   Content,
-  isIndexPage,
   seoProps = {},
-  ...extraProps
 } = Astro.props as CollectionLayoutProps;
 
-const data = entry?.data || {};
-const featuredImageSrc = getImageSrc(data.featuredImage);
+const data = (entry?.data ?? {}) as Record<string, any>;
+const postId = entry?.id;
+
+// FAQs scoped to this post. Rendering them through AccordionVariant is what
+// produces the FAQPage schema, so the markup always matches what's shown.
+// Mirrors the MonmouthCountyLayout `monmouthPage` pattern.
+const faqQuery = postId
+  ? query("faq")
+      .where((e: any) =>
+        normalizeReference(e.data.post).some((r: any) => r.id === postId)
+      )
+      .orderBy(sortByOrder())
+  : null;
+const faqCount = faqQuery ? (await faqQuery.all()).length : 0;
+
+/** Resolve the author ref to a display name. `getAuthorName` in layoutHelpers
+ *  is synchronous, so it can only ever echo the raw id ("richard-faria") —
+ *  the real title lives in the `authors` collection, as the blog index's own
+ *  async lookup does. */
+const authorId = normalizeRef(data.author);
+let authorName: string | undefined;
+if (authorId && authorId !== "[object Object]") {
+  authorName = authorId;
+  try {
+    const authorEntry = await find("authors", authorId);
+    if (authorEntry?.data?.title) authorName = String(authorEntry.data.title);
+  } catch {}
+}
 ---
 
 <BaseLayout {...seoProps}>
-  <main class="container mx-auto px-4 py-8">
-    <article class="max-w-4xl mx-auto">
-      {/* Featured image */}
-      {
-        featuredImageSrc && (
-          <div class="mb-8 rounded-xl overflow-hidden">
-            <img
-              src={featuredImageSrc}
-              alt={data.featuredImage?.alt || data.title}
-              class="w-full h-64 md:h-96 object-cover"
-            />
-          </div>
-        )
-      }
+  <main class="flex-1">
+    {/* Shared inner-page hero — same component the blog index and legal pages
+        use. It renders the post metadata (date, author, reading time) itself. */}
+    <SecondaryHero
+      title={data.title}
+      image={data.featuredImage}
+      publishDate={data.publishDate}
+      author={authorName}
+      readingTime={data.readingTime}
+      minHeight="50vh"
+    />
 
-      {/* Article header */}
-      <header class="mb-8">
-        <h1 class="text-4xl md:text-5xl font-bold mb-4">{data.title}</h1>
+    {/* Post body + quote form aside, matching the legacy post page's
+        content-with-sidebar shape.
 
-        {
-          data.description && (
-            <p class="text-xl text-text">{data.description}</p>
-          )
-        }
+        `bg-bg` is required, not cosmetic: the site body sits on NAVY and each
+        band paints its own light background. The starter layout had no
+        background of its own, so the post copy rendered dark-on-dark.
 
-        {/* Metadata */}
-        <div class="flex flex-wrap gap-4 mt-4 text-sm text-text">
-          {
-            data.publishDate && (
-              <time datetime={new Date(data.publishDate).toISOString()}>
-                {new Date(data.publishDate).toLocaleDateString()}
-              </time>
-            )
-          }
-          {data.author && <span>By {getAuthorName(data.author)}</span>}
-          {data.readingTime && <span>{data.readingTime} min read</span>}
+        Body copy uses `.legal-document` — the ported legacy long-form
+        typography (headings, lists, links, blockquotes) from legal.css. The
+        starter's `prose prose-lg` classes did nothing at all here: there's no
+        Tailwind typography plugin in this project. */}
+    <section class="bg-bg text-text">
+      <div class="container mx-auto px-4 py-12">
+        <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,2fr)_360px] gap-10">
+          <article class="legal-document post-body max-w-none">
+            {Content && <Content />}
+          </article>
+
+          {/* Quote form + Latest Posts / Categories / Tags, ported from the
+              2025 post template. The form is slotted in so the sidebar owns
+              the card rhythm and the sticky behaviour. */}
+          <BlogSidebar currentPostId={postId}>
+            <QuoteForm />
+          </BlogSidebar>
         </div>
-      </header>
+      </div>
+    </section>
 
-      {/* Article content */}
-      {
-        Content && (
-          <div class="prose prose-lg max-w-none">
-            <Content />
-          </div>
-        )
-      }
-    </article>
+    {/* Per-post FAQs — the Phase 8 gap. Scoped by the `post` ref so a post
+        only ever shows (and only ever schemas) its own questions. */}
+    {faqQuery && faqCount > 0 && (
+      <ContentRenderer
+        query={faqQuery}
+        variant="AccordionVariant"
+        heading="Frequently Asked Questions"
+      />
+    )}
+
+    {/* Closing bands — the same pair every other page type ends on. */}
+    <ContentRenderer
+      query={query("testimonials").orderBy(sortByOrder())}
+      variant="TestimonialShowcaseVariant"
+      pretitle="Testimonials"
+      heading="Hear It Straight from Homeowners"
+    />
+
+    <ContentRenderer
+      query={query("gallery").orderBy(sortByOrder())}
+      variant="GalleryVariant"
+      heading="Whether you need a new roof or want to go solar with NO MONEY DOWN, we make it easy!"
+      video="/roofingandsolarvid-smaller.webm"
+      buttons={serviceBtns}
+    />
   </main>
 </BaseLayout>
+
+<style is:global>
+  /* Blog-post headings in Koi navy. Scoped to `.post-body` rather than added
+     to `.legal-document` in legal.css, because that class is shared with the
+     privacy and cookie policies — client legal text whose styling shouldn't
+     shift as a side effect of a blog change.
+
+     `is:global` is required: the headings come from rendered MDX, so Astro's
+     scoped-style hashing never reaches them. */
+  .post-body h1,
+  .post-body h2,
+  .post-body h3,
+  .post-body h4,
+  .post-body h5,
+  .post-body h6 {
+    color: var(--color-primary);
+  }
+</style>

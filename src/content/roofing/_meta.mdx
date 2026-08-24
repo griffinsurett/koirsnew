@@ -39,6 +39,7 @@ seo:
 ---
 
 import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
+import Banner from "@/components/Banner.astro";
 import SpanishSection from "@/components/SpanishSection.astro";
 import VideoSection from "@/layouts/VideoSection.astro";
 import KoiRoofers from "@/assets/koi/roof-work-koi.jpg";
@@ -98,7 +99,7 @@ import { related } from "@/utils/query/snippets";
 <ContentRenderer
   query={related("types", "serviceLines", "roofing").orderBy(sortByOrder())}
   variant="ImageCardVariant"
-  columns={3}
+  columns={4}
   title="Types of Roofing We Offer"
 />
 
@@ -121,4 +122,28 @@ import { related } from "@/utils/query/snippets";
       variant="GalleryVariant"
       title="Whether you need a new roof or want to go solar with NO MONEY DOWN, we make it easy!"
       video="/roofingandsolarvid-smaller.webm"
-    />
+      buttons={[
+        {
+          text: "Get a Free Quote",
+          link: "#roofing-quote",
+          variant: "tertiary",
+          className: "w-full md:w-auto lg:min-w-[320px]",
+        },
+        {
+          text: "Call Us",
+          contact: "phone",
+          variant: "secondary",
+          leftIcon: "fa6:phone",
+          className: "w-full md:w-auto lg:min-w-[320px]",
+        },
+      ]}
+    >
+      <Banner
+        slot="after-gallery"
+        title="Already Have a Roof? Go Solar and Save!"
+        description="Maximize the value of your roof by adding a high-efficiency solar array. Reduce your energy bills, qualify for tax incentives, and get more value from your home with one experienced roofing and solar team."
+        buttons={[
+          { text: "Explore Solar Options", link: "/solar/", variant: "secondary" },
+        ]}
+      />
+    </ContentRenderer>

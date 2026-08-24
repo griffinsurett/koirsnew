@@ -30,7 +30,8 @@ interface Props {
    *  a 9:16 video capped only by width is still ~1.8x taller than it is wide. */
   mediaMaxHeight?: string;
   /** Height cap from `lg` up. Mobile is width-driven, so it keeps the
-   *  smaller `mediaMaxHeight`. */
+   *  smaller `mediaMaxHeight`. Sized so the video plus the section's own
+   *  `py-16` still fits inside the viewport — see the default below. */
   mediaMaxHeightLg?: string;
   /** Top-align the columns (default, matching 2025's `items-start`) or center
    *  the copy against the video. */
@@ -47,9 +48,12 @@ const {
   video,
   poster,
   reverse = false,
-  mediaMaxWidth = "clamp(280px, 32vw, 460px)",
-  /** Desktop-only height ceiling — mobile keeps `mediaMaxHeight`. */
-  mediaMaxHeightLg = "clamp(600px, 78vh, 760px)",
+  mediaMaxWidth = "clamp(280px, 28vw, 400px)",
+  /** Desktop-only height ceiling — mobile keeps `mediaMaxHeight`.
+   *  At 78vh the video plus this section's 64px of `py-16` above and below
+   *  overflowed the viewport, so a portrait clip never sat fully on screen.
+   *  Subtracting that padding from the vh budget is what makes it fit. */
+  mediaMaxHeightLg = "clamp(520px, calc(82vh - 8rem), 660px)",
   mediaMaxHeight = "420px",
   align = "start",
   className = "",

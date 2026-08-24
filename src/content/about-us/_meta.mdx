@@ -13,18 +13,71 @@ addToMenu:
 
 import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
 import MediaBand from "@/components/MediaBand.astro";
+import SplitMedia from "@/components/SplitMedia.astro";
+import SectionHeading from "@/components/SectionHeading.astro";
+import { Image } from "astro:assets";
 import { query, sortByOrder } from "@/utils/query";
-import { siteData } from "@/content/siteData";
+import { siteData, businessData, serviceBtns } from "@/content/siteData";
+import AboutImage from "@/assets/koi/koiandfriends2.jpg";
+import OnRoof from "@/assets/koi/roofing1.JPG";
+import RichiePic from "@/assets/koi/RichardFaria2.PNG";
 
-{/* The about-us entries' full prose. AccordionVariant is the ONLY starter
-    variant that renders item bodies (via ContentBridge) — so it's used here in
-    Phase 3.5 to get the real copy onto the page for the content diff. The UI
-    phase swaps in a prose/bands treatment. */}
-<ContentRenderer
-  query={query("about-us").orderBy(sortByOrder())}
-  variant="AccordionVariant"
-  faqSchema={false}
-/>
+{/* ── Opening band ───────────────────────────────────────────────────────────
+    The legacy page opened with an amber eyebrow, the site description as the
+    gradient H2, the tagline in italic secondary, and then TWO alternating
+    prose+photo blocks. Reproduced here.
+
+    This replaces a Phase-3.5 placeholder that rendered the whole story inside
+    an AccordionVariant — a collapsed "Our Story" row with the copy hidden, and
+    the heading/description repeated underneath it. */}
+<section class="bg-bg text-text pt-[var(--spacing-3xl)]">
+  <div class="container mx-auto px-4 text-center">
+    <SectionHeading
+      pretitle="Putting Homeowners First, Every Step of the Way"
+      title={siteData.description}
+      tagline={siteData.tagline}
+    />
+  </div>
+</section>
+
+{/* Story part 1 — copy left, the team photo right (legacy: md:flex-row-reverse). */}
+<SplitMedia
+  reverse={true}
+  className="bg-bg text-text !pt-[var(--spacing-lg)]"
+  description={[
+    `${siteData.title} is more than just a roofing and solar company—we're a family-style business rooted in New Jersey and built on a foundation of trust, expert craftsmanship, and lasting relationships. Our mission is to redefine how people experience contractors by making home upgrades feel smooth, stress-free, and even enjoyable.`,
+    `Our story spans ${businessData.experience}. This isn't just a profession—it's a legacy. What began with our grandfather's commitment to quality roofing was passed down to our father, and now to us. Three generations of knowledge, pride, and hard work live in every project we take on today.`,
+  ]}
+>
+  <Image
+    src={AboutImage}
+    alt="The Koi Roofing and Solar team"
+    class="w-full h-auto object-cover rounded-2xl"
+    loading="lazy"
+    decoding="async"
+    widths={[480, 800, 1200]}
+    sizes="(min-width: 1024px) 50vw, 100vw"
+  />
+</SplitMedia>
+
+{/* Story part 2 — the legacy page flipped the columns for this one. */}
+<SplitMedia
+  className="bg-bg text-text !pt-0"
+  description={[
+    `Best of all, we make these upgrades accessible to everyone through ${businessData.financing} and flexible options tailored to all credit types. At ${siteData.title}, it's not just about installing panels or replacing shingles—it's about delivering peace of mind and real value to homeowners across New Jersey, Pennsylvania, and New York.`,
+    `We're building one of the fastest-growing roofing and solar companies in New Jersey—not by cutting corners, but by doing things differently. We honor every promise, create opportunity, and bring life and energy into a space that's long overdue for change.`,
+  ]}
+>
+  <Image
+    src={OnRoof}
+    alt="Koi roofers building a roof"
+    class="w-full h-auto object-cover rounded-2xl"
+    loading="lazy"
+    decoding="async"
+    widths={[480, 800, 1200]}
+    sizes="(min-width: 1024px) 50vw, 100vw"
+  />
+</SplitMedia>
 
 {/* legacy: variant="media1" — the Our Vision band, above the values grid. */}
 <MediaBand
@@ -34,24 +87,46 @@ import { siteData } from "@/content/siteData";
   overlayClass="bg-primary opacity-80"
 />
 
-{/* Koi's five core values — its own collection, rendered here (plan §4.2). */}
-<ContentRenderer
-  query={query("values").orderBy(sortByOrder())}
-  variant="GridVariant"
-  columns={3}
-/>
+{/* Koi's five core values beside the team photo — the legacy `imageCol`
+    treatment: an icon list, not a card grid. IconListVariant renders its own
+    two-column band, so the photo goes in via VideoSection-style layout using
+    SplitMedia's single media slot with the list as the section heading. */}
+<section class="bg-bg text-text py-[var(--spacing-3xl)]">
+  <div class="container mx-auto px-4">
+    <div class="flex flex-col lg:flex-row-reverse gap-10 lg:gap-16 items-center">
+      <div class="w-full lg:w-1/2">
+        <Image
+          src={AboutImage}
+          alt="The Koi Roofing and Solar team"
+          class="w-full h-auto object-cover rounded-2xl"
+          loading="lazy"
+          decoding="async"
+          widths={[480, 800, 1200]}
+          sizes="(min-width: 1024px) 50vw, 100vw"
+        />
+      </div>
+      <div class="w-full lg:w-1/2">
+        <ContentRenderer
+          query={query("values").orderBy(sortByOrder())}
+          variant="IconListVariant"
+          columns={1}
+          heading="Our Core Values"
+          headingAlign="responsive"
+          bare={true}
+          showButtonSection={false}
+        />
+      </div>
+    </div>
+  </div>
+</section>
 
-{/* legacy: variant="media1" — the CEO quote band that set up the team grid. */}
-<MediaBand
-  heading={'"All I have is my words and my smile, and without that-I am nothing."'}
-  description="That quote defines our culture. We don't chase hype. We chase results, service, and the trust of our community."
+{/* Gallery marquee + the Roofing/Solar CTA pair — the same closing band the
+    homepage and service pages use, so About ends on the same call to action
+    rather than trailing off after the values list. */}
+<ContentRenderer
+  query={query("gallery").orderBy(sortByOrder())}
+  variant="GalleryVariant"
+  title="Whether you need a new roof or want to go solar with NO MONEY DOWN, we make it easy!"
   video="/roofingandsolarvid-smaller.webm"
-  overlayClass="bg-primary opacity-80"
-/>
-
-{/* The team. */}
-<ContentRenderer
-  query={query("team").orderBy(sortByOrder())}
-  variant="GridVariant"
-  columns={3}
+  buttons={serviceBtns}
 />

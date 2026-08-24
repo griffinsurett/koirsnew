@@ -1,0 +1,26 @@
+[
+  {
+    "id": "energy",
+    "title": "Energy Efficiency & Cost Savings",
+    "description": "Lowering bills, incentives, payback, and what solar actually saves.",
+    "order": 1
+  },
+  {
+    "id": "roofing",
+    "title": "Roofing Insights",
+    "description": "Materials, replacement timing, storm damage, and roof systems.",
+    "order": 2
+  },
+  {
+    "id": "solar",
+    "title": "Solar Guides & Comparisons",
+    "description": "Panels, batteries, PPAs, and choosing between solar options.",
+    "order": 3
+  },
+  {
+    "id": "maintenance",
+    "title": "Roofing Maintenance & Care",
+    "description": "Inspections, seasonal checklists, and extending roof lifespan.",
+    "order": 4
+  }
+]

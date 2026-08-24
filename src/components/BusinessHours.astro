@@ -1,0 +1,45 @@
+---
+// src/components/BusinessHours.astro
+/**
+ * Business Hours — the "when you can reach us" band on /contact-us, rendered
+ * as a MediaBand over the team photo so it reads as a real brand band rather
+ * than a flat grey strip.
+ *
+ * Reads `siteData.businessHours`, the SAME array the footer prints and the
+ * JSON-LD `openingHoursSpecification` is derived from, so the three can't
+ * drift apart. Each entry carries both representations (the human `days` /
+ * `hours` strings and the structured `dayOfWeek` / `opens` / `closes`), which
+ * is why this renders the strings verbatim rather than reformatting times.
+ */
+import MediaBand from "@/components/MediaBand.astro";
+import { businessHours } from "@/content/siteData";
+import hoursBg from "@/assets/koi/koi_team1.jpg";
+
+interface Props {
+  heading?: string;
+  className?: string;
+}
+
+const { heading = "Customer Support Hours", className = "" } = Astro.props as Props;
+---
+
+{businessHours.length > 0 && (
+  <MediaBand
+    heading={heading}
+    image={hoursBg}
+    imageClass="object-top"
+    overlayClass="bg-primary opacity-90"
+    className={className}
+  >
+    {/* `text-bg` copy on the band's own light-on-dark colour. The days label
+        is emphasised rather than colour-shifted, since the band is navy. */}
+    <ul class="mt-[var(--spacing-sm)] inline-flex flex-col gap-[var(--spacing-xs)] list-none p-0 m-0 text-lg md:text-xl text-bg">
+      {businessHours.map((slot: any) => (
+        <li>
+          <span class="font-semibold">{slot.days}:</span>{" "}
+          <span class="text-bg/80">{slot.hours}</span>
+        </li>
+      ))}
+    </ul>
+  </MediaBand>
+)}

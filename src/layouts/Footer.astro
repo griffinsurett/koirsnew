@@ -20,93 +20,273 @@ import PreferencesLayout from "./PreferencesLayout.astro";
 import { businessHours } from "@/content/siteData";
 import { getContactLinks } from "@/utils/contactLinks";
 import { Image } from "astro:assets";
+import BackgroundMedia from "@/components/BackgroundMedia.astro";
 import KoiLogo from "@/assets/koi/logowwords.png";
+import FooterBg from "@/assets/koi/koi_team2.JPG";
 
 const contactLinks = await getContactLinks();
+
+/** The bottom bar names the address, phone and email individually (rather than
+ *  as a list), so pull them out of the same contact-us collection. */
+const addressContact = contactLinks.find((c) => c.id === "address");
+const phoneContact = contactLinks.find((c) => c.id === "phone");
+const emailContact = contactLinks.find((c) => c.id === "email");
+
+/** Legacy footer list/item/contact classes, copied from the 2025 Footer.astro. */
+const footerListClass =
+  "flex flex-col justify-center items-center xl:items-start gap-[var(--spacing-xs)] py-[var(--spacing-xs)]";
+/** Legacy `menuItemClass` was "hover:text-accent text-base uppercase" and the
+ *  links inherited cream from the legacy Menu component. Here they render
+ *  through Button variant="link", whose `.link-base` applies `text-primary`
+ *  (navy) — invisible on the navy footer — so `!text-bg` is added to restore
+ *  the cream the legacy footer had. */
+const footerItemClass = "text-bg hover:text-accent text-base uppercase";
+/** Legacy `bottomLinksHoverClass` — amber links that go blue + underlined. */
+const bottomLinksHoverClass = "text-accent hover:text-secondary hover:underline";
+
+/** Footer background — the team photo under a heavy navy tint. The legacy
+ *  footer used the roofing/solar video here; a still is requested instead. The
+ *  overlay stays high because all the footer copy sits on top of it. */
+const footerBackgroundMedia = {
+  image: { src: FooterBg, imageClass: "object-cover object-center" },
+  overlayClass: "bg-primary/95",
+};
+const footerContactItemClass =
+  "flex flex-col justify-center xl:justify-start items-center xl:items-start gap-[var(--spacing-xs)] pb-[var(--spacing-sm)] text-base";
 ---
 
-<footer class="bg-text text-bg mt-auto">
-  <div class="mx-auto">
-    {/* Brand, contact facts and business hours — the legacy footer's first
-        column. Hours come from siteData.businessHours (the same array the
-        business schema reads), so the two can't drift. */}
-    <div class="grid gap-8 py-10 px-6 md:grid-cols-3 max-w-6xl mx-auto w-full">
-      <div class="flex flex-col gap-4">
-        <Image
-          src={KoiLogo}
-          alt={`${siteData.title} logo`}
-          class="h-20 w-auto object-contain"
-          widths={[240]}
-          loading="lazy"
-        />
-        <p class="text-base opacity-90">{siteData.description}</p>
-      </div>
+<footer class="relative overflow-hidden text-bg mt-auto">
+  <BackgroundMedia backgroundMedia={footerBackgroundMedia} />
 
-      <div class="flex flex-col gap-2 text-sm">
-        <h2 class="font-semibold mb-1">Contact</h2>
-        {contactLinks.map((c) => (
-          <a href={c.href} class="hover:underline opacity-90">
-            {c.displayValue ?? c.value}
+  {/* Content sits above the media layer. `w-38/40` matches the header's
+      container so the footer lines up with the nav rather than being narrower. */}
+  <div class="relative z-10 w-38/40 mx-auto">
+    {/* ── Footer top, ported from the 2025 footer ──────────────────────────
+        The legacy footer was ONE row: the brand column (logo + description +
+        socials) on the left, then the menu columns pushed to the right. So the
+        brand block and the menus share a single flex row here rather than the
+        brand sitting in its own 3-column grid above them.
+
+        The old grid's other two columns (Contact / Business Hours) are gone:
+        they duplicated the Business Hours column in the menu row below. */}
+    <div class="footer-top flex justify-center items-center text-center xl:text-left media-border">
+      <div class="top-footer-wrap flex items-center justify-between py-[var(--spacing-md)] flex-col xl:flex-row w-full xl:gap-4">
+        {/* Brand column — legacy classes: `lg:w-3/4 xl:w-1/4`, logo `h-35`,
+            description `text-lg font-thin text-text-light`, socials beneath it
+            in amber with `h-6` icons. */}
+        <div class="w-full text-center xl:text-left lg:w-3/4 xl:w-1/4 flex flex-col items-center xl:items-start justify-center mb-[var(--spacing-md)] lg:mt-0">
+          <a href="/">
+            <Image
+              src={KoiLogo}
+              alt={`${siteData.title} logo`}
+              class="h-35 w-auto object-contain"
+              widths={[240, 480]}
+              loading="lazy"
+            />
           </a>
-        ))}
-      </div>
+          <p class="text-lg font-thin text-text-light">{siteData.description}</p>
+          <ContentRenderer
+            query={query("social-media")}
+            variant="SocialMediaVariant"
+            size="md"
+            alignment="left"
+            className="!text-bg hover:!text-accent justify-center xl:justify-start gap-[var(--spacing-md)] mt-[var(--spacing-md)]"
+          />
+        </div>
 
-      <div class="flex flex-col gap-2 text-sm">
-        <h2 class="font-semibold mb-1">Business Hours</h2>
-        {businessHours.map((h) => (
-          <p class="opacity-90 mb-0">{h.days}: {h.hours}</p>
-        ))}
+    {/* ── Menu columns, ported from the 2025 footer ─────────────────────────
+        The legacy footer ran four columns across one row: Service Areas,
+        Services, Info, Contact Us. Each list came from a query, not hardcoded
+        markup, so they're ContentRenderer lists here:
+
+          Service Areas -> roots("service-areas")   (legacy getParentServiceAreas)
+          Services      -> roofing + solar          (legacy getParentServiceItems,
+                                                     which returned top-level
+                                                     `services`; that collection
+                                                     split into these two)
+          Info          -> the footer-menu          (legacy hardcoded FooterMenu)
+
+        Legacy classes kept:
+          heading  "h4 font-medium pr-[var(--spacing-sm)]"
+          list     "flex flex-col justify-center items-center xl:items-start
+                    gap-[var(--spacing-xs)] py-[var(--spacing-xs)]"
+          item     "hover:text-accent text-base uppercase"
+
+        Styling of the footer as a whole is the next step — this pass is about
+        getting the right menus and collections in as renderer lists. */}
+        <div class="w-full flex justify-center xl:justify-end xl:flex-1">
+      <div class="w-full flex flex-col lg:flex-row justify-center lg:justify-between items-start gap-6 lg:gap-8">
+        {/* Services + Service Areas share ONE column, stacked: Services on
+            top with Service Areas beneath it, rather than sitting side by side.
+            Each keeps its own <h4> and query. */}
+        <div class="w-full lg:w-auto text-center xl:text-left flex flex-col gap-[var(--spacing-lg)]">
+        {/* Services — the legacy query returned top-level `services`; that
+              collection is now roofing + solar as co-equal siblings. */}
+          <div class="w-full lg:w-auto text-center xl:text-left">
+            <h4 class="h4 font-medium pr-[var(--spacing-sm)]">Services:</h4>
+            <ContentRenderer
+              query={related("menu-items", "menu", "main-menu").where(
+                (e: any) => e.data.url === "/roofing" || e.data.url === "/solar"
+              )}
+              variant="ListVariant"
+              sectionClassName="py-0"
+              listClassName={footerListClass}
+              itemClassName={footerItemClass}
+            />
+          </div>
+        {/* Service Areas — the 3 root regions, the entry point into the
+              577-entry tree. */}
+          {/* showHeadingSection={false}: the collection's _meta.heading ("We
+              Proudly Serve The Following Areas") would otherwise render above the
+              links, and this column already has its own <h4>. */}
+          <div class="w-full lg:w-auto text-center xl:text-left">
+            <h4 class="h4 font-medium pr-[var(--spacing-sm)]">Service Areas:</h4>
+            <ContentRenderer
+              query={roots("service-areas")}
+              variant="ListVariant"
+              showHeadingSection={false}
+              sectionClassName="py-0"
+              listClassName={footerListClass}
+              itemClassName={footerItemClass}
+            />
+          </div>
+        </div>
+
+        {/* Info — the legacy hardcoded FooterMenu (Privacy Policy, Cookie
+            Policy, Contact Us, Internship Program, Careers), now driven by the
+            footer-menu. Roofing/Solar are filtered out (the Services column
+            above already lists them), and so are the legal pages — those get
+            their own row beneath the columns. */}
+        <div class="w-full lg:w-auto text-center xl:text-left">
+          <h4 class="h4 font-medium pr-[var(--spacing-sm)]">Info:</h4>
+          <ContentRenderer
+            query={related("menu-items", "menu", "footer-menu").where(
+              (e: any) =>
+                !["/roofing", "/solar", "/privacy-policy", "/cookie-policy"].includes(
+                  e.data.url
+                )
+            )}
+            variant="ListVariant"
+            sectionClassName="py-0"
+            listClassName={footerListClass}
+            itemClassName={footerItemClass}
+          />
+        </div>
+
+        {/* Contact Us — hours + the contact links, as the legacy 4th column. */}
+        <div class="w-full lg:w-auto flex flex-col justify-start items-center xl:items-start text-center xl:text-left xl:ml-8">
+          <div class={footerContactItemClass}>
+            <p class="h4 font-medium pr-[var(--spacing-sm)] mb-0">Business Hours:</p>
+            {businessHours.map((h) => (
+              <div>{h.days}: {h.hours}</div>
+            ))}
+          </div>
+          {contactLinks.map((c) => (
+            <div class={footerContactItemClass}>
+              <a href={c.href} class="text-bg hover:text-accent">
+                {c.displayValue ?? c.value}
+              </a>
+            </div>
+          ))}
+        </div>
+        </div>
+        </div>
       </div>
     </div>
 
-    {/* Service Areas — the legacy footer listed the top-level regions here,
-        the entry point into the 577-entry service-areas tree. */}
-    <div class="w-full text-center py-4">
-      <h2 class="font-semibold mb-1">Service Areas</h2>
-      <ContentRenderer
-        query={roots("service-areas")}
-        variant="ListVariant"
-        className="text-bg flex flex-wrap justify-center gap-4 text-sm"
-      />
+    {/* ── Footer bottom bar, ported from the 2025 footer ────────────────────
+        Legacy structure: one max-w-7xl row that stacks on mobile and splits
+        left/right from lg. Left is copyright + credits; right is the legal
+        entity, address and inquiry line.
+
+        Legacy classes kept:
+          bar    "footer-bottom flex justify-center items-center
+                  p-[var(--spacing-sm)] w-full"
+          inner  "w-full max-w-7xl flex flex-col lg:flex-row justify-between
+                  items-center lg:items-center gap-4 text-sm font-thin"
+          links  "text-accent hover:text-secondary hover:underline"
+
+        Every fact comes from the content layer (siteData + contact-us) rather
+        than being retyped, so the bar can't drift from the rest of the site. */}
+    <div class="footer-bottom flex justify-center items-center p-[var(--spacing-sm)] w-full">
+      <div class="w-full flex flex-col lg:flex-row justify-between items-center lg:items-center gap-4 text-sm font-thin">
+        {/* Left: copyright, credits, legal links. Three rows in the same
+            `flex flex-col py-4 gap-4` as the right column so the two sides
+            balance instead of one being tight and the other spaced. */}
+        <div class="text-center lg:text-left leading-relaxed flex flex-col py-4 gap-4">
+          {/* Legal links — the `legal` collection (Privacy Policy, Cookie
+              Policy) as the FIRST row: inline from md up, stacked on mobile.
+              White with a gold hover, matching the footer menu links rather
+              than the amber `bottomLinksHoverClass` used for inline text. */}
+          <ContentRenderer
+            query={query("legal")}
+            variant="ListVariant"
+            showHeadingSection={false}
+            sectionClassName="py-0"
+            listClassName="flex flex-col md:flex-row items-center lg:items-start justify-center lg:justify-start gap-[var(--spacing-xs)] md:gap-[var(--spacing-lg)]"
+            itemClassName={footerItemClass}
+          />
+          <p class="m-0">
+            &copy; {new Date().getFullYear()} {siteData.title} All rights reserved.
+          </p>
+          <p class="m-0">
+            Website by
+            <a
+              href="https://griffinswebservices.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              class={bottomLinksHoverClass}
+            >
+              Griffin's Web Services
+            </a>
+            | Marketing by Koi Crest Marketing
+          </p>
+        </div>
+
+        {/* Right: legal entity, address, inquiry line. `legalName` is the 2026
+            name for what the legacy called `businessName`. */}
+        <div class="text-center lg:text-left leading-relaxed flex flex-col py-4 gap-4">
+          <p class="m-0">
+            {/* No trailing "." here: siteData.legalName is "Koi Solar Corp."
+                and already ends in one, so the legacy template's literal period
+                produced "Corp..". */}
+            {siteData.title} is a registered DBA of {siteData.legalName}
+          </p>
+          {addressContact && (
+            <p class="m-0">
+              <a
+                href={addressContact.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                class={bottomLinksHoverClass}
+              >
+                {addressContact.displayValue ?? addressContact.value}
+              </a>
+            </p>
+          )}
+          {(phoneContact || emailContact) && (
+            <p class="m-0">
+              For inquiries, please contact us at{" "}
+              {phoneContact && (
+                <a href={phoneContact.url} class={bottomLinksHoverClass}>
+                  {phoneContact.displayValue ?? phoneContact.value}
+                </a>
+              )}
+              {phoneContact && emailContact && <Fragment>{" "}or{" "}</Fragment>}
+              {emailContact && (
+                <a href={emailContact.url} class={bottomLinksHoverClass}>
+                  {emailContact.displayValue ?? emailContact.value}
+                </a>
+              )}
+            </p>
+          )}
+        </div>
+      </div>
     </div>
 
-    <div class="flex flex-col justify-between items-center gap-6 py-4 w-full">
-      {/* Footer navigation links */}
-      <div class="flex flex-wrap items-center justify-center gap-4 text-sm">
-        <ContentRenderer
-          query={related("menu-items", "menu", "footer-menu")}
-          variant="ListVariant"
-          className="text-bg flex"
-        />
-      </div>
+    {/* Preference scripts + cookie banner only (no visible buttons). The
+        socials now live in the brand column, as they did on the legacy site. */}
+    <PreferencesLayout showButtons={false} />
 
-      {/* Legal & privacy links — with the cookie-preferences control rendered
-          inline as part of the legal links (not a separate preferences bar). */}
-      <div class="flex flex-wrap items-center justify-center gap-4 text-sm">
-        <ContentRenderer
-          query={query("legal")}
-          variant="ListVariant"
-          className="text-bg flex"
-        />
-        {/* Scripts + cookie banner only — the visible cookie-preferences control
-            lives in the legal links above. */}
-        <PreferencesLayout showButtons={false} />
-      </div>
-
-      {/* Social media icons */}
-      <ContentRenderer
-        query={query("social-media")}
-        variant="SocialMediaVariant"
-        size="md"
-        alignment="left"
-        className="text-bg"
-      />
-
-      {/* Copyright notice */}
-      <p class="text-bg text-base">
-        &copy; {new Date().getFullYear()}
-        {siteData.legalName}. All rights reserved.
-      </p>
-    </div>
   </div>
 </footer>

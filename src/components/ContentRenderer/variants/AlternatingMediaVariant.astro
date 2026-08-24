@@ -1,0 +1,110 @@
+---
+// src/components/ContentRenderer/variants/AlternatingMediaVariant.astro
+/**
+ * Alternating Media Variant — the full-width image/copy rows the 2025 Monmouth
+ * County landing pages used for their "Roof Types We Work On" and
+ * "Comprehensive Roofing Solutions" lists.
+ *
+ * Legacy markup (ported verbatim from the six landing pages):
+ *   • row      — `group w-full h-[50vh] overflow-hidden shadow rounded-lg
+ *                hover:shadow-lg transition-shadow`
+ *   • image    — `w-full lg:w-1/2 h-full`, object-cover, group-hover:scale-105
+ *   • copy     — `w-full lg:w-1/2 h-full p-lg`, centered on desktop
+ *   • title    — `.h3 text-primary`
+ *   • body     — `lg:text-lg text-text font-thin lg:px-xl`
+ *   • rhythm   — rows stack with `gap-[var(--spacing-lg)]`
+ *
+ * Direction alternates per row (`lg:flex-row` / `lg:flex-row-reverse`), which
+ * is what makes the band read as a zig-zag rather than a list. It's derived
+ * from the index so content doesn't have to declare it, but a per-item
+ * `reverse` still wins when set.
+ *
+ * The legacy `scale-up` scroll animation is intentionally NOT carried over —
+ * motion is dropped site-wide (see AGENTS.md / the rebuild plan §06).
+ */
+import type { BaseVariantProps } from "../ContentRenderer.types";
+import { Image } from "astro:assets";
+import SectionHeading from "@/components/SectionHeading.astro";
+import SectionButtons from "../SectionButtons.astro";
+import { resolveImageMetadata } from "@/utils/images";
+
+interface Props extends BaseVariantProps {
+  pretitle?: string;
+  /** Start the first row with the image on the right instead of the left. */
+  reverseFirst?: boolean;
+}
+
+const {
+  items = [],
+  title,
+  heading,
+  pretitle,
+  description,
+  className = "",
+  buttons = [],
+  buttonsClassName = "",
+  reverseFirst = false,
+  id,
+} = Astro.props as Props;
+
+const rows = (Array.isArray(items) ? items : []).map((item: any, i: number) => ({
+  ...item,
+  media: resolveImageMetadata(item.image ?? item.featuredImage),
+  // Per-item `reverse` wins; otherwise alternate from the starting side.
+  flip: typeof item.reverse === "boolean" ? item.reverse : (i % 2 === 1) !== reverseFirst,
+}));
+---
+
+<section id={id} class={`bg-bg text-text py-[var(--spacing-3xl)] ${className}`}>
+  <div class="container mx-auto px-4">
+    {(heading || title || pretitle || description) && (
+      <SectionHeading
+        pretitle={pretitle}
+        heading={heading}
+        title={title}
+        description={description}
+        class="pb-[var(--spacing-xl)]"
+      />
+    )}
+
+    {rows.length > 0 && (
+      <div class="flex flex-col gap-[var(--spacing-lg)]">
+        {rows.map((row: any) => (
+          <article class="group w-full lg:h-[50vh] overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow">
+            <div
+              class:list={[
+                "flex h-full flex-col items-center",
+                row.flip ? "lg:flex-row-reverse" : "lg:flex-row",
+              ]}
+            >
+              <div class="w-full lg:w-1/2 h-64 lg:h-full overflow-hidden">
+                {row.media ? (
+                  <Image
+                    src={row.media}
+                    alt={row.alt || row.title || ""}
+                    format="webp"
+                    loading="lazy"
+                    widths={[480, 800, 1200]}
+                    sizes="(min-width: 1024px) 50vw, 100vw"
+                    class="h-full w-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
+                  />
+                ) : null}
+              </div>
+
+              <div class="w-full lg:w-1/2 h-full p-[var(--spacing-lg)] flex flex-col items-start lg:items-center text-left lg:text-center gap-[var(--spacing-sm)] justify-center">
+                {row.title && <h3 class="h3 text-primary">{row.title}</h3>}
+                {row.description && (
+                  <p class="lg:text-lg text-text font-thin lg:px-[var(--spacing-xl)]">
+                    {row.description}
+                  </p>
+                )}
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    )}
+
+    <SectionButtons buttons={buttons} class={`mt-[var(--spacing-xl)] ${buttonsClassName}`} />
+  </div>
+</section>

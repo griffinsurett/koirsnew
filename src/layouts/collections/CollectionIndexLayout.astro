@@ -6,7 +6,7 @@
  * The default layout for collection index pages (e.g., /blog, /services).
  * 
  * Behavior:
- * - Always shows SecondaryHero with title and description
+ * - Always shows SecondaryHero with the page title
  * - Uses featuredImage from _meta.mdx if provided, otherwise default
  * - If MDX Content exists → Renders it
  * - If no MDX Content → Renders default grid
@@ -16,7 +16,6 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
 import SecondaryHero from "@/layouts/SecondaryHero.astro";
 import { query } from "@/utils/query";
-import { humanizeSlug } from "@/utils/string";
 
 export interface Props {
   Content?: any;
@@ -35,7 +34,7 @@ const {
   hasContent = false,
 } = Astro.props;
 
-const { title: pageTitle, description: pageDescription } = seoProps;
+const { title: pageTitle } = seoProps;
 
 // Use featuredImage from _meta.mdx if provided, otherwise undefined (will use default)
 const heroImage = collectionMeta.featuredImage;
@@ -45,25 +44,30 @@ const heroImage = collectionMeta.featuredImage;
   <main class="flex-1">
     {/* Header - Always displayed */}
     <SecondaryHero
-      eyebrow={humanizeSlug(collectionName)}
       title={pageTitle}
-      heading={collectionMeta.heading}
-      description={pageDescription}
       image={heroImage}
       minHeight="50vh"
     />
 
-    {/* Content - Either custom MDX or default grid */}
-    <div class="container mx-auto px-4 pb-16">
-      {
-        hasContent && Content ? (
-          /* Custom MDX content from _meta.mdx body */
-          <Content />
-        ) : (
-          /* Default: Grid of collection items */
+    {/* Content — either the custom MDX body or the default grid.
+
+        No container wrapper here: every variant already renders its own
+        `<section>` with its own container and vertical rhythm, so wrapping
+        them again constrained full-width bands (the contact band, about-us's
+        MediaBand) into an inset panel floating on the navy page background.
+        ServiceIndexLayout and MonmouthCountyLayout render `<Content />` bare
+        for exactly this reason; this matches them.
+
+        The default grid keeps a container of its own, since GridVariant is
+        rendered here rather than by a section-owning body. */}
+    {
+      hasContent && Content ? (
+        <Content />
+      ) : (
+        <div class="container mx-auto px-4 pb-16">
           <ContentRenderer query={query(collectionName)} variant="GridVariant" />
-        )
-      }
-    </div>
+        </div>
+      )
+    }
   </main>
 </BaseLayout>

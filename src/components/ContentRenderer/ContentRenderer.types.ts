@@ -39,9 +39,12 @@ export interface BaseVariantProps {
  */
 export interface SectionButton {
   text: string;
-  link: string;
+  link?: string;
+  /** Resolve the destination from a canonical contact collection entry. */
+  contact?: 'phone';
   variant?: 'primary' | 'secondary' | 'tertiary' | 'ghost' | 'link';
   size?: 'sm' | 'md' | 'lg';
+  className?: string;
   leftIcon?: string;
   rightIcon?: string;
 }

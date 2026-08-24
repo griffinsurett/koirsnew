@@ -387,6 +387,10 @@ export const baseSchema = ({ image }: { image: Function }) =>
     // Parent reference for content hierarchy (slug of parent item in same collection)
     parent: z.union([z.string(), z.array(z.string())]).optional(),
     heading: headingSchema.optional(),
+    // Small label above the hero heading (the legacy amber `top-heading`,
+    // e.g. "Koi Roofing"). The line-of-business pages derive theirs from the
+    // collection name; a landing page carries its own.
+    eyebrow: z.string().optional(),
     cta: ctaSchema,
     // Tags for filtering (e.g., "featured")
     tags: z.array(z.string()).default([]),
@@ -484,6 +488,9 @@ export const metaSchema = ({ image }: { image: Function }) =>
     // Default childHasPage for all parent items in this collection
     itemsChildHasPage: z.boolean().optional(),
     itemsRootPath: z.boolean().default(false),
+    // Former collection prefixes that should redirect each legacy item URL
+    // to its current generated route (for example /serviceAreas/{slug}).
+    itemsRedirectFromPrefixes: z.array(z.string()).optional(),
     itemsAddToMenu: z.array(ItemsAddToMenuFields).optional(),
     // Link behavior for all items in this collection (can be overridden per-item)
     itemsLinkBehavior: LinkBehaviorConfig,

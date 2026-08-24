@@ -15,7 +15,6 @@
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import SecondaryHero from "@/layouts/SecondaryHero.astro";
 import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
-import { humanizeSlug } from "@/utils/string";
 import { query, sortByOrder, normalizeReference } from "@/utils/query";
 import { siteData } from "@/content/siteData";
 import { buildServiceSchema } from "@/utils/schema/serviceSchema";
@@ -59,10 +58,7 @@ const serviceSchema = await buildServiceSchema({
   <JsonLd schema={serviceSchema} />
   <main class="flex-1">
     <SecondaryHero
-      eyebrow={humanizeSlug(entry?.id ?? "")}
       title={data.title}
-      heading={data.heading}
-      description={data.description}
       image={data.bannerImage}
       publishDate={data.publishDate}
       author={data.author}

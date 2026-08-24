@@ -1,0 +1,73 @@
+---
+// src/components/ContactLeadIn.astro
+/**
+ * Contact Lead-in — the single inline row at the top of /contact-us: the
+ * "interested in roofing or solar?" prompt, the hours, and the call button on
+ * one line.
+ *
+ * Was a two-up card grid (prospective + existing customers). Collapsed to one
+ * inline row: the existing-customer card offered the same phone number and a
+ * support email that also appears in the footer, so it was a second card
+ * carrying no new information.
+ *
+ * Static composition, but the contact details are QUERIED from the
+ * `contact-us` collection and `siteData.businessHours` rather than retyped, so
+ * a phone-number or hours change on the collection reaches this page for free.
+ */
+import Button from "@/components/Button/Button";
+import { find } from "@/utils/query";
+import { businessHours } from "@/content/siteData";
+import { formatPhoneNumber } from "@/utils/string";
+
+const phone = await find("contact-us", "phone");
+
+const phoneRaw = String(phone?.data?.value ?? "");
+const phoneDisplay = phoneRaw ? formatPhoneNumber(phoneRaw) : "";
+
+/** Human-readable hours line, e.g. "Everyday: 8AM - 8PM". */
+const hoursLine = businessHours
+  .map((slot) => `${slot.days}: ${slot.hours}`)
+  .join(" · ");
+---
+
+<section class="bg-bg text-text py-[var(--spacing-3xl)]">
+  <div class="container mx-auto px-4">
+    {/* Centered column: heading, description, then the call CTA. No icon —
+        the heading and description carry the message on their own. */}
+    <div class="flex flex-col items-center text-center gap-[var(--spacing-md)]">
+      <h2 class="h2 heading-primary">Interested in roofing or solar?</h2>
+
+      {/* Width constrained via the scoped <style> below, NOT `max-w-2xl`:
+          Tailwind's `@source` in global.css doesn't cover src/components, so
+          arbitrary utilities used only here are never generated — the class
+          lands in the HTML with no rule behind it, and as a flex child of an
+          `items-center` column the paragraph then shrink-wraps to its longest
+          word (one word per line). */}
+      <p class="lead-in-copy text-lg md:text-xl text-text">
+        Free estimates, no obligation. Talk to a real person about your roof or
+        your energy bills{hoursLine ? ` — ${hoursLine}.` : "."}
+      </p>
+
+      {phoneDisplay && (
+        <Button
+          variant="secondary"
+          size="lg"
+          href={`tel:${phoneRaw}`}
+          leftIcon="fa6:phone"
+          className="mt-[var(--spacing-sm)]"
+        >
+          {phoneDisplay}
+        </Button>
+      )}
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Scoped so it can't depend on Tailwind scanning this directory. */
+  .lead-in-copy {
+    width: 100%;
+    max-width: 42rem; /* Tailwind's max-w-2xl */
+    margin-inline: auto;
+  }
+</style>

@@ -104,6 +104,16 @@ export const collections = {
       }),
   }),
 
+  // ── categories ──────────────────────────────────────────────────────────
+  // Blog categories, ported from the 2025 sidebar where the four names were
+  // hardcoded in the post template. Each `id` matches an existing blog tag
+  // (energy / roofing / solar / maintenance), so the sidebar links filter the
+  // index by tag without the posts needing a second field. Display-only.
+  "categories": defineCollection({
+    loader: FileLoad("categories", "categories.json"),
+    schema: ({ image }) => baseSchema({ image }),
+  }),
+
   "authors": defineCollection({
     loader: FileLoad("authors", "authors.json"),
     schema: ({ image }) =>
@@ -236,6 +246,51 @@ export const collections = {
     schema: ({ image }) =>
       baseSchema({ image }).extend({
         serviceLines: refSchema(["roofing", "solar"]),
+        // The page-specific band stack. Every one of these landing pages runs
+        // the same shape — two topic/service lists and a "Why Choose" grid,
+        // with a CTA banner between them — but the copy, images and item
+        // counts are unique per page. So the SEQUENCE lives here as content
+        // rather than being hardcoded in the layout, which is what lets one
+        // layout serve all six without a per-page branch.
+        //
+        // `kind` selects the renderer:
+        //   mediaCards  -> AlternatingMediaVariant (image/copy zig-zag rows)
+        //   featureCards-> FeatureCardVariant      (bordered icon-card grid)
+        //   steps       -> StepListVariant         (numbered process list)
+        //   banner      -> MediaBand               (CTA over a photo)
+        sections: z
+          .array(
+            z.object({
+              kind: z.enum(["mediaCards", "featureCards", "imageCards", "steps", "banner", "closingBanner"]),
+              heading: z.string().optional(),
+              description: z.string().optional(),
+              // banner only — background photo behind the CTA copy.
+              image: imageInputSchema({ image }).optional(),
+              // featureCards only — the solar page used the larger title.
+              titleSize: z.enum(["h4", "h5"]).optional(),
+              centered: z.boolean().optional(),
+              columns: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]).optional(),
+              items: z
+                .array(
+                  z.object({
+                    title: z.string().optional(),
+                    description: z.string().optional(),
+                    image: imageInputSchema({ image }).optional(),
+                    alt: z.string().optional(),
+                    // mediaCards: flip this row's image to the other side.
+                    reverse: z.boolean().optional(),
+                    // steps: explicit number, else derived from position.
+                    step: z.number().optional(),
+                    // featureCards: raw SVG path data, as the legacy pages
+                    // hand-wrote inline heroicons rather than icon tokens.
+                    svgPaths: z.array(z.string()).optional(),
+                    icon: z.string().optional(),
+                  })
+                )
+                .default([]),
+            })
+          )
+          .optional(),
       }),
   }),
 

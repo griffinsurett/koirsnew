@@ -5,78 +5,250 @@
  * form, so it stays a page rather than becoming a collection of one entry
  * (see KOI-REBUILD-PLAN.md §9.3).
  *
- * ── STATUS: Phase 3.5 stub ────────────────────────────────────────────────
- * Real copy, no styling. Its repeated content (role lists, benefit lists) moves
- * into collections during the design phase; the hiring form is wired when the
- * Formspree ids land.
+ * Ported from the 2025 `src/pages/careers.astro`, section for section:
+ *   hero → Now Hiring intro → Why Work at KOI? (copy + photo) → Open Positions
+ *   → team photo → Benefits & Perks (accordion) → "we build leaders" band
+ *   → What We Look For → Ready to Apply? (HiringForm)
+ *
+ * This replaces a Phase-3.5 stub that rendered bare <h1>/<h2> tags with the
+ * copy duplicated three times and no styling.
+ *
+ * The three role/benefit lists stay inline consts, exactly as the legacy page
+ * had them: they're page-specific narrative content, not a set of sibling
+ * entries, so a collection of four would be worse than a page (plan §9.3).
  */
 import BaseLayout from "@/layouts/BaseLayout.astro";
+import SecondaryHero from "@/layouts/SecondaryHero.astro";
+import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
+import MediaBand from "@/components/MediaBand.astro";
+import SectionHeading from "@/components/SectionHeading.astro";
 import HiringForm from "@/components/Form/forms/HiringForm.astro";
-import { siteData, businessData } from "@/content/siteData";
+import { Image } from "astro:assets";
+import { siteData } from "@/content/siteData";
+import TeamOnSite from "@/assets/koi/koi_team1.jpg";
+import TeamTogether from "@/assets/koi/koi_team2.JPG";
 
 const title = "Careers at KOI";
 const description =
   "Join the KOI Roofing & Solar team. We're hiring sales reps, roofers, solar installers, and more across NJ, NY, and PA. Competitive pay, growth opportunities, and a family-style culture.";
+
+/** Legacy `openPositions` — verbatim. */
+const openPositions = [
+  {
+    title: "Sales Representative",
+    description:
+      "Build relationships with homeowners and close deals on roofing and solar projects.",
+  },
+  {
+    title: "Roofing Installer",
+    description:
+      "Hands-on roof installation, repair, and replacement work across residential and commercial properties.",
+  },
+  {
+    title: "Solar Installer",
+    description:
+      "Install solar panel systems on rooftops, ensuring quality and safety standards.",
+  },
+  {
+    title: "Project Manager",
+    description:
+      "Oversee roofing and solar projects from start to finish, coordinating crews and customer communication.",
+  },
+];
+
+/** Legacy `whyJoinKoi` — verbatim. Rendered as the Benefits & Perks accordion. */
+const whyJoinKoi = [
+  {
+    title: "Competitive Pay",
+    description:
+      "We offer industry-leading compensation with performance bonuses and commission structures.",
+  },
+  {
+    title: "Growth Opportunities",
+    description:
+      "We promote from within. Many of our leaders started in entry-level positions.",
+  },
+  {
+    title: "Training & Development",
+    description:
+      "Ongoing training programs to sharpen your skills and advance your career.",
+  },
+  {
+    title: "Team Culture",
+    description:
+      "Join a family-style company where your contributions are valued and celebrated.",
+  },
+  {
+    title: "Benefits Package",
+    description:
+      "Health insurance, paid time off, and flexible scheduling for full-time employees.",
+  },
+];
+
+/** Legacy `qualifications` — verbatim. */
+const qualifications = [
+  {
+    title: "Strong Work Ethic",
+    description:
+      "We value dedication, reliability, and a willingness to go the extra mile.",
+  },
+  {
+    title: "Team Player",
+    description:
+      "Collaboration is key to our success. We work together to deliver exceptional results.",
+  },
+  {
+    title: "Customer Focus",
+    description: "Every interaction matters. We treat customers like family.",
+  },
+  {
+    title: "Growth Mindset",
+    description:
+      "We're looking for people who want to learn, improve, and advance.",
+  },
+];
 ---
 
-<BaseLayout title={title} description={description}>
+<BaseLayout title={`${title} | Join Our Team | ${siteData.title}`} description={description}>
   <main class="flex-1">
-    <h1>{title}</h1>
-    <p>
-      KOI is growing fast, and we're looking for motivated individuals to join
-      our team. Whether you're experienced or just starting out, we have
-      opportunities for you.
-    </p>
-    <p>
-      {siteData.title} is a {businessData.ownership} company built on{" "}
-      {businessData.experience}.
-    </p>
+    <SecondaryHero title={title} minHeight="50vh" />
 
-    <p>Join the KOI Roofing & Solar team. We're hiring sales reps, roofers, solar installers, and more across NJ, NY, and PA. Competitive pay, growth opportunities, and a family-style culture.</p>
-    <h2>Build Your Career With Us</h2>
-    <p>KOI is growing fast, and we're looking for motivated individuals to join our team. Whether you're experienced or just starting out, we have opportunities for you.</p>
-    <h2>Why Work at KOI?</h2>
-    <h2>Join Our Growing Team</h2>
-    <h2>Benefits & Perks</h2>
-    <h2>What We Look For</h2>
-    <h2>Ready to Apply?</h2>
-    <h2>Tell us about yourself and the position you're interested in.</h2>
+    {/* Now Hiring intro — amber eyebrow over the gradient H2. */}
+    <section class="bg-bg text-text py-[var(--spacing-3xl)]">
+      <div class="container mx-auto px-4 text-center">
+        {/* legacy classes, verbatim: eyebrow `top-heading text-accent
+            uppercase`, H2 `h1 heading-primary`, description `text-xl text-text`. */}
+        <SectionHeading
+          pretitle="Now Hiring"
+          pretitleClass="!text-accent"
+          title="Build Your Career With Us"
+          headingClass="h1"
+          description="KOI is growing fast, and we're looking for motivated individuals to join our team. Whether you're experienced or just starting out, we have opportunities for you."
+          descriptionClass="!text-xl !text-text"
+        />
+      </div>
+    </section>
 
-    <p>At KOI Roofing & Solar, we're not just building roofs and installing solar panels—we're building careers. Our team members are the heart of our company, and we invest in their success.</p>
-    <p>Ready to join a team that values hard work, rewards performance, and treats everyone like family?</p>
-    <ul>
-      <li>veteran-owned company with over 20 years of industry experience.</li>
-      <li>Opportunities across sales, installation, and management.</li>
-      <li>We promote from within—your growth is our priority.</li>
-      <li>Serving NJ, NY, and PA with plans for continued expansion.</li>
-    </ul>
-    <h3>Sales Representative</h3>
-    <p>Build relationships with homeowners and close deals on roofing and solar projects.</p>
-    <h3>Roofing Installer</h3>
-    <p>Hands-on roof installation, repair, and replacement work across residential and commercial properties.</p>
-    <h3>Solar Installer</h3>
-    <p>Install solar panel systems on rooftops, ensuring quality and safety standards.</p>
-    <h3>Project Manager</h3>
-    <p>Oversee roofing and solar projects from start to finish, coordinating crews and customer communication.</p>
-    <h3>Competitive Pay</h3>
-    <p>We offer industry-leading compensation with performance bonuses and commission structures.</p>
-    <h3>Growth Opportunities</h3>
-    <p>We promote from within. Many of our leaders started in entry-level positions.</p>
-    <h3>Training & Development</h3>
-    <p>Ongoing training programs to sharpen your skills and advance your career.</p>
-    <h3>Team Culture</h3>
-    <p>Join a family-style company where your contributions are valued and celebrated.</p>
-    <h3>Benefits Package</h3>
-    <p>Health insurance, paid time off, and flexible scheduling for full-time employees.</p>
-    <h3>Strong Work Ethic</h3>
-    <p>We value dedication, reliability, and a willingness to go the extra mile.</p>
-    <h3>Team Player</h3>
-    <p>Collaboration is key to our success. We work together to deliver exceptional results.</p>
-    <h3>Customer Focus</h3>
-    <p>Every interaction matters. We treat customers like family.</p>
-    <h3>Growth Mindset</h3>
-    <p>We're looking for people who want to learn, improve, and advance.</p>
+    {/* Why Work at KOI? — copy left, team photo right. The legacy bullet list
+        and its bolded accent phrases, ported. */}
+    <section class="bg-bg text-text pb-[var(--spacing-3xl)]">
+      <div class="container mx-auto px-4">
+        {/* legacy: `h2 text-primary` — solid navy, not the gradient. */}
+        <SectionHeading
+          title="Why Work at KOI?"
+          gradient={false}
+          headingClass="!text-primary"
+          class="pb-[var(--spacing-xl)]"
+        />
 
-    <HiringForm />
+        <div class="flex flex-col lg:flex-row justify-center items-start gap-[var(--spacing-xl)]">
+          <div class="w-full lg:w-2/3 text-left space-y-[var(--spacing-md)] sticky-section">
+            <p class="text-lg text-text">
+              At <span class="text-secondary font-semibold">KOI Roofing &amp; Solar</span>,
+              we're not just building roofs and installing solar panels—we're
+              <span class="text-secondary font-semibold">building careers</span>. Our
+              team members are the heart of our company, and we invest in their
+              success.
+            </p>
+
+            <ul class="list-disc pl-6 text-lg text-text space-y-1">
+              <li>veteran-owned company with over 20 years of industry experience.</li>
+              <li>Opportunities across sales, installation, and management.</li>
+              <li>We promote from within—your growth is our priority.</li>
+              <li>Serving NJ, NY, and PA with plans for continued expansion.</li>
+            </ul>
+
+            <p class="text-lg text-text">
+              Ready to join a team that <span class="text-secondary font-semibold"
+                >values hard work, rewards performance, and treats everyone like
+                family</span
+              >?
+            </p>
+          </div>
+
+          <div class="w-full lg:w-1/2 sticky-section">
+            <Image
+              src={TeamTogether}
+              alt="KOI team working together"
+              class="w-full h-auto object-cover rounded-2xl"
+              loading="lazy"
+              decoding="async"
+              widths={[480, 800, 1200]}
+              sizes="(min-width: 1024px) 50vw, 100vw"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {/* Open Positions — the legacy `listSection`. */}
+    <ContentRenderer
+      items={openPositions}
+      variant="ListSectionVariant"
+      heading="Open Positions"
+      headingClass="!text-primary"
+      gradient={false}
+      pretitle="Join Our Growing Team"
+      pretitleClass="h4 uppercase"
+    />
+
+    {/* The legacy page dropped a half-width team photo between the positions
+        list and the benefits accordion. */}
+    <section class="bg-bg py-[var(--spacing-lg)]">
+      <div class="container mx-auto px-4">
+        <Image
+          src={TeamOnSite}
+          alt="KOI team on site"
+          class="w-full lg:w-1/2 mx-auto h-auto object-cover rounded-2xl"
+          loading="lazy"
+          decoding="async"
+          widths={[480, 800, 1200]}
+          sizes="(min-width: 1024px) 50vw, 100vw"
+        />
+      </div>
+    </section>
+
+    {/* Benefits & Perks — the legacy `faqs` variant (accordion), so these stay
+        collapsed exactly as before. faqSchema is off: these are perks, not
+        FAQs, and must not emit FAQPage markup. */}
+    <ContentRenderer
+      items={whyJoinKoi}
+      variant="AccordionVariant"
+      heading="Benefits & Perks"
+      headingClass="!text-primary"
+      gradient={false}
+      faqSchema={false}
+    />
+
+    {/* legacy: variant="media2" — the "we build leaders" quote band. */}
+    <MediaBand
+      heading={'"We don\'t just hire employees—we build leaders."'}
+      description="At KOI, your career growth is our mission. We invest in training, mentorship, and real opportunities for advancement."
+      video="/roofingandsolarvid-smaller.webm"
+      overlayClass="bg-primary opacity-80"
+    />
+
+    {/* What We Look For — the second legacy `listSection`. */}
+    <ContentRenderer
+      items={qualifications}
+      variant="ListSectionVariant"
+      heading="What We Look For"
+      headingClass="!text-primary"
+      gradient={false}
+    />
+
+    {/* Ready to Apply? — the hiring form, with its resume dropzone. */}
+    <section class="bg-bg text-text py-[var(--spacing-3xl)]">
+      <div class="container mx-auto px-4">
+        <SectionHeading
+          title="Ready to Apply?"
+          description="Tell us about yourself and the position you're interested in."
+          class="pb-[var(--spacing-lg)]"
+        />
+        <div class="w-full flex justify-center">
+          <HiringForm />
+        </div>
+      </div>
+    </section>
   </main>
 </BaseLayout>

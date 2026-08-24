@@ -7,7 +7,8 @@
     "serviceLines": [
       "roofing",
       "solar"
-    ]
+    ],
+    "order": 1
   },
   {
     "title": "$0 Down Payment",
@@ -17,17 +18,8 @@
     "serviceLines": [
       "roofing",
       "solar"
-    ]
-  },
-  {
-    "title": "No 12-Month Payments",
-    "description": "Enjoy financing options with no payments due for the first 12 months, giving you extra budget flexibility.",
-    "icon": "@/assets/koi/calandar.png",
-    "id": "no-12-month-payments",
-    "serviceLines": [
-      "roofing",
-      "solar"
-    ]
+    ],
+    "order": 2
   },
   {
     "title": "50 Year Warranty",
@@ -37,7 +29,8 @@
     "serviceLines": [
       "roofing",
       "solar"
-    ]
+    ],
+    "order": 3
   },
   {
     "title": "Roofing Insurance Done for You",
@@ -46,7 +39,8 @@
     "id": "roofing-insurance-done-for-you",
     "serviceLines": [
       "roofing"
-    ]
+    ],
+    "order": 4
   },
   {
     "title": "No Credit Check",
@@ -56,6 +50,18 @@
     "serviceLines": [
       "roofing",
       "solar"
-    ]
+    ],
+    "order": 5
+  },
+  {
+    "title": "No 12-Month Payments",
+    "description": "Enjoy financing options with no payments due for the first 12 months, giving you extra budget flexibility.",
+    "icon": "@/assets/koi/calandar.png",
+    "id": "no-12-month-payments",
+    "serviceLines": [
+      "roofing",
+      "solar"
+    ],
+    "order": 6
   }
 ]

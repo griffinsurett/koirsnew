@@ -61,6 +61,7 @@ const HeroForm = HERO_FORMS[collectionMeta.heroForm] ?? QuoteForm;
   <main class="flex-1">
     {/* Two-column hero: copy + quote form, matching the legacy ServicesLayout. */}
     <ServiceHero
+      id={`${collectionName}-quote`}
       eyebrow={`Koi ${humanizeSlug(collectionName)}`}
       title={pageTitle}
       heading={collectionMeta.heading}

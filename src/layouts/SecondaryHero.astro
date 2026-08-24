@@ -3,8 +3,9 @@
 /**
  * Secondary Hero Layout
  *
- * Full-width hero with optimized background media support.
- * The plain centered banner used by collection index, legal and blog pages.
+ * Full-width Koi inner-page hero with optimized background image support.
+ * The plain centered title banner used by collection index, legal and blog
+ * pages, matching the legacy site's secondary hero.
  * The two-column service hero (copy + quote form) lives in ServiceHero.astro.
  *
  * Features:
@@ -17,18 +18,10 @@
 import { getAuthorName } from "@/layouts/collections/helpers/layoutHelpers";
 import BackgroundMedia from "@/components/BackgroundMedia.astro";
 import SectionHeading from "@/components/SectionHeading.astro";
-import backgroundSvg from "@/assets/background.jpg";
-
-type Heading = string | { before?: string; text?: string; after?: string };
+import defaultHeroImage from "@/assets/koi/roofingandsolarvid-poster.jpg";
 
 export interface Props {
   title: string;
-  /** Main H1 override (the sought-after heading). Falls back to `title`.
-   *  Supports a segmented form `{ before, text, after }` where `text` is the
-   *  emphasized segment. */
-  heading?: Heading;
-  eyebrow?: string;
-  description?: string;
   image?: any; // Astro image asset or public path
   publishDate?: Date | string;
   author?: string | { collection: string; id: string };
@@ -39,9 +32,6 @@ export interface Props {
 
 const {
   title,
-  heading,
-  eyebrow,
-  description,
   image,
   publishDate,
   author,
@@ -50,21 +40,26 @@ const {
   minHeight = "50vh",
 } = Astro.props;
 
-// The H1 prefers `heading` (string or segmented), falling back to `title`.
-const headingObj =
-  heading && typeof heading === "object" ? heading : undefined;
-const headingStr =
-  typeof heading === "string" && heading.trim() ? heading : undefined;
-
 // Prepare optimized background media
 const backgroundMedia = {
   image: {
-    src: image || backgroundSvg,
-    imageClass: "filter brightness-50 bg-cover bg-center",
+    src: image || defaultHeroImage,
+    imageClass: "brightness-75 object-cover object-center",
     aboveTheFold: true, // Automatic LCP optimization
   },
-  // Legacy service hero: navy at 60% over a brightness-50 photo.
-  overlayClass: "bg-primary opacity-60",
+  // Legacy secondary hero: aerial Koi image beneath a navy readability tint.
+  //
+  // Strengthened from the legacy /65 to /80 for contrast. The tint is the only
+  // thing guaranteeing legibility here, because the photo behind it is
+  // arbitrary — any page can pass its own `image`, so a bright sky or a pale
+  // roof can sit directly under the title.
+  //
+  // Worst case is a blown-out white pixel: brightness-75 takes it to #bfbfbf,
+  // and navy at 80% composites that to ~#424c61. Against the cream title
+  // (#f2f0ef) that is 7.6:1 — WCAG AAA, and AA for the smaller date/author
+  // line at text-bg/90 (6.5:1). At the old /65 the same worst case was 5.5:1:
+  // still AA, but with no headroom once a lighter photo is used.
+  overlayClass: "bg-primary/80",
 };
 ---
 
@@ -82,19 +77,14 @@ const backgroundMedia = {
 
     {/* Hero content */}
     <div class="relative container mx-auto px-4 py-16 md:py-24 z-10">
-      <div class="max-w-4xl mx-auto text-center text-bg">
-      <div>
+      <div class="max-w-6xl mx-auto text-center text-bg">
         <SectionHeading
           headingTag="h1"
           tone="dark"
           align="center"
-          pretitle={eyebrow}
-          heading={headingObj ?? headingStr ?? title}
-          description={description}
+          heading={title}
           class="!mb-0 !max-w-none"
-          pretitleClass="top-heading !text-accent !mb-0 py-[var(--spacing-sm)]"
-          headingClass="h1 !text-3xl md:!text-4xl lg:!text-5xl xl:!text-6xl !tracking-wider !text-bg py-[var(--spacing-sm)]"
-          descriptionClass="h4 !font-thin !text-text-light py-[var(--spacing-sm)]"
+          headingClass="h1 !text-[clamp(3rem,5vw,7rem)] !tracking-wider !text-bg py-[var(--spacing-sm)]"
         />
 
         {/* Below the description, inside the copy column — the legacy service
@@ -167,8 +157,6 @@ const backgroundMedia = {
             </div>
           )
         }
-      </div>
-
       </div>
     </div>
   </div>

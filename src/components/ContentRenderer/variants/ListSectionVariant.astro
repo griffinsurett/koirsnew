@@ -1,0 +1,98 @@
+---
+// src/components/ContentRenderer/variants/ListSectionVariant.astro
+/**
+ * List Section Variant — a direct port of the 2025 `listSection` variant used
+ * by the careers page ("Open Positions", "What We Look For").
+ *
+ * Every class below is copied from the legacy source, not re-derived:
+ *
+ *   SectionVariants.js `listSection`:
+ *     sectionClass      "flex text-center flex-col justify-center items-center"
+ *     contentClass      "content-section flex flex-col justify-center"
+ *     itemsClass        "w-full grid grid-cols-1 sm:grid-cols-2
+ *                        gap-[var(--spacing-xl)] py-[var(--spacing-md)]"
+ *     headingAreaClass  "flex flex-col gap-[var(--spacing-sm)]
+ *                        py-[var(--spacing-sm)] lg:py-[var(--spacing-md)]"
+ *
+ *   LoopComponents/ListItem.jsx (the per-item component):
+ *     <article className="flex flex-col items-start justify-start
+ *                         space-x-[var(--spacing-md)]">
+ *       <h3 className="h4 text-left text-primary m-0">{title}</h3>
+ *       <p  className="text-text text-left text-lg m-0">{description}</p>
+ *     </article>
+ *
+ * Deliberately NOT a card: the legacy items have no border, no background, no
+ * icon, and no padding — they are plain left-aligned title+copy pairs in a
+ * two-column grid. The careers page originally rendered these through
+ * FeatureCardVariant, which drew bordered boxes the 2025 site never had.
+ *
+ * The legacy `slide-left` animation class is dropped, consistent with motion
+ * being off site-wide (plan §06).
+ */
+import type { BaseVariantProps } from "../ContentRenderer.types";
+import SectionHeading from "@/components/SectionHeading.astro";
+import SectionButtons from "../SectionButtons.astro";
+
+interface Props extends BaseVariantProps {
+  pretitle?: string;
+  /** Legacy eyebrow classes, e.g. `h4 uppercase` on "Join Our Growing Team". */
+  pretitleClass?: string;
+  /** Legacy headings here are `h2 text-primary` — solid navy, not the gradient. */
+  gradient?: boolean;
+}
+
+const {
+  items = [],
+  title,
+  heading,
+  pretitle,
+  description,
+  className = "",
+  buttons = [],
+  buttonsClassName = "",
+  pretitleClass = "",
+  headingClass = "",
+  gradient = true,
+  id,
+} = Astro.props as Props;
+
+const listItems = Array.isArray(items) ? items : [];
+---
+
+{/* legacy sectionClass: "w-full section-md bg-bg" + the variant's own
+    "flex text-center flex-col justify-center items-center" */}
+<section
+  id={id}
+  class={`w-full bg-bg text-text py-[var(--spacing-3xl)] flex text-center flex-col justify-center items-center ${className}`}
+>
+  {/* legacy contentClass: "content-section flex flex-col justify-center" */}
+  <div class="container mx-auto px-4 flex flex-col justify-center">
+    {(heading || title || pretitle || description) && (
+      <SectionHeading
+        pretitle={pretitle}
+        pretitleClass={pretitleClass}
+        heading={heading}
+        title={title}
+        headingClass={headingClass}
+        gradient={gradient}
+        description={description}
+        class="flex flex-col gap-[var(--spacing-sm)] py-[var(--spacing-sm)] lg:py-[var(--spacing-md)]"
+      />
+    )}
+
+    {listItems.length > 0 && (
+      <div class="w-full grid grid-cols-1 sm:grid-cols-2 gap-[var(--spacing-xl)] py-[var(--spacing-md)]">
+        {listItems.map((item: any) => (
+          <article class="flex flex-col items-start justify-start">
+            {item.title && <h3 class="h4 text-left text-primary m-0">{item.title}</h3>}
+            {item.description && (
+              <p class="text-text text-left text-lg m-0">{item.description}</p>
+            )}
+          </article>
+        ))}
+      </div>
+    )}
+
+    <SectionButtons buttons={buttons} class={buttonsClassName} />
+  </div>
+</section>

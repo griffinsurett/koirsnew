@@ -1,0 +1,66 @@
+---
+/** Shared tail used by the homepage and every generated service-area page. */
+import MediaBand from "@/components/MediaBand.astro";
+import VideoSection from "@/layouts/VideoSection.astro";
+import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
+import SpanishSection from "@/components/SpanishSection.astro";
+import { serviceBtns, siteData } from "@/content/siteData";
+import { query, sortByOrder } from "@/utils/query";
+import goalBg from "@/assets/koi/koi_team1.jpg";
+---
+
+<MediaBand
+  heading="Our goal is simple:"
+  description={'"Make Roofing and Solar an enjoyable, trustworthy, and inspiring experience for everyone."'}
+  image={goalBg}
+  imageClass="object-top"
+  overlayClass="bg-primary opacity-95"
+/>
+
+<VideoSection video="/notlikekoi.mp4" reverse={true}>
+  <ContentRenderer
+    query={query("benefits").orderBy(sortByOrder())}
+    variant="IconListVariant"
+    columns={1}
+    pretitle="Why Choose Us?"
+    heading="Benefits of Choosing Koi Roofing and Solar!"
+    headingAlign="responsive"
+    description=""
+    buttons={[
+      { text: "Request Estimate", link: "/contact-us/", variant: "secondary" },
+    ]}
+    showButtonSection={false}
+    bare={true}
+  />
+</VideoSection>
+
+<SpanishSection />
+
+<ContentRenderer
+  query={query("testimonials").orderBy(sortByOrder())}
+  variant="TestimonialShowcaseVariant"
+  pretitle="Testimonials"
+  heading="Hear It Straight from Homeowners"
+/>
+
+<ContentRenderer
+  query={query("projects").orderBy(sortByOrder())}
+  variant="BeforeAfterVariant"
+  columns={3}
+  title={`Discover ${siteData.title}'s Rooftop Masterpieces`}
+/>
+
+<ContentRenderer
+  query={query("faq")
+    .where((entry: any) => !entry.data.monmouthPage && !entry.data.post)
+    .orderBy(sortByOrder())}
+  variant="AccordionVariant"
+/>
+
+<ContentRenderer
+  query={query("gallery").orderBy(sortByOrder())}
+  variant="GalleryVariant"
+  title="Whether you need a new roof or want to go solar with NO MONEY DOWN, we make it easy!"
+  video="/roofingandsolarvid-smaller.webm"
+  buttons={serviceBtns}
+/>

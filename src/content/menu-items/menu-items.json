@@ -6,7 +6,11 @@
     "url": "/",
     "order": 0,
     "openInNewTab": false,
-    "menu": ["main-menu", "links-menu", "footer-menu"]
+    "menu": [
+      "main-menu",
+      "links-menu",
+      "footer-menu"
+    ]
   },
   {
     "id": "monmouth-county",
@@ -27,5 +31,23 @@
     "order": 300,
     "openInNewTab": false,
     "menu": "main-menu"
+  },
+  {
+    "id": "internship-program",
+    "title": "Internship Program",
+    "description": "KOI's 2026 Home Improvement Internship Program",
+    "url": "/internship-program",
+    "order": 40,
+    "openInNewTab": false,
+    "menu": "footer-menu"
+  },
+  {
+    "id": "careers",
+    "title": "Careers",
+    "description": "Open roles at Koi Roofing and Solar",
+    "url": "/careers",
+    "order": 50,
+    "openInNewTab": false,
+    "menu": "footer-menu"
   }
 ]

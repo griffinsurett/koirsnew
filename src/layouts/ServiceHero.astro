@@ -18,6 +18,7 @@ import backgroundSvg from "@/assets/background.jpg";
 type Heading = string | { before?: string; text?: string; after?: string };
 
 export interface Props {
+  id?: string;
   title: string;
   /** Main H1 override. Falls back to `title`. Supports `{ before, text, after }`. */
   heading?: Heading;
@@ -29,6 +30,7 @@ export interface Props {
 }
 
 const {
+  id,
   title,
   heading,
   eyebrow,
@@ -53,7 +55,7 @@ const backgroundMedia = {
 };
 ---
 
-<section class={`relative ${className}`}>
+<section id={id} class={`relative ${className}`}>
   <div
     class="relative flex items-start justify-center"
     style={`min-height: ${minHeight}`}

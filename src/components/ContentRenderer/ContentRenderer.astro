@@ -207,7 +207,8 @@ const items = Array.isArray(data?.items) ? data.items : [];
 const hasSlotContent =
   Astro.slots?.has("default") ||
   Astro.slots?.has("under-text") ||
-  Astro.slots?.has("under-button");
+  Astro.slots?.has("under-button") ||
+  Astro.slots?.has("after-gallery");
 
 if (items.length === 0 && !hasSlotContent) {
   return;
@@ -253,4 +254,5 @@ if (!VariantComponent) {
   <slot />
   <slot name="under-text" slot="under-text" />
   <slot name="under-button" slot="under-button" />
+  <slot name="after-gallery" slot="after-gallery" />
 </VariantComponent>

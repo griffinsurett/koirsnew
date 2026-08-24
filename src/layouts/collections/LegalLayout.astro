@@ -16,7 +16,6 @@
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import LastUpdated from '@/integrations/preferences/consent/ui/PrivacyPolicy/LastUpdated.astro';
 import SecondaryHero from '@/layouts/SecondaryHero.astro';
-import { humanizeSlug } from '@/utils/string';
 import type { CollectionLayoutProps } from './types';
 
 const { 
@@ -48,10 +47,7 @@ const effectiveDate = formatDate(data.effectiveDate);
 <BaseLayout {...seoProps}>
   <main class="flex-1">
     <SecondaryHero
-      eyebrow={humanizeSlug(entry?.id ?? "")}
       title={data.title}
-      heading={data.heading}
-      description={data.description}
       image={data.bannerImage}
       publishDate={data.publishDate}
       minHeight="45vh"

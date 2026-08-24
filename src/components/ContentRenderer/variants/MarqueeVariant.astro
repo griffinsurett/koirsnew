@@ -1,0 +1,157 @@
+---
+// src/components/ContentRenderer/variants/MarqueeVariant.astro
+/**
+ * Marquee Variant — continuously scrolling highlight strip.
+ *
+ * Renders collection item TITLES as a single-line marquee that loops
+ * seamlessly: the track holds two copies of the list and translates -50%, so
+ * the second copy slides into place exactly as the first scrolls off.
+ *
+ * Ported from johns-pro-roofing, with two changes for Koi:
+ *   • Koi has no FlagStarIcon, so the divider is a small amber diamond drawn
+ *     in CSS rather than an imported SVG component.
+ *   • Uses Koi's own tokens (--color-primary, --font-heading, --color-accent).
+ *
+ * On the homepage this runs on the `benefits` collection — the same one the
+ * "Why Choose Us" band below queries. No separate marquee collection: the
+ * strip is a second view of existing content, not new content.
+ *
+ * Pauses on hover, and respects prefers-reduced-motion by falling back to a
+ * static centered wrapped row.
+ */
+import type { BaseVariantProps } from "../ContentRenderer.types";
+
+interface Props extends BaseVariantProps {
+  /** Seconds for one full loop. Lower = faster. */
+  speed?: number;
+}
+
+const {
+  items = [],
+  className = "",
+  id,
+  speed = 40,
+} = Astro.props as Props;
+---
+
+{items.length > 0 && (
+  <div
+    id={id}
+    class={`koi-marquee ${className}`}
+    aria-label="Highlights"
+    style={`--marquee-speed: ${speed}s;`}
+  >
+    <div class="koi-marquee-track">
+      {/* Two identical copies: the loop depends on the pair, so the second is
+          aria-hidden to keep it out of the accessibility tree. */}
+      {[0, 1].map((copy) => (
+        <ul class="koi-marquee-group" aria-hidden={copy === 1 ? "true" : undefined}>
+          {items.map((item: any) => (
+            <li>
+              <span>{item.title}</span>
+              <span class="koi-marquee-sep" aria-hidden="true"></span>
+            </li>
+          ))}
+        </ul>
+      ))}
+    </div>
+  </div>
+)}
+
+<style>
+  .koi-marquee {
+    background: var(--color-primary);
+    border-top: 1px solid rgb(255 255 255 / 0.1);
+    border-bottom: 1px solid rgb(255 255 255 / 0.1);
+    overflow: hidden;
+    height: clamp(80px, 6vw, 110px);
+    display: flex;
+    align-items: center;
+  }
+
+  .koi-marquee-track {
+    display: flex;
+    width: max-content;
+    animation: koi-marquee-scroll var(--marquee-speed, 40s) linear infinite;
+  }
+
+  .koi-marquee:hover .koi-marquee-track {
+    animation-play-state: paused;
+  }
+
+  .koi-marquee-group {
+    display: flex;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    flex-shrink: 0;
+  }
+
+  .koi-marquee-group li {
+    display: flex;
+    align-items: center;
+    font-family: var(--font-heading);
+    font-size: clamp(18px, 2.2vw, 30px);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-bg);
+    white-space: nowrap;
+    padding: 0 28px;
+    line-height: 0.9;
+  }
+
+  /* Amber diamond divider — Koi's accent, standing in for johns' flag star. */
+  .koi-marquee-sep {
+    width: 0.45em;
+    height: 0.45em;
+    margin-left: 56px;
+    flex-shrink: 0;
+    background: var(--color-accent);
+    transform: rotate(45deg);
+  }
+
+  @keyframes koi-marquee-scroll {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .koi-marquee {
+      height: auto;
+      padding: 1.25rem 0;
+    }
+
+    .koi-marquee-track {
+      animation: none;
+      flex-wrap: wrap;
+      justify-content: center;
+      width: 100%;
+    }
+
+    /* One copy is enough when nothing scrolls. */
+    .koi-marquee-group[aria-hidden="true"] {
+      display: none;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .koi-marquee {
+      height: 70px;
+    }
+
+    .koi-marquee-group li {
+      font-size: clamp(14px, 4vw, 20px);
+      padding: 0 16px;
+    }
+
+    .koi-marquee-sep {
+      margin-left: 24px;
+    }
+  }
+</style>

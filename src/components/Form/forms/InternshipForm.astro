@@ -1,21 +1,33 @@
 ---
 // src/components/Form/forms/InternshipForm.astro
 /**
- * Apply for the Internship Program — ported field-for-field from the legacy site.
+ * Apply for the KOI Internship — ported from the legacy
+ * `src/components/Form/Forms/InternshipForm.astro`, class for class.
  *
- * Falls back to the contact endpoint when PUBLIC_FORMSPREE_INTERNSHIP_ID is unset, matching the legacy
- * fallback chain.
+ * Every wrapper/field class below is copied from that file, not re-derived:
+ *   card      "bg-bg py-[var(--spacing-2xl)] px-[var(--spacing-2xl)]
+ *              rounded-4xl shadow-lg w-[90vw] lg:w-full gap-[var(--spacing-md)]"
+ *   title     a plain <label>, NOT an <h2>
+ *   rows      "flex flex-col lg:flex-row lg:space-x-[var(--spacing-sm)]"
+ *             with each field in "w-full lg:w-1/2"
+ *   submit    "w-full mt-[var(--spacing-sm)] justify-center cursor-pointer"
  *
- * NOTE: the legacy form included a resume file upload. Formspree file uploads
- * need a paid plan and a multipart submission path, so the field is omitted
- * here and applicants are asked to email their resume instead — flagged rather
- * than silently dropped.
+ * Required flags match the legacy form exactly: firstName, lastName, email,
+ * resumeOrCv, message and consent are required; phone, street, city, state and
+ * postalCode are NOT (the previous version marked them all required, which
+ * would have blocked real submissions).
+ *
+ * The resume upload is restored. An earlier note here claimed Formspree file
+ * uploads were unavailable and asked applicants to email a resume instead —
+ * that's obsolete: submitToFormspree switches from JSON to multipart when it
+ * sees a File, and the hiring form uses the same path.
  */
 import FormWrapper from "@/components/Form/FormWrapper";
 import Input from "@/components/Form/inputs/Input";
 import Textarea from "@/components/Form/inputs/Textarea";
 import Checkbox from "@/components/Form/inputs/Checkbox";
 import Button from "@/components/Button/Button";
+import { siteData } from "@/content/siteData";
 
 interface Props {
   title?: string;
@@ -23,7 +35,7 @@ interface Props {
   className?: string;
 }
 
-const { title = "Apply for the Internship Program", description, className = "" } = Astro.props;
+const { title = "Apply for the KOI Internship", description, className = "" } = Astro.props;
 
 const formId =
   import.meta.env.PUBLIC_FORMSPREE_INTERNSHIP_ID ||
@@ -33,39 +45,183 @@ const formId =
 const currentPageUrl = Astro.url.href;
 ---
 
-<div class={className}>
-  {title && <h2>{title}</h2>}
+{/* Legacy card wrapper, verbatim. */}
+<div
+  class={`bg-bg py-[var(--spacing-2xl)] px-[var(--spacing-2xl)] rounded-4xl shadow-lg w-[90vw] lg:w-full gap-[var(--spacing-md)] ${className}`}
+>
+  {title && (
+    <label class="" for="internship-form">
+      {title}
+    </label>
+  )}
   {description && <p>{description}</p>}
 
   <FormWrapper
     client:idle
     formspreeId={formId}
     useNativeFormSubmission={Boolean(formId)}
-    successMessage="Thanks for applying! We'll be in touch about next steps."
+    successMessage="Thanks for your interest! Someone from KOI will reach out soon."
+    errorMessage="We could not submit your application. Please try again."
     resetOnSuccess={true}
-    className="w-full gap-0"
+    className="pt-[var(--spacing-md)]"
   >
     <input type="hidden" name="formName" value="Koi Internship Application" />
     <input type="hidden" name="pageUrl" value={currentPageUrl} />
 
-    <Input name="firstName" label="First Name" type="text" required={true} />
-    <Input name="lastName" label="Last Name" type="text" required={true} />
-    <Input name="email" label="Email Address" type="email" required={true} />
-    <Input name="phone" label="Phone Number" type="tel" required={true} />
-    <Input name="street" label="Street Address" type="text" required={true} />
-    <Input name="city" label="City" type="text" required={true} />
-    <Input name="state" label="State / Province" type="text" required={true} />
-    <Input name="zip" label="ZIP / Postal Code" type="text" required={true} />
-    <Textarea name="message" label="Tell us why you're interested" rows={5} required={true} />
+    <div class="flex flex-col lg:flex-row lg:space-x-[var(--spacing-sm)] text-sm">
+      <div class="w-full lg:w-1/2">
+        <Input name="firstName" label="First Name" placeholder="First Name" required={true} />
+      </div>
+      <div class="w-full lg:w-1/2">
+        <Input name="lastName" label="Last Name" placeholder="Last Name" required={true} />
+      </div>
+    </div>
 
-    {/* SMS/TCPA consent — legal requirement for texting applicants, separate
-        from cookie consent (disabled site-wide). */}
-    <Checkbox name="smsConsent" required={true}>
-      By checking this box, I consent to receive transactional messages related
-      to my application. Message frequency may vary. Message &amp; Data rates may
-      apply. Reply STOP to opt out.
+    <div class="flex flex-col lg:flex-row lg:space-x-[var(--spacing-sm)]">
+      <div class="w-full lg:w-1/2">
+        <Input
+          name="email"
+          type="email"
+          label="Email Address"
+          placeholder="you@example.com"
+          required={true}
+        />
+      </div>
+      <div class="w-full lg:w-1/2">
+        {/* Legacy: phone is NOT required on the internship form. */}
+        <Input name="phone" type="tel" label="Phone Number" placeholder="123-456-7890" />
+      </div>
+    </div>
+
+    <Input name="street" label="Street Address" placeholder="123 Main St" />
+
+    <div class="flex flex-col lg:flex-row lg:space-x-[var(--spacing-sm)]">
+      <div class="w-full lg:w-1/2">
+        <Input name="city" label="City" placeholder="City" />
+      </div>
+      <div class="w-full lg:w-1/2">
+        <Input name="state" label="State / Province" placeholder="State" />
+      </div>
+    </div>
+
+    <Input name="postalCode" label="ZIP / Postal Code" placeholder="12345" />
+
+    {/* Resume upload — the legacy drag-and-drop dropzone. The real
+        <input type="file"> is sr-only and the styled .dropzone div is the
+        visible target, so clicking the label or dropping a file both work. */}
+    <label
+      for="internship-resume"
+      class="mb-[var(--spacing-md)] w-full flex flex-col text-left cursor-pointer"
+      data-dropzone-wrapper
+    >
+      <span class="text-primary mb-[var(--spacing-xs)] font-thin text-left">
+        Resume / CV
+      </span>
+      <input
+        type="file"
+        id="internship-resume"
+        name="resumeOrCv"
+        accept=".pdf,.doc,.docx,.docm,.rtf"
+        class="sr-only"
+        required
+        data-dropzone-input
+      />
+      <div class="dropzone" data-dropzone>
+        <p class="text-primary font-medium">Drag &amp; drop your resume here</p>
+        <p class="text-sm text-text">
+          or <span class="text-secondary underline">browse</span> to upload
+        </p>
+        <p class="text-xs text-text" data-dropzone-filename aria-live="polite">
+          Accepted formats: PDF, DOC, or DOCX (max 10MB)
+        </p>
+      </div>
+    </label>
+
+    <Textarea
+      name="message"
+      label="Tell us why you're interested"
+      placeholder="Share what you're studying, what you want to learn, and any relevant experience."
+      rows={5}
+      required={true}
+    />
+
+    <Checkbox name="consent" required={true}>
+      By checking this box, I agree to the{" "}
+      <a href="/privacy-policy" class="underline">Privacy Policy</a>
+      {" "}and I consent to receive appointment-related and promotional SMS messages from {siteData.title}. Message frequency varies. I can opt-out at any time by replying STOP.
     </Checkbox>
 
-    <Button type="submit" variant="primary">Submit</Button>
+    <Button
+      type="submit"
+      variant="primary"
+      className="w-full mt-[var(--spacing-sm)] justify-center cursor-pointer"
+    >
+      Submit
+    </Button>
   </FormWrapper>
 </div>
+
+<script is:inline>
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll("[data-dropzone-wrapper]").forEach((wrapper) => {
+      if (wrapper.dataset.dropzoneReady === "true") {
+        return;
+      }
+      wrapper.dataset.dropzoneReady = "true";
+      const input = wrapper.querySelector("[data-dropzone-input]");
+      const zone = wrapper.querySelector("[data-dropzone]");
+      const filename = wrapper.querySelector("[data-dropzone-filename]");
+      if (!input || !zone) return;
+
+      const defaultMessage = filename?.textContent || "";
+      const updateFileName = () => {
+        const file = input.files && input.files[0];
+        if (filename) {
+          filename.textContent = file
+            ? `Selected file: ${file.name}`
+            : defaultMessage;
+        }
+      };
+
+      input.addEventListener("change", updateFileName);
+
+      const preventDefaults = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+      };
+
+      ["dragenter", "dragover"].forEach((eventName) => {
+        zone.addEventListener(eventName, (event) => {
+          preventDefaults(event);
+          zone.classList.add("is-dragging");
+        });
+      });
+
+      ["dragleave", "dragend"].forEach((eventName) => {
+        zone.addEventListener(eventName, (event) => {
+          preventDefaults(event);
+          zone.classList.remove("is-dragging");
+        });
+      });
+
+      zone.addEventListener("drop", (event) => {
+        preventDefaults(event);
+        zone.classList.remove("is-dragging");
+        const files = event.dataTransfer?.files;
+        if (!files || !files.length) return;
+        if (typeof DataTransfer !== "undefined") {
+          const transfer = new DataTransfer();
+          transfer.items.add(files[0]);
+          input.files = transfer.files;
+        } else {
+          try {
+            input.files = files;
+          } catch {
+            // Ignore assignment errors on older browsers.
+          }
+        }
+        input.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+    });
+  });
+</script>

@@ -137,22 +137,10 @@ const handleSubmit = async () => {
       textareaClassName="w-full px-4 py-3 bg-surface border-0 rounded-md focus:outline-none focus:ring-2 focus:ring-MainDark resize-vertical"
     />
 
-    <Checkbox
-      name="privacy"
-      required
-      containerClassName="mb-6"
-      checkboxClassName="w-4 h-4 text-MainDark border-surface rounded"
-    >
-      I have read and agree to the{" "}
-      <Button
-        variant="link"
-        href="/privacy-policy"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Privacy Policy
-      </Button>
-    </Checkbox>
+    {/* No separate "agree to the Privacy Policy" checkbox here: the two
+        consent boxes below are the ones that carry legal weight, and a third
+        required tick before submitting is friction the contact page doesn't
+        need. QuoteForm still has it. */}
 
     {/* SMS/TCPA consent — ported from the legacy form. Required for texting
         leads, and unrelated to cookie consent (disabled site-wide). */}

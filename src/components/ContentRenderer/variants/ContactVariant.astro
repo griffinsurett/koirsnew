@@ -1,8 +1,12 @@
 ---
 // src/components/ContentRenderer/variants/ContactVariant.astro
 /**
- * Contact Variant - Contact information with social media
- * Features: Contact cards, embedded social media section, 1-3 columns
+ * Contact Variant — the /contact-us band: contact-method cards on the left,
+ * the inquiry form on the right, social links beneath it.
+ *
+ * This is the shape the legacy contact page was built for: its source had a
+ * contact-links column beside the form, commented out. The cards are a single
+ * stacked column rather than a grid, so `columns` no longer applies.
  */
 import ContentRenderer from "../ContentRenderer.astro";
 import type { BaseVariantProps } from "../ContentRenderer.types";
@@ -14,7 +18,10 @@ import { shouldShowCollectionCTA } from "../utils/helpers";
 import ContactForm from "@/components/Form/forms/ContactForm.astro";
 
 interface Props extends BaseVariantProps {
-  columns?: 1 | 2 | 3;
+  /** Render the inquiry form beside the cards. /contact-us sets this false —
+   *  that page composes its own form column, so the variant would otherwise
+   *  put a second ContactForm on the page. */
+  showFormColumn?: boolean;
 }
 
 const {
@@ -23,25 +30,50 @@ const {
   heading,
   description,
   className = "",
-  columns = 2,
   collectionUrl,
-  collectionTitle,
+  showFormColumn = true,
   id,
 } = Astro.props as Props;
 
 const viewAllText = `Contact Us`;
-
-const columnClasses = {
-  1: "grid-cols-1",
-  2: "grid-cols-1 md:grid-cols-2",
-  3: "grid-cols-1 md:grid-cols-2 lg:grid-cols-3",
-};
 ---
 
-<section id={id} class={`py-16 w-full ${className}`}>
-  <SectionHeading heading={heading} title={title} description={description} />
-  <div class="flex flex-col-reverse lg:flex-row w-full">
-    <div class="px-4">
+{/* Full-width light band. The light background is load-bearing, not
+    decorative: ContactForm has no background of its own, so on the navy page
+    background its labels would render dark-on-dark. */}
+<section
+  id={id}
+  class:list={[
+    "text-text w-full",
+    // Own band only when it IS the section; nested inside a page that already
+    // provides background and rhythm, those would double up.
+    showFormColumn && "bg-bg py-16",
+    className,
+  ]}
+>
+  <div class:list={[showFormColumn && "container mx-auto px-4"]}>
+    {/* Guarded: with no heading passed, an unguarded SectionHeading still
+        emits its wrapper and leaves an empty gap above the cards. */}
+    {(heading || title || description) && (
+      <SectionHeading
+        heading={heading}
+        title={title}
+        description={description}
+        class="pb-[var(--spacing-xl)]"
+      />
+    )}
+
+    {/* Contact methods left, form right — the shape the legacy page's
+        (commented-out) links column was meant to produce. `flex-col-reverse`
+        on mobile keeps the FORM first on small screens, since that's the
+        page's purpose; the cards follow it. */}
+    <div class="flex flex-col-reverse lg:flex-row w-full gap-10 relative lg:gap-16 items-start">
+      {/* Sized as a sidebar only when the form sits beside it; with the form
+          column off, the cards get the full width of their container. */}
+      <div class:list={[
+        "w-full sticky-section",
+        showFormColumn && "lg:w-1/3 lg:flex-none",
+      ]}>
       {
         items.length > 0 && (
           <ul class={`flex flex-col gap-6 list-none`}>
@@ -68,16 +100,26 @@ const columnClasses = {
           </div>
         )
       }
-    </div>
-    <div class="flex flex-col justify-between w-full">
-      <ContactForm />
-      <ContentRenderer
-        query={query("social-media")}
-        variant="SocialMediaVariant"
-        title="Follow Us"
-        size="lg"
-        alignment="center"
-      />
+
+        {/* Social links sit under the contact cards, not under the form —
+            they're another way to reach Koi, so they belong with the contact
+            methods rather than trailing the submit button. Heading omitted:
+            the icons are self-evident beside the contact cards. */}
+        <ContentRenderer
+          query={query("social-media")}
+          variant="SocialMediaVariant"
+          size="lg"
+          alignment="left"
+          className="mt-8"
+        />
+      </div>
+
+      {showFormColumn && (
+        <div class="w-full lg:flex-1 lg:min-w-0">
+          <ContactForm />
+        </div>
+      )}
     </div>
   </div>
 </section>
+

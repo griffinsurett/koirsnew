@@ -16,7 +16,7 @@ import { useState, type ReactNode } from "react";
 import Modal from "@/components/Modal";
 import MobileMenuItem from "@/components/LoopComponents/Menu/MobileMenuItem";
 import HamburgerButton from "./HamburgerButton";
-import drawerBg from "@/assets/koi/rooffromvid.jpg";
+import drawerBg from "@/assets/koi/roofingandsolarvid-poster.jpg";
 import logo from "@/assets/koi/logowwords.png";
 
 interface MobileMenuDrawerProps {

@@ -21,6 +21,11 @@ interface Props extends BaseVariantProps {
   /** Emit schema.org FAQPage JSON-LD from the items (default true). Set false
    *  for a non-FAQ accordion to avoid a spurious FAQPage block. */
   faqSchema?: boolean;
+  /** Some legacy accordions ("Benefits & Perks", "Training Areas") used a solid
+   *  `h2 text-primary` heading rather than the gradient — pass these through so
+   *  a caller can reproduce that instead of always getting the default. */
+  headingClass?: string;
+  gradient?: boolean;
 }
 
 const {
@@ -31,6 +36,8 @@ const {
   className = "",
   allowMultiple = false,
   faqSchema = true,
+  headingClass = "",
+  gradient = true,
   collectionUrl,
   collectionTitle,
   id,
@@ -50,6 +57,8 @@ const faqStructuredData = faqSchema ? buildFaqSchema(items as any) : null;
     <SectionHeading
       heading={heading}
       title={title}
+      headingClass={headingClass}
+      gradient={gradient}
       class="pb-[var(--spacing-2xl)]"
     />
 
