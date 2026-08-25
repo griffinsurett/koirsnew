@@ -14,9 +14,9 @@ npm run build    # → dist/  (603 pages)
 npm run preview
 ```
 
-`.env` is gitignored and **not** in the repo. Copy the Formspree ids from the live deployment
-before building anything that submits a form; the tracker ids are already committed to `.env`
-since they are public by nature. The site domain is **not** an env var — it lives in
+`.env` is gitignored and **not** in the repo. Copy the public tracker and widget IDs from the
+live deployment before building. GHL form IDs live in
+`src/content/ghl-forms/ghl-forms.json`. The site domain is **not** an env var — it lives in
 `src/content/siteDomain.js`.
 
 ## Working in this repo

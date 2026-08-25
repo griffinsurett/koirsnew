@@ -7,7 +7,7 @@ interface ImportMetaEnv {
   // because a GHL form id is public by nature and belongs with the content that
   // renders it. The Formspree vars that used to live here are gone with it.
 
-  // ── Trackers — all 10 preserved verbatim from the legacy site (§7.1).
+  // ── Trackers — established IDs preserved from the legacy site (§7.1).
   // The _2 variants are NOT duplicates to consolidate; both are live.
   readonly PUBLIC_GA4_ID?: string;          // loads via Partytown
   readonly PUBLIC_GA4_ID_2?: string;        // loads normally
@@ -15,7 +15,6 @@ interface ImportMetaEnv {
   readonly PUBLIC_GTM_ID_2?: string;        // <noscript> iframe only
   readonly PUBLIC_META_PIXEL_ID?: string;
   readonly PUBLIC_META_PIXEL_ID_2?: string;
-  readonly PUBLIC_CLARITY_ID?: string;
   readonly PUBLIC_LEADCONNECTOR_WIDGET_ID?: string;
   readonly PUBLIC_GOOGLE_SITE_VERIFICATION?: string;
 

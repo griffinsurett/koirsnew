@@ -64,13 +64,12 @@ links don't count as integrations.
 | **Google Analytics** | `G-MFDQM6J7VE`, `G-7S1TEFL7YE` | analytics — **two** properties | `IntHeadScripts` | `PUBLIC_GA4_ID`, `_2` |
 | **Google Tag Manager** | `GTM-5QV9L2ZC`, `GTM-MHMZXZW2` | tags — **two** containers | `GoogleTagManager.astro` + `IntBodyScripts` | `PUBLIC_GTM_ID`, `_2` |
 | **Meta Pixel** | `1599711647766029`, `1689278455447883` | ads — **two** pixels | `IntHeadScripts` | `PUBLIC_META_PIXEL_ID`, `_2` |
-| **Microsoft Clarity** | `ukrfopzgqf` | session recording | `IntHeadScripts` | `PUBLIC_CLARITY_ID` |
 | **LeadConnector** | `6a0c691e6e838e289f5df2e5` | chat widget | `IntBodyScripts` | `PUBLIC_LEADCONNECTOR_WIDGET_ID` |
 | **Google Search Console** | `5l36yHMA…Gej4` | site verification `<meta>` | `IntHeadScripts` | `PUBLIC_GOOGLE_SITE_VERIFICATION` |
 
 ### 🔒 Tracker parity is non-negotiable
 
-**All 10 trackers must stay exactly as the legacy site has them — same IDs, same count.**
+**The remaining trackers must keep their established IDs and loading behavior.**
 The `_2` variants are **not** duplicates awaiting consolidation; both are live and carry
 history. Three load details that must survive:
 

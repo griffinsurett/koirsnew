@@ -408,10 +408,9 @@ truth rather than a reading of the source:
 | 4 | GTM | `GTM-MHMZXZW2` | **noscript iframe ONLY — no head loader** | body |
 | 5 | Meta Pixel | `1599711647766029` | `fbq('init', …)`, `is:inline` | head |
 | 6 | Meta Pixel | `1689278455447883` | second `fbq('init', …)`, same block | head |
-| 7 | Microsoft Clarity | `ukrfopzgqf` | inline IIFE | head |
-| 8 | LeadConnector chat | `6a0c691e6e838e289f5df2e5` | `widgets.leadconnectorhq.com/loader.js`, `is:inline` | body |
-| 9 | Google site verification | `5l36yHMAKLrNxTyWuc5cUqlWONqugF0PtNlYQ8FGej4` | `<meta>` | head |
-| 10 | Formspree | 6 form IDs (§7.3) | `fetch()` POST | runtime |
+| 7 | LeadConnector chat | `6a0c691e6e838e289f5df2e5` | `widgets.leadconnectorhq.com/loader.js`, `is:inline` | body |
+| 8 | Google site verification | `5l36yHMAKLrNxTyWuc5cUqlWONqugF0PtNlYQ8FGej4` | `<meta>` | head |
+| 9 | Formspree | 6 form IDs (§7.3) | `fetch()` POST | runtime |
 
 **Three load-mechanism details that must survive the port** — these are easy to normalize away
 by accident:
@@ -427,30 +426,30 @@ by accident:
    `fbq('track','PageView')`, plus **two** matching `<noscript>` tracking pixels.
 
 **Action — architecture only:**
-- Move all 10 IDs out of hardcoded strings into `PUBLIC_*` env vars (§7.3), so they're
+- Move all IDs out of hardcoded strings into `PUBLIC_*` env vars (§7.3), so they're
   configurable rather than buried in markup.
 - Route GTM through `integrations/analytics/GoogleTagManager.astro`, extended to accept **two**
   container IDs (it currently reads a single `PUBLIC_GTM_ID`).
-- Keep GA4, Meta Pixel, Clarity, and LeadConnector in `IntHeadScripts`/`IntBodyScripts` — the
+- Keep GA4, Meta Pixel, and LeadConnector in `IntHeadScripts`/`IntBodyScripts` — the
   purpose-built injection points, instead of a hand-edited `HeadTags.astro`.
 - **These must load as plain `<script>` tags, not `type="text/plain" data-consent="…"`** — with
   consent disabled (§7.6) nothing would ever unblock them.
 
 **Phase 9 gate is a diff, not a vibe check:** enumerate every tracker ID in the new
-`dist/index.html` and assert the set is **exactly equal** to the old build's. Same 10, no more,
-no fewer. Then confirm each fires in the network tab.
+`dist/index.html` and verify every currently configured tracker ID is present exactly where
+expected. Then confirm each fires in the network tab.
 
 ### 7.2 CSP must be extended — per directive, per tracker
 
-`vercel.json` ships `default-src 'none'`. **As-is, all 10 trackers are blocked.** Follow the
+`vercel.json` ships `default-src 'none'`. Follow the
 per-project convention (hydraIV adds `https://intakeq.com`; johns adds only Google Translate):
 add exactly the hosts these trackers need, and nothing more.
 
 | Directive | Hosts to add | Needed by |
 |---|---|---|
-| `script-src` | `www.googletagmanager.com`, `www.google-analytics.com`, `connect.facebook.net`, `www.clarity.ms`, `widgets.leadconnectorhq.com` | GA4 ×2, GTM ×2, Pixel ×2, Clarity, LeadConnector |
+| `script-src` | `www.googletagmanager.com`, `www.google-analytics.com`, `connect.facebook.net`, `widgets.leadconnectorhq.com` | GA4 ×2, GTM ×2, Pixel ×2, LeadConnector |
 | `img-src` | `www.google-analytics.com`, `www.facebook.com` | GA4 pixel beacons; the **two** Pixel `<noscript>` images |
-| `connect-src` | `www.google-analytics.com`, `*.google-analytics.com`, `www.clarity.ms`, `*.clarity.ms`, `widgets.leadconnectorhq.com` | GA4/Clarity beacons; chat websocket |
+| `connect-src` | `www.google-analytics.com`, `*.google-analytics.com`, `widgets.leadconnectorhq.com` | GA4 beacons; chat websocket |
 | `frame-src` | `www.googletagmanager.com`, `widgets.leadconnectorhq.com` | **both** GTM `<noscript>` iframes; chat iframe |
 | `worker-src` | already `'self' blob:` — **verify unchanged** | **Partytown** runs `G-MFDQM6J7VE` in a worker |
 | `style-src` | *(none)* | — |
@@ -480,7 +479,6 @@ Old Koi (6 form vars, own naming) vs Greastro (3, `PUBLIC_FORMSPREE_*`):
 | — | `PUBLIC_GTM_ID` + `PUBLIC_GTM_ID_2` (both containers) |
 | *(hardcoded)* | `PUBLIC_GA4_ID`, `PUBLIC_GA4_ID_2` |
 | *(hardcoded)* | `PUBLIC_META_PIXEL_ID`, `PUBLIC_META_PIXEL_ID_2` |
-| *(hardcoded)* | `PUBLIC_CLARITY_ID` |
 | *(hardcoded)* | `PUBLIC_LEADCONNECTOR_WIDGET_ID` |
 | *(hardcoded)* | `PUBLIC_GOOGLE_SITE_VERIFICATION` |
 
@@ -629,7 +627,7 @@ than a wash.
 > the old Koi site today): plain `<script>` in `IntHeadScripts`/`IntBodyScripts`, no
 > `type="text/plain"`, no `data-consent` attribute. This supersedes the "gate the marketing
 > tags behind consent categories" note in §7.1 — **§7.6 wins.** Verify after Phase 9 that GTM
-> / GA / Meta Pixel / Clarity actually fire in the network tab, not just that the build passes.
+> / GA / Meta Pixel actually fire in the network tab, not just that the build passes.
 
 > ⚠️ **Load-bearing side effect — do not miss this.** Greastro's consent system is also the
 > **script gate**. `GoogleTagManager.astro` ships its GTM tag as
@@ -1198,7 +1196,7 @@ Restyle what Phase 3.5 already built: `about-us`, `contact-us`, `careers`, `inte
 Build `LandingPageLayout` + the 6 `landing-pages` entries; move all 62 inline FAQs into the `faq` collection; delete the 6 hand-pasted JSON-LD blobs (§9.2). Blog: move the ~20 per-post `faqItems` into `faq` with a `post` ref, delete the missing-image ternary, derive category chips from `tags` (§9.1). *Gate: copy identical to the old pages; `FAQPage` schema now emitted for every landing page **and** every post; no hardcoded slug ternaries remain.*
 
 **Phase 9 — SEO, schema, redirects**
-Delete every hand-pasted JSON-LD — **only after the §7.10 field audit is signed off** (any deliberately-dropped field recorded as a decision, not an omission). Verify the derived `@graph` (business + breadcrumb + review + faq + service) — **`areaServed` populates from the real `service-areas` collection**. Add `redirectFrom` for the 2 service URLs; set `"trailingSlash": false` in `vercel.json` (§6.1). Extend CSP. Wire all **10** trackers as **direct** loads, preserving each one's load mechanism (§7.1, §7.6). *Gate: `robots.txt`, `llms.txt`, `llms-full.txt` generate; **sitemap has all 603 pages** (§6.3); Rich Results test passes; **tracker-ID set in the new `dist/index.html` is exactly equal to the old build's — all 10, verified by diff — and each fires in the network tab** (the consent-gate removal's biggest risk).*
+Delete every hand-pasted JSON-LD — **only after the §7.10 field audit is signed off** (any deliberately-dropped field recorded as a decision, not an omission). Verify the derived `@graph` (business + breadcrumb + review + faq + service) — **`areaServed` populates from the real `service-areas` collection**. Add `redirectFrom` for the 2 service URLs; set `"trailingSlash": false` in `vercel.json` (§6.1). Extend CSP. Wire all configured trackers as **direct** loads, preserving each one's load mechanism (§7.1, §7.6). *Gate: `robots.txt`, `llms.txt`, `llms-full.txt` generate; **sitemap has all 603 pages** (§6.3); Rich Results test passes; **every currently configured tracker ID appears in `dist/index.html` as expected and each fires in the network tab** (the consent-gate removal's biggest risk).*
 
 **Phase 10 — Verification**
 Full-page screenshot diff old vs new at mobile/tablet/desktop — comparing **final rendered state**, since the old site animates in and the new one doesn't (§7.9). Plus a final text-diff against the Phase 3.5 baseline to catch content lost during styling. Lighthouse (incl. its accessibility score — the markup must still pass without the panel). Sitemap/redirect audit. A real submission per form. Confirm **no consent banner, no language switcher, no accessibility button** appears anywhere, and that no dead preference scripts ship in `<head>`.
