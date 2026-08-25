@@ -13,7 +13,7 @@ interface Props extends BaseVariantProps {
   pretitle?: string;
   /** Red accent phrase appended after the title (matches the site's heading style). */
   accentTitle?: string;
-  columns?: 2 | 3 | 4;
+  columns?: 1 | 2 | 3 | 4;
 }
 
 const {
@@ -58,9 +58,9 @@ const gridClasses = isTwoCardLayout
     {
       items.length > 0 && (
         <div class={`grid ${columnClasses[effectiveColumns]} ${gridClasses}`}>
-          {/* Static grid — cards pop in one after another. */}
+          {/* Multi-column cards stagger; a single column reveals together. */}
           {items.map((item, index) => (
-            <ImageCard {...item} compact={isTwoCardLayout} animateDelay={index * 120} />
+            <ImageCard {...item} compact={isTwoCardLayout} animateDelay={effectiveColumns === 1 ? 0 : index * 120} />
           ))}
         </div>
       )

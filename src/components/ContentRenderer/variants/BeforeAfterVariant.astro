@@ -76,7 +76,7 @@ const itemBasis = {
       <ul class={`grid ${columnClasses[columns]} gap-[30px] list-none`}>
         {safeItems.map((item, index) => (
           <li>
-            <BeforeAfterCard {...item} animate={true} animateDelay={index * 120} />
+            <BeforeAfterCard {...item} animate={true} animateDelay={columns === 1 ? 0 : index * 120} />
           </li>
         ))}
       </ul>
@@ -112,7 +112,7 @@ const itemBasis = {
               <BeforeAfterCard
                 {...item}
                 animate={true}
-                animateDelay={index * 120}
+                animateDelay={carouselCols === 1 ? 0 : index * 120}
                 animateRoot=".ba-track"
               />
             </li>

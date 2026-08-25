@@ -19,10 +19,8 @@ interface AccordionProps {
     expanded: boolean;
   }) => ReactNode;
   headerClassName?: string;
-  /** Reveal rows on scroll, staggered (the legacy FAQ behaviour). */
+  /** Reveal rows on scroll. */
   animate?: boolean;
-  /** Milliseconds between consecutive rows. */
-  staggerMs?: number;
 }
 
 export default function Accordion({
@@ -32,7 +30,6 @@ export default function Accordion({
   headerSlot,
   headerClassName = "",
   animate = false,
-  staggerMs = 100,
 }: AccordionProps) {
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const panelRefs = useRef<Map<string, HTMLDivElement>>(new Map());
@@ -95,7 +92,7 @@ export default function Accordion({
             }
             headerClassName={headerClassName}
             animate={animate}
-            animateDelay={index * staggerMs}
+            animateDelay={0}
           >
             {/* Simple container - content gets cloned here when panel opens */}
             <div 

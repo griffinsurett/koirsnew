@@ -58,7 +58,7 @@ const reviewSchema = buildReviewSchema(safeItems as any);
     >
       {safeItems.map((item: any, index: number) => (
         <li>
-          <TestimonialCard {...item} fillMedia={true} animate={true} animateDelay={index * 100} />
+          <TestimonialCard {...item} fillMedia={true} animate={true} animateDelay={columns === 1 ? 0 : index * 100} />
         </li>
       ))}
     </ul>

@@ -8,9 +8,8 @@
  * `listOfBoxes` (single stacked column with the icon trailing — the "what we
  * look for" style lists). `layout="stacked"` selects the latter.
  *
- * Rows reveal ONE AT A TIME on scroll: each gets `fade-in-up` with a delay
- * stepped by its index, so the list builds top-to-bottom rather than the whole
- * block appearing at once. `animate={false}` opts a band out.
+ * Multi-column rows stagger on scroll. A single column reveals together so
+ * lower items are not held back unnecessarily. `animate={false}` opts out.
  */
 import type { BaseVariantProps } from "../ContentRenderer.types";
 import SectionHeading from "@/components/SectionHeading.astro";
@@ -71,6 +70,7 @@ const listClass =
   layout === "stacked"
     ? "flex flex-col w-full gap-[var(--spacing-xl)]"
     : `grid gap-[var(--spacing-xl)] ${columnClasses[columns]}`;
+const isSingleColumn = layout === "stacked" || columns === 1;
 ---
 
 <section id={id} class={`${bare ? "" : "py-16"} ${className}`}>
@@ -94,7 +94,7 @@ const listClass =
           <li
             data-animate={animate ? "fade-in-up" : undefined}
             data-animate-once={animate ? "true" : undefined}
-            data-animate-delay={animate ? String(index * staggerMs) : undefined}
+            data-animate-delay={animate ? String(isSingleColumn ? 0 : index * staggerMs) : undefined}
             class:list={[
               "flex gap-4",
               centerOnMobile

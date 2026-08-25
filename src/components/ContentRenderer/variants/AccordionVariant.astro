@@ -26,9 +26,8 @@ interface Props extends BaseVariantProps {
    *  a caller can reproduce that instead of always getting the default. */
   headingClass?: string;
   gradient?: boolean;
-  /** Reveal the rows on scroll, staggered — the legacy FAQ behaviour. */
+  /** Reveal the rows on scroll. Rows share one column, so they do not stagger. */
   animate?: boolean;
-  staggerMs?: number;
 }
 
 const {
@@ -42,7 +41,6 @@ const {
   headingClass = "",
   gradient = true,
   animate = true,
-  staggerMs = 100,
   collectionUrl,
   collectionTitle,
   id,
@@ -85,7 +83,6 @@ const faqStructuredData = faqSchema ? buildFaqSchema(items as any) : null;
           }))}
           allowMultiple={allowMultiple}
           animate={animate}
-          staggerMs={staggerMs}
           client:visible
         />
       </ContentBridge>
