@@ -73,8 +73,8 @@ links don't count as integrations.
 The `_2` variants are **not** duplicates awaiting consolidation; both are live and carry
 history. Three load details that must survive:
 
-1. **`PUBLIC_GA4_ID` loads through Partytown** (`type="text/partytown"`, off main thread);
-   `PUBLIC_GA4_ID_2` loads as a normal `<script async>`. Different threads by design.
+1. **Both GA4 properties and the primary GTM loader run through Partytown**
+   (`type="text/partytown"`, off main thread), with `dataLayer.push` forwarded.
 2. **`PUBLIC_GTM_ID_2` exists ONLY as a `<noscript>` iframe** — there is no `gtm.js` loader for
    it. **Do not "fix" this** by adding one; that would start sending data to a container that
    receives none today.

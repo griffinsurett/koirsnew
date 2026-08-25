@@ -14,10 +14,9 @@
  * would simply never fire.
  *
  * ── ONE DELIBERATE ASYMMETRY ──────────────────────────────────────────────
- * PUBLIC_GA4_ID runs through Partytown (off the main thread); PUBLIC_GA4_ID_2
- * loads as a normal async script. That's how the legacy site had it, so the
- * split is reproduced rather than normalized. Partytown forwards dataLayer.push
- * (configured in IntBodyScripts) which is what makes the off-thread one work.
+ * Both GA4 properties run through Partytown so Google's analytics work stays
+ * off the main thread. Partytown forwards dataLayer.push (configured in
+ * IntBodyScripts), keeping page and GTM calls connected to the worker trackers.
  *
  * The Meta Pixel <noscript> images and both GTM <noscript> iframes must be
  * inside <body> — they live in IntBodyScripts.
@@ -35,7 +34,7 @@ const pixels = [PIXEL, PIXEL_2].filter(Boolean);
 {/* Google Search Console verification */}
 {VERIFY && <meta name="google-site-verification" content={VERIFY} />}
 
-{/* GA4 #1 — via Partytown, off the main thread (legacy behavior) */}
+{/* GA4 #1 — via Partytown, off the main thread */}
 {GA4 && (
   <>
     <script async type="text/partytown" src={`https://www.googletagmanager.com/gtag/js?id=${GA4}`}></script>
@@ -51,12 +50,12 @@ const pixels = [PIXEL, PIXEL_2].filter(Boolean);
   </>
 )}
 
-{/* GA4 #2 — normal main-thread load (legacy behavior) */}
+{/* GA4 #2 — via Partytown, off the main thread */}
 {GA4_2 && (
   <>
-    <script async src={`https://www.googletagmanager.com/gtag/js?id=${GA4_2}`}></script>
+    <script async type="text/partytown" src={`https://www.googletagmanager.com/gtag/js?id=${GA4_2}`}></script>
     <script
-      is:inline
+      type="text/partytown"
       set:html={`
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}

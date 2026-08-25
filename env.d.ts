@@ -10,7 +10,7 @@ interface ImportMetaEnv {
   // ── Trackers — established IDs preserved from the legacy site (§7.1).
   // The _2 variants are NOT duplicates to consolidate; both are live.
   readonly PUBLIC_GA4_ID?: string;          // loads via Partytown
-  readonly PUBLIC_GA4_ID_2?: string;        // loads normally
+  readonly PUBLIC_GA4_ID_2?: string;        // loads via Partytown
   readonly PUBLIC_GTM_ID?: string;
   readonly PUBLIC_GTM_ID_2?: string;        // <noscript> iframe only
   readonly PUBLIC_META_PIXEL_ID?: string;
