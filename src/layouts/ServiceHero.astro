@@ -93,11 +93,11 @@ const backgroundMedia = {
           <slot name="belowDescription" />
         </div>
 
-        {/* Form card — beside the copy on desktop, stacked underneath on
-            mobile. The negative bottom margin lets it overhang the hero, as
-            the legacy card did. */}
+        {/* Form column — the GHL embed draws its own container. The negative
+            bottom margin lets it overhang the hero without wrapping it in a
+            second site-owned card. */}
         <div
-          class="hero-aside lg:w-3/7 w-[90vw] mt-10 lg:mt-[calc(var(--spacing-sm)+20px)] bg-bg text-text rounded-4xl shadow-lg py-[var(--spacing-2xl)] px-[var(--spacing-2xl)] mb-[-100px] xl:mb-[-200px]"
+          class="hero-aside lg:w-3/7 w-[90vw] mt-10 lg:mt-[calc(var(--spacing-sm)+20px)] mb-[-100px] xl:mb-[-200px]"
         >
           <slot name="aside" />
         </div>

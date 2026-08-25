@@ -117,19 +117,9 @@ wrong value is a visible reflow, not a broken form.
 `PUBLIC_FORMSPREE_*` vars, and its `connect-src`/`form-action` CSP entries. Do not reintroduce a
 hand-built form; GHL owns fields, validation, file uploads and delivery.
 
-> 🌐 **`api.leadconnectorhq.com` may be blocked by your local DNS.** On this machine it resolves to
-> an ISP address and the iframe fails `ERR_CONNECTION_RESET`, so forms look blank **locally while
-> being perfectly fine in production**. Verify before debugging the code:
-> `dig +short api.leadconnectorhq.com` — anything other than Cloudflare IPs (104.18.x / 172.64.x)
-> is your resolver, not the site. Confirmed to follow the **machine, not the wifi**: it reproduced
-> across two networks, both resolving via the local router. Loading the form URL directly in a
-> browser tab (no site, no iframe, no CSP) fails the same way, which is the quickest way to prove
-> it isn't the code.
->
-> Fix: point the Mac at public DNS — `networksetup -setdnsservers Wi-Fi 1.1.1.1 8.8.8.8`
-> (undo with `... Wi-Fi Empty`). To test without changing settings, launch Chrome with
-> `--host-resolver-rules="MAP api.leadconnectorhq.com 104.18.34.38"`.
-> Likely ISP-level filtering (both resolutions returned an Optimum address).
+> The forms use GHL's `link.apisystem.tech` embed hostname. The older
+> `api.leadconnectorhq.com` hostname failed DNS resolution on this machine and rendered blank
+> iframes, while the same form IDs load correctly through `link.apisystem.tech`.
 
 ### CSP is the enforcement layer
 
@@ -140,7 +130,7 @@ the CSP in the same change**, or the browser blocks it. Two easy-to-miss require
 - **`frame-src` must allow `googletagmanager.com`** for the GTM noscript iframes — including the
   container that exists only as an iframe.
 - **The GHL forms need two hosts** that the chat widget does not:
-  `https://api.leadconnectorhq.com` in **`frame-src`** (the form iframes) and
+  `https://link.apisystem.tech` in **`frame-src`** (the form iframes) and
   `https://link.msgsndr.com` in **`script-src`** (the resizer). Note these are *different hosts*
   from the widget's `widgets.leadconnectorhq.com` — allowing the widget does not allow the forms.
 
