@@ -60,7 +60,7 @@ links don't count as integrations.
 
 | Service | ID(s) | Purpose | Wired via | Env |
 |---|---|---|---|---|
-| **Formspree** | 6 form ids | form submission | `src/utils/formspree.ts` | `PUBLIC_FORMSPREE_*` |
+| **LeadConnector / GHL forms** | 5 form ids | inline form embeds (iframe + resizer) | `src/components/Form/GhlForm.astro` | — (ids in `ghl-forms`) |
 | **Google Analytics** | `G-MFDQM6J7VE`, `G-7S1TEFL7YE` | analytics — **two** properties | `IntHeadScripts` | `PUBLIC_GA4_ID`, `_2` |
 | **Google Tag Manager** | `GTM-5QV9L2ZC`, `GTM-MHMZXZW2` | tags — **two** containers | `GoogleTagManager.astro` + `IntBodyScripts` | `PUBLIC_GTM_ID`, `_2` |
 | **Meta Pixel** | `1599711647766029`, `1689278455447883` | ads — **two** pixels | `IntHeadScripts` | `PUBLIC_META_PIXEL_ID`, `_2` |
@@ -81,6 +81,56 @@ history. Three load details that must survive:
    receives none today.
 3. **Both Pixels share one `fbq` block** — two `init` calls, one `PageView`, two noscript images.
 
+### Forms are Go High Level embeds — not code
+
+All 6 site forms are **GHL inline iframes**, one component and one collection:
+
+- `src/content/ghl-forms/ghl-forms.json` — one entry per form (`formId`, `height`, `radius`).
+  Adding a form or re-pointing an existing one is a **JSON edit, never a code change**.
+- `src/components/Form/GhlForm.astro` — the ONE form component. `<GhlForm form="contact" />`.
+  It throws at build time on an unknown id, so a typo fails loudly instead of shipping a blank space.
+- `heroForm` in a collection's `_meta.mdx` (and the `form` field on `roofing`/`solar` items) is a
+  **`ghl-forms` entry id**, not an enum. The old `HERO_FORMS` component maps in
+  `ServiceIndexLayout` and `MonmouthCountyLayout` are gone — one component renders any form.
+  For the Monmouth pages, `serviceLines` doubles as the form id (`roofing`/`solar` match by name).
+
+| id | form | used on |
+|---|---|---|
+| `contact` | Website - Contact Us | `/contact-us`, `ContactVariant` |
+| `quote` | Website - Blog Quote | blog sidebar, default hero form |
+| `roofing` | Website - Roofing Form | `/roofing` hero, roofing Monmouth pages |
+| `solar` | ⚠️ currently the **roofing** form id | `/solar` hero, solar Monmouth page |
+| `hiring` | Website - Job Application | `/careers` |
+| `internship` | Website - Internship Application | `/internship-program` |
+
+> ⚠️ **`solar` points at the roofing form id** (`AWS5BpuQ2kGrs4Rj7gAh`) — that is what the embed
+> list supplied. Swap `formId` on the `solar` entry when a real solar form exists.
+
+**The resizer.** `link.msgsndr.com/js/form_embed.js` resizes each iframe to its content. GHL's
+copy-paste snippet repeats that `<script>` after every iframe; `GhlForm` emits it once per page
+behind a `data-ghl-loader` guard, and only on pages that embed a form. The `height` in the
+collection is the **pre-hydration** height so the page doesn't jump before the script runs — a
+wrong value is a visible reflow, not a broken form.
+
+**Formspree is fully removed** — `utils/formspree.ts`, the 7 form components, and the entire
+`inputs/`, `step/`, `messages/`, `FormContext`/`FormWrapper` tree (20 files), the 6
+`PUBLIC_FORMSPREE_*` vars, and its `connect-src`/`form-action` CSP entries. Do not reintroduce a
+hand-built form; GHL owns fields, validation, file uploads and delivery.
+
+> 🌐 **`api.leadconnectorhq.com` may be blocked by your local DNS.** On this machine it resolves to
+> an ISP address and the iframe fails `ERR_CONNECTION_RESET`, so forms look blank **locally while
+> being perfectly fine in production**. Verify before debugging the code:
+> `dig +short api.leadconnectorhq.com` — anything other than Cloudflare IPs (104.18.x / 172.64.x)
+> is your resolver, not the site. Confirmed to follow the **machine, not the wifi**: it reproduced
+> across two networks, both resolving via the local router. Loading the form URL directly in a
+> browser tab (no site, no iframe, no CSP) fails the same way, which is the quickest way to prove
+> it isn't the code.
+>
+> Fix: point the Mac at public DNS — `networksetup -setdnsservers Wi-Fi 1.1.1.1 8.8.8.8`
+> (undo with `... Wi-Fi Empty`). To test without changing settings, launch Chrome with
+> `--host-resolver-rules="MAP api.leadconnectorhq.com 104.18.34.38"`.
+> Likely ISP-level filtering (both resolutions returned an Optimum address).
+
 ### CSP is the enforcement layer
 
 `vercel.json` ships a strict CSP (`default-src 'none'`). **Adding any third party means editing
@@ -89,6 +139,10 @@ the CSP in the same change**, or the browser blocks it. Two easy-to-miss require
   Don't prune it.
 - **`frame-src` must allow `googletagmanager.com`** for the GTM noscript iframes — including the
   container that exists only as an iframe.
+- **The GHL forms need two hosts** that the chat widget does not:
+  `https://api.leadconnectorhq.com` in **`frame-src`** (the form iframes) and
+  `https://link.msgsndr.com` in **`script-src`** (the resizer). Note these are *different hosts*
+  from the widget's `widgets.leadconnectorhq.com` — allowing the widget does not allow the forms.
 
 ---
 
@@ -129,23 +183,17 @@ one component animates every page that uses it, so **do not add `data-animate` t
   gating an LCP heading behind an IntersectionObserver delays LCP. The homepage About band also
   opts out (user request).
 - `MediaBand` — the full-bleed copy-over-photo bands ("Our goal is simple", ¡Hablamos Español!,
-  the closing CTAs) fade up as **one whole section**, background media included: the
-  `<section>` itself carries `data-animate`, and its inner `SectionHeading` gets
-  `animate={false}` so the parts don't animate again inside an animating wrapper. Don't
-  "fix" that by re-enabling the inner heading.
-
-  Three details keep a full-bleed band from flashing the page background behind it while it
-  animates — 2025 avoided this for free because its version was a **scroll-scrubbed** CSS
-  animation (`animation-timeline: view()`), which was already well advanced by the time the band
-  was on screen. The JS observer is trigger-based, so it needs all three:
-  1. the section paints the band's own tint (`overlayClass` minus `opacity-*`) as its background,
-     so anything visible mid-fade is the band's colour, not the navy `body`;
-  2. `data-animate-root-margin="0px 0px 25% 0px"` + `data-animate-threshold="0"` start the reveal
-     while the band is still below the fold (the global default `-50px` delays it until the band
-     is already on screen);
-  3. `section[data-animate="fade-in-up"]` uses `translateY(1rem)` instead of the global 40px —
-     a 40px lift on a full-viewport-width section opens a visible strip of the page behind it.
-- Cards — `pop-in` on the card root, `once` so a card settles after its first reveal.
+  the closing CTAs) **fade up by default** (`animate`, default `true`). The animated element is
+  the whole `<section>`, background photo/video and overlay included, so the band arrives as one
+  unit.
+  **The outer ground wrapper is what makes that safe — don't remove it.** `<body>` is navy and
+  each section paints its own light background over it, so lifting a full-bleed band 40px off its
+  footprint would expose a navy strip between two light neighbours. The wrapper holds the
+  footprint, paints `groundClass` (default `bg-bg`, matching the neighbouring sections) behind the
+  travelling band, and `overflow-clip`s the 40px overshoot so it can't add page height.
+  If a band ever sits between two **dark** sections, pass `groundClass` to match them.
+  The inner `SectionHeading` keeps `animate={false}` on purpose — the band rises as one block
+  instead of its parts staggering separately inside a moving parent.
 
 ### ⚠️ Items inside a horizontal scroller need `data-animate-root`
 

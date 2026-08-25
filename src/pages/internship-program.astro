@@ -9,7 +9,7 @@
  *   hero → "Grow. Earn. Lead." intro → Why We Created This Program (copy +
  *   photo, sticky) → How the Program Works (listSection) → interns photo →
  *   Program Journey band → Primary Position (listSection) → Training Areas
- *   (accordion) → Ready to Apply? (InternshipForm)
+ *   (accordion) → Ready to Apply? (GHL internship application form)
  *
  * Legacy heading classes, kept rather than defaulted:
  *   eyebrow  "top-heading text-accent uppercase"   -> amber, not the blue default
@@ -31,7 +31,7 @@ import SecondaryHero from "@/layouts/SecondaryHero.astro";
 import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
 import MediaBand from "@/components/MediaBand.astro";
 import SectionHeading from "@/components/SectionHeading.astro";
-import InternshipForm from "@/components/Form/forms/InternshipForm.astro";
+import GhlForm from "@/components/Form/GhlForm.astro";
 import { Image } from "astro:assets";
 import { siteData } from "@/content/siteData";
 import InternsOnSite from "@/assets/koi/koi_team1.jpg";
@@ -244,7 +244,7 @@ const trainingFocus = [
           class="pb-[var(--spacing-lg)]"
         />
         <div class="w-full flex justify-center">
-          <InternshipForm />
+          <GhlForm form="internship" />
         </div>
       </div>
     </section>

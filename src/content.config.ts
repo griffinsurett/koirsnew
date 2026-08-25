@@ -145,7 +145,7 @@ export const collections = {
         features: z.array(z.string()).default([]),
         // Intro video shown on the line-of-business index page.
         introVideo: z.string().optional(),
-        // Which form the page's quote CTA renders.
+        // Which form the page's quote CTA renders — a `ghl-forms` entry id.
         form: z.string().optional(),
       }),
   }),
@@ -163,6 +163,7 @@ export const collections = {
         price: z.string().optional(),
         features: z.array(z.string()).default([]),
         introVideo: z.string().optional(),
+        // Which form the page's quote CTA renders — a `ghl-forms` entry id.
         form: z.string().optional(),
       }),
   }),
@@ -336,6 +337,33 @@ export const collections = {
         // builders emit FAQPage markup on the page that actually shows it.
         monmouthPage: refSchema("monmouth-county"),
         post: refSchema("blog"),
+      }),
+  }),
+
+  // ── ghl-forms ───────────────────────────────────────────
+  // Every Go High Level inline form embed on the site, as content rather than
+  // markup. One entry per form; `<GhlForm form="contact" />` (or a `heroForm`
+  // ref) resolves against this collection, so adding or re-pointing a form is a
+  // JSON edit and never a code change.
+  //
+  // Replaced the Formspree system: 7 hand-built React/Astro form components
+  // plus formspree.ts submitted directly to Formspree endpoints. GHL hosts the
+  // fields, validation, file uploads and delivery, so the site only embeds.
+  // Display-only — these are iframes, not pages.
+  "ghl-forms": defineCollection({
+    loader: FileLoad("ghl-forms", "ghl-forms.json"),
+    schema: ({ image }) =>
+      baseSchema({ image }).extend({
+        // The GHL form id — the last path segment of the embed src, and the
+        // value of `data-form-id` on the iframe GHL hands you.
+        formId: z.string(),
+        // `data-height` from the embed. The GHL loader resizes the iframe once
+        // it initialises; this is the pre-hydration height, so the page doesn't
+        // jump. Wrong value = a visible reflow on load, not a broken form.
+        height: z.number(),
+        // border-radius in px, when the embed specifies one (roofing/solar use
+        // 8, the rest 3).
+        radius: z.number().default(3),
       }),
   }),
 

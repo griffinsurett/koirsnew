@@ -19,12 +19,12 @@
  *   • the closing testimonials → gallery bands the other layouts end on
  *
  * The legacy post page ran SecondaryHero + content + a sidebar quote form; the
- * hero and content match it, and the quote form is the QuoteForm aside.
+ * hero and content match it, and the quote form is the GHL quote aside.
  */
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import SecondaryHero from "@/layouts/SecondaryHero.astro";
 import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
-import QuoteForm from "@/components/Form/forms/QuoteForm.astro";
+import GhlForm from "@/components/Form/GhlForm.astro";
 import BlogSidebar from "@/components/Blog/BlogSidebar.astro";
 import { find, query, sortByOrder, normalizeReference } from "@/utils/query";
 import { serviceBtns } from "@/content/siteData";
@@ -102,7 +102,7 @@ if (authorId && authorId !== "[object Object]") {
               2025 post template. The form is slotted in so the sidebar owns
               the card rhythm and the sticky behaviour. */}
           <BlogSidebar currentPostId={postId}>
-            <QuoteForm />
+            <GhlForm form="quote" />
           </BlogSidebar>
         </div>
       </div>

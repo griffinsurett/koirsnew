@@ -1,0 +1,98 @@
+---
+// src/components/Form/GhlForm.astro
+/**
+ * GhlForm — the ONE form component. Renders a Go High Level inline embed by
+ * collection id.
+ *
+ * Replaced the Formspree system (7 bespoke form components + formspree.ts).
+ * GHL hosts the fields, validation, file uploads and delivery, so the site's
+ * only job is to embed the right form at the right size. Adding a form or
+ * re-pointing an existing one is a `ghl-forms.json` edit, never a code change.
+ *
+ * @example
+ *   <GhlForm form="contact" />
+ *   <GhlForm form={meta.heroForm} />
+ *
+ * The loader script (`link.msgsndr.com/js/form_embed.js`) is what resizes the
+ * iframe to its content once the form initialises; without it every embed stays
+ * at the static fallback height below. GHL's copy-paste snippet repeats that
+ * <script> after every iframe — here it's emitted once per page via the
+ * `data-ghl-loader` guard, and only on pages that actually embed a form, rather
+ * than shipping to all 608 pages from BaseLayout.
+ *
+ * `height` is the pre-hydration height, so the page doesn't jump before the
+ * loader runs. It's set as a `min-height` on the WRAPPER, not only on the
+ * iframe: an iframe is a replaced element, so if its document never loads it
+ * collapses to nothing and takes the surrounding card down with it (the hero
+ * form card has no height of its own). The wrapper is a plain block, so it
+ * holds the space open regardless — no layout shift on a slow connection, and
+ * a failed load leaves a correctly-sized gap instead of a squashed pill.
+ */
+import { safeGetEntry } from "@/utils/query";
+
+interface Props {
+  /** Entry id in the `ghl-forms` collection (contact | quote | roofing | …). */
+  form: string;
+  /** Wrapper class — width, spacing, shadow live at the call site. */
+  class?: string;
+  /** Override the collection's stored height (px). */
+  height?: number;
+  /** Lazy-load the iframe. Off for above-the-fold forms. */
+  loading?: "lazy" | "eager";
+}
+
+const { form, class: className = "", height, loading = "lazy" } = Astro.props as Props;
+
+const entry = await safeGetEntry("ghl-forms", form);
+
+if (!entry) {
+  // Loud at build time: a typo'd or removed form id would otherwise ship as a
+  // silently missing form — the page still builds and looks intentional.
+  throw new Error(
+    `<GhlForm form="${form}" /> — no such entry in the ghl-forms collection. ` +
+      `Add it to src/content/ghl-forms/ghl-forms.json or fix the id.`
+  );
+}
+
+const { formId, title, radius } = entry.data as {
+  formId: string;
+  title: string;
+  radius: number;
+};
+const frameHeight = height ?? (entry.data as { height: number }).height;
+const domId = `inline-${formId}`;
+---
+
+<div class={className} style={`min-height:${frameHeight}px`}>
+  <iframe
+    src={`https://api.leadconnectorhq.com/widget/form/${formId}`}
+    id={domId}
+    title={title}
+    loading={loading}
+    style={`width:100%;height:${frameHeight}px;min-height:${frameHeight}px;border:none;border-radius:${radius}px;display:block`}
+    data-layout="{'id':'INLINE'}"
+    data-trigger-type="alwaysShow"
+    data-trigger-value=""
+    data-activation-type="alwaysActivated"
+    data-activation-value=""
+    data-deactivation-type="neverDeactivate"
+    data-deactivation-value=""
+    data-form-name={title}
+    data-height={String(frameHeight)}
+    data-layout-iframe-id={domId}
+    data-form-id={formId}
+  ></iframe>
+</div>
+
+{/* Emitted by every GhlForm, but the guard means only the first one on the page
+    actually appends the loader. */}
+<script is:inline>
+  (function () {
+    if (document.querySelector("script[data-ghl-loader]")) return;
+    var s = document.createElement("script");
+    s.src = "https://link.msgsndr.com/js/form_embed.js";
+    s.defer = true;
+    s.setAttribute("data-ghl-loader", "");
+    document.body.appendChild(s);
+  })();
+</script>

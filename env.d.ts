@@ -2,14 +2,10 @@
 /// <reference types="astro/client" />
 
 interface ImportMetaEnv {
-  // ── Formspree (one id per form; each falls back to the contact id) ──
-  readonly PUBLIC_FORMSPREE_ID?: string;
-  readonly PUBLIC_FORMSPREE_CONTACT_ID?: string;
-  readonly PUBLIC_FORMSPREE_QUOTE_ID?: string;
-  readonly PUBLIC_FORMSPREE_ROOFING_ID?: string;
-  readonly PUBLIC_FORMSPREE_SOLAR_ID?: string;
-  readonly PUBLIC_FORMSPREE_HIRING_ID?: string;
-  readonly PUBLIC_FORMSPREE_INTERNSHIP_ID?: string;
+  // Forms are Go High Level inline embeds — no env vars. Each form's id lives
+  // in the `ghl-forms` collection (src/content/ghl-forms/ghl-forms.json),
+  // because a GHL form id is public by nature and belongs with the content that
+  // renders it. The Formspree vars that used to live here are gone with it.
 
   // ── Trackers — all 10 preserved verbatim from the legacy site (§7.1).
   // The _2 variants are NOT duplicates to consolidate; both are live.

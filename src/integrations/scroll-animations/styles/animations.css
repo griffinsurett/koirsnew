@@ -421,14 +421,6 @@
   opacity: 1;
   transform: translateY(0);
 }
-
-/* Full-bleed bands (MediaBand): a 40px lift on a section that spans the whole
-   viewport width opens a visible strip of the page behind it while it animates.
-   The 2025 site used translateY(1rem) here (`animate-on-appear`), which is
-   small enough that the band's own painted background covers the movement. */
-section[data-animate="fade-in-up"] {
-  transform: translateY(1rem);
-}
 /* Exit scrolling down: fade out upward (element leaves top of viewport) */
 [data-animate="fade-in-up"][data-exit-direction="down"] {
   opacity: 0;

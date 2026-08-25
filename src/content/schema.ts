@@ -479,8 +479,10 @@ export const metaSchema = ({ image }: { image: Function }) =>
     // Separate from featuredImage, which is the card/OG image.
     bannerImage: imageInputSchema({ image }).optional(),
     // Renders a quote form beside the hero copy on the collection index, the
-    // way the legacy service pages opened. One of: roofing | solar | quote.
-    heroForm: z.enum(["roofing", "solar", "quote"]).optional(),
+    // way the legacy service pages opened. The id of a `ghl-forms` entry —
+    // not an enum, so adding a form is a JSON edit rather than a schema change.
+    // <GhlForm> throws at build time if the id doesn't resolve.
+    heroForm: z.string().optional(),
     seo: seoSchema({ image }),
     addToMenu: z.array(AddToMenuFields).optional(),
     redirectFrom: redirectFromSchema,

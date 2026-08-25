@@ -2,6 +2,13 @@
 /**
  * Hybrid Select Component
  * Pure TSX component - uses HTML5 validation
+ *
+ * The lone survivor of the Formspree form system. Every other file under
+ * `components/Form/inputs|step|messages` went with it when forms moved to Go
+ * High Level embeds — but the (commented-out) accessibility panel imports THIS
+ * one, at `integrations/preferences/shared/ui/SelectControl.tsx`. Deleting it
+ * would break restoring that panel, which AGENTS.md keeps as an uncomment-only
+ * operation. Not used by any form; do not wire it into one.
  */
 
 import type { SelectHTMLAttributes } from "react";

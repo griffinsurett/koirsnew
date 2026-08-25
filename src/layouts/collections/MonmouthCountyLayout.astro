@@ -34,9 +34,7 @@ import SpanishSection from "@/components/SpanishSection.astro";
 import MediaBand from "@/components/MediaBand.astro";
 import Banner from "@/components/Banner.astro";
 import VideoSection from "@/layouts/VideoSection.astro";
-import RoofingForm from "@/components/Form/forms/RoofingForm.astro";
-import SolarForm from "@/components/Form/forms/SolarForm.astro";
-import QuoteForm from "@/components/Form/forms/QuoteForm.astro";
+import GhlForm from "@/components/Form/GhlForm.astro";
 import { query, sortByOrder, normalizeReference } from "@/utils/query";
 import { related } from "@/utils/query/snippets";
 import { siteData } from "@/content/siteData";
@@ -69,18 +67,14 @@ const faqCount = faqQuery ? (await faqQuery.all()).length : 0;
  *
  *  Driven by `serviceLines`, the field that already says which line a page
  *  belongs to, rather than a second per-entry form field that could drift out
- *  of sync with it: a roofing topic gets RoofingForm, a solar topic SolarForm. */
-const HERO_FORMS: Record<string, any> = {
-  roofing: RoofingForm,
-  solar: SolarForm,
-  quote: QuoteForm,
-};
+ *  of sync with it: a roofing topic gets the roofing form, a solar topic the
+ *  solar one. The line-of-business ids match the `ghl-forms` entry ids, so
+ *  `serviceLine` doubles as the form id — no lookup table to keep in sync. */
 /** "roofing" | "solar" — this page's line of business, from `serviceLines`.
  *  Typed as a CollectionKey so it can be passed straight to query(). */
 const serviceLine = (normalizeReference(data.serviceLines)[0]?.id ?? "roofing") as
   | "roofing"
   | "solar";
-const HeroForm = HERO_FORMS[serviceLine] ?? QuoteForm;
 
 /** `sections[].kind` -> the variant that renders it. Ported from the 2025
  *  landing pages: the zig-zag image rows, the bordered icon grid, and the
@@ -130,7 +124,7 @@ const pageSections = (data.sections ?? []).filter((s: any) => s.kind !== "closin
         tone="dark"
         class="justify-center lg:justify-start"
       />
-      <HeroForm slot="aside" />
+      <GhlForm slot="aside" form={serviceLine} loading="eager" />
     </ServiceHero>
 
     {/* ── Page-specific bands, ported from the 2025 landing pages ──────────

@@ -8,7 +8,7 @@
  * Ported from the 2025 `src/pages/careers.astro`, section for section:
  *   hero → Now Hiring intro → Why Work at KOI? (copy + photo) → Open Positions
  *   → team photo → Benefits & Perks (accordion) → "we build leaders" band
- *   → What We Look For → Ready to Apply? (HiringForm)
+ *   → What We Look For → Ready to Apply? (GHL job application form)
  *
  * This replaces a Phase-3.5 stub that rendered bare <h1>/<h2> tags with the
  * copy duplicated three times and no styling.
@@ -22,7 +22,7 @@ import SecondaryHero from "@/layouts/SecondaryHero.astro";
 import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
 import MediaBand from "@/components/MediaBand.astro";
 import SectionHeading from "@/components/SectionHeading.astro";
-import HiringForm from "@/components/Form/forms/HiringForm.astro";
+import GhlForm from "@/components/Form/GhlForm.astro";
 import { Image } from "astro:assets";
 import { siteData } from "@/content/siteData";
 import TeamOnSite from "@/assets/koi/koi_team1.jpg";
@@ -246,7 +246,7 @@ const qualifications = [
           class="pb-[var(--spacing-lg)]"
         />
         <div class="w-full flex justify-center">
-          <HiringForm />
+          <GhlForm form="hiring" />
         </div>
       </div>
     </section>

@@ -1,0 +1,46 @@
+[
+  {
+    "id": "contact",
+    "title": "Website - Contact Us",
+    "formId": "xlT8z74eNKBpYmK5OOze",
+    "height": 879,
+    "description": "Main contact form — /contact-us and the ContactVariant band."
+  },
+  {
+    "id": "quote",
+    "title": "Website - Blog Quote",
+    "formId": "KmT4ktxaweO5J97OP6h1",
+    "height": 647,
+    "description": "Short quote form — the blog sidebar aside and the default hero form."
+  },
+  {
+    "id": "roofing",
+    "title": "Website - Roofing Form",
+    "formId": "AWS5BpuQ2kGrs4Rj7gAh",
+    "height": 1833,
+    "radius": 8,
+    "description": "Roofing quote — the /roofing hero and the roofing Monmouth County pages."
+  },
+  {
+    "id": "solar",
+    "title": "Website - Roofing Form",
+    "formId": "AWS5BpuQ2kGrs4Rj7gAh",
+    "height": 1833,
+    "radius": 8,
+    "description": "Solar quote — the /solar hero and the solar Monmouth County page. NOTE: currently points at the ROOFING form id, as supplied. Swap formId here when the real solar form exists."
+  },
+  {
+    "id": "hiring",
+    "title": "Website - Job Application",
+    "formId": "AYaqfwWRJ9KcHhCsYr7d",
+    "height": 1431,
+    "description": "Job application — /careers. Handles its own resume upload."
+  },
+  {
+    "id": "internship",
+    "title": "Website - Internship Application",
+    "formId": "gElZK10jacnLdtw9KWnc",
+    "height": 1352,
+    "description": "Internship application — /internship-program. Handles its own resume upload."
+  }
+]

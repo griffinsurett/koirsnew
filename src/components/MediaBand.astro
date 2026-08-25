@@ -9,10 +9,18 @@
  * no collection items — they're copy + CTA — so this is a plain component
  * rather than a ContentRenderer variant, same as SpanishSection.
  *
- * Scroll animation: OFF for now (user request). A full-bleed band is awkward to
- * reveal with the trigger-based observer — it briefly exposed the page behind
- * it. The `animate` prop is kept so it can be switched back on, but nothing
- * passes it today.
+ * Scroll animation: ON by default — the WHOLE band (background photo/video,
+ * overlay and copy) fades up as one unit.
+ *
+ * The catch this solves: `<body>` is navy and the neighbouring bands paint
+ * their own light backgrounds over it, so lifting a full-bleed band 40px off
+ * its own footprint used to expose a navy strip through the gap. The fix is the
+ * outer wrapper below — it keeps the band's footprint in the layout and paints
+ * the same light ground as the neighbouring sections, so the moving band always
+ * travels over the correct colour instead of over raw <body>. `overflow-clip`
+ * hides the band's 40px overshoot rather than letting it push page height.
+ *
+ * `animate={false}` opts a band out (and then renders no wrapper at all).
  */
 import type { SectionButton } from "@/components/ContentRenderer/ContentRenderer.types";
 import BackgroundMedia from "@/components/BackgroundMedia.astro";
@@ -37,8 +45,12 @@ interface Props {
   video?: string;
   /** Tint over the media so the copy stays legible. */
   overlayClass?: string;
-  /** Fade the whole band (background media included) up on scroll. */
+  /** Fade the whole band — background media included — up on scroll. */
   animate?: boolean;
+  /** Ground colour painted behind the band while it travels. Must match the
+   *  neighbouring sections (they paint light over the navy body), or the gap
+   *  the lift opens up reads as the wrong colour. */
+  groundClass?: string;
 }
 
 const {
@@ -52,7 +64,8 @@ const {
   video,
   imageClass = "",
   overlayClass = "bg-primary opacity-80",
-  animate = false,
+  animate = true,
+  groundClass = "bg-bg",
   id,
 } = Astro.props as Props;
 
@@ -67,6 +80,10 @@ const backgroundMedia = (image || video)
 
 ---
 
+{/* Ground wrapper — see the docblock. Holds the band's footprint and paints
+    the neighbouring sections' colour so the lift never exposes the navy body.
+    Only rendered when animating; a static band needs no wrapper. */}
+<div class={animate ? `${groundClass} overflow-clip` : "contents"}>
 <section
   id={id}
   data-animate={animate ? "fade-in-up" : undefined}
@@ -94,3 +111,4 @@ const backgroundMedia = (image || video)
     <SectionButtons buttons={buttons} class={`my-[var(--spacing-lg)] mt-[var(--spacing-md)] ${buttonsClassName}`} />
   </div>
 </section>
+</div>

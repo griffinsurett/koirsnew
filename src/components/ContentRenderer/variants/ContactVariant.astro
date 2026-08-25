@@ -15,12 +15,12 @@ import ContactCard from "@/components/LoopComponents/ContactCard.astro";
 import Button from "@/components/Button/Button";
 import { query } from "@/utils/query";
 import { shouldShowCollectionCTA } from "../utils/helpers";
-import ContactForm from "@/components/Form/forms/ContactForm.astro";
+import GhlForm from "@/components/Form/GhlForm.astro";
 
 interface Props extends BaseVariantProps {
   /** Render the inquiry form beside the cards. /contact-us sets this false —
    *  that page composes its own form column, so the variant would otherwise
-   *  put a second ContactForm on the page. */
+   *  put a second contact form on the page. */
   showFormColumn?: boolean;
 }
 
@@ -39,7 +39,7 @@ const viewAllText = `Contact Us`;
 ---
 
 {/* Full-width light band. The light background is load-bearing, not
-    decorative: ContactForm has no background of its own, so on the navy page
+    decorative: the embedded form has no background of its own, so on the navy page
     background its labels would render dark-on-dark. */}
 <section
   id={id}
@@ -116,7 +116,7 @@ const viewAllText = `Contact Us`;
 
       {showFormColumn && (
         <div class="w-full lg:flex-1 lg:min-w-0">
-          <ContactForm />
+          <GhlForm form="contact" />
         </div>
       )}
     </div>
