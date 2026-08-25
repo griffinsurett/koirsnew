@@ -53,10 +53,25 @@ let responsiveImages = null;
 
 if (backgroundMedia?.image?.src) {
   const rawSrc = backgroundMedia.image.src;
+  // An imported asset (ImageMetadata) ALSO has a string `.src`, so testing for
+  // that alone classified every unoptimized import as "already processed" and
+  // sent it down the pass-through branch below — shipping the raw source. That
+  // is how koi_team1.jpg went out at 625 KB on 2,344 pages.
+  //
+  // The real distinction: unprocessed ImageMetadata carries width/height/format
+  // from the build, while a getImage() result carries `options`/`attributes`.
+  const isImageMetadata =
+    typeof rawSrc === 'object' &&
+    rawSrc !== null &&
+    typeof rawSrc.src === 'string' &&
+    typeof rawSrc.width === 'number' &&
+    typeof rawSrc.height === 'number';
+
   const isProcessedImage =
     typeof rawSrc === 'object' &&
     rawSrc !== null &&
-    typeof rawSrc.src === 'string';
+    typeof rawSrc.src === 'string' &&
+    !isImageMetadata;
 
   if (!isProcessedImage && typeof rawSrc !== 'string') {
     try {
