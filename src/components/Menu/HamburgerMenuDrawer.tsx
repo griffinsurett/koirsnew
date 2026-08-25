@@ -27,6 +27,18 @@ interface MobileMenuDrawerProps {
   children?: ReactNode;
   /** Astro named slot — the social icon row pinned to the drawer's bottom. */
   footer?: ReactNode;
+  /**
+   * Optimized asset URLs, rendered by getImage() on the SERVER and passed in.
+   *
+   * getImage() cannot run here — this is a client island, and calling it in a
+   * module this file imports breaks hydration outright ("`getImage()` should
+   * only be used on the server"). So the Astro parent does the work and hands
+   * down finished URLs. Falling back to the raw imports keeps the component
+   * standalone, but that path ships the 4,768 KB source JPEG and the 512 KB
+   * logo PNG — the parent should always pass these.
+   */
+  bgUrl?: string;
+  logoUrl?: string;
 }
 
 export default function MobileMenuDrawer({
@@ -36,6 +48,8 @@ export default function MobileMenuDrawer({
   closeButton = false,
   children,
   footer,
+  bgUrl,
+  logoUrl,
 }: MobileMenuDrawerProps) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -43,8 +57,8 @@ export default function MobileMenuDrawer({
     setIsOpen(false);
   };
 
-  const bgSrc = (drawerBg as any).src ?? drawerBg;
-  const logoSrc = (logo as any).src ?? logo;
+  const bgSrc = bgUrl ?? (drawerBg as any).src ?? drawerBg;
+  const logoSrc = logoUrl ?? (logo as any).src ?? logo;
 
   return (
     <>

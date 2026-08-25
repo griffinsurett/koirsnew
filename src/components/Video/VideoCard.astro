@@ -42,7 +42,12 @@ const {
 
 let poster: string | undefined;
 try {
-  poster = (await generateVideoPoster(video, { timecodeSeconds: posterTime })).src;
+  // 1080px, not the 1600px default: a card is capped at max-w-[380px] and
+  // renders ~525px at its widest, so 1080 still covers 2x retina while the
+  // default shipped a 1600x2844 poster (320 KB for Sherell alone) into a
+  // 380px box. The full-bleed hero keeps the 1600 default — see
+  // BackgroundMedia, which genuinely spans the viewport.
+  poster = (await generateVideoPoster(video, { timecodeSeconds: posterTime, width: 1080 })).src;
 } catch (err) {
   console.warn(`[VideoCard] Failed to generate poster for ${video}:`, err);
 }

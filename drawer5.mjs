@@ -1,0 +1,15 @@
+import { chromium } from '/Users/griffinsurett/coding/2025-Website-Projects/2026/griffinswebservices/node_modules/playwright-core/index.mjs';
+const b = await chromium.launch({ executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', headless:true });
+const p = await b.newPage({ viewport:{width:390,height:844}, isMobile:true, hasTouch:true });
+const errs=[];
+p.on('console', m=>{ if(m.type()==='error') errs.push(m.text().slice(0,300)); });
+p.on('pageerror', e=>errs.push('PAGEERROR: '+e.message.slice(0,300)));
+p.on('requestfailed', r=>{ if(/_astro/.test(r.url())) errs.push('REQFAIL: '+r.url().split('/').pop()+' '+r.failure()?.errorText); });
+await p.goto('http://localhost:4321/', { waitUntil:'domcontentloaded', timeout:60000 });
+await p.waitForTimeout(4000);
+await p.locator('label[for="mobile-menu-toggle"]').click({force:true}).catch(()=>{});
+await p.waitForTimeout(4000);
+console.log('HYDRATED?', await p.evaluate(()=>{const i=document.querySelector('astro-island[component-url*="HamburgerMenuDrawer"]');return i?{ssr:i.hasAttribute('ssr'),childCount:i.children.length,html:i.innerHTML.slice(0,120)}:'no island';}));
+console.log('CHECKBOX:', await p.evaluate(()=>{const c=document.querySelector('#mobile-menu-toggle');return c?{checked:c.checked}:'none';}));
+console.log('ERRORS:', errs.length?errs.join('\n'):'(none)');
+await b.close();

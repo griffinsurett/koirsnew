@@ -50,9 +50,16 @@ export interface PosterResult {
  */
 export async function generateVideoPoster(
   videoSrc: string,
-  options: { timecodeSeconds?: number; width?: number } = {}
+  options: { timecodeSeconds?: number; width?: number; quality?: number } = {}
 ): Promise<PosterResult> {
-  const { timecodeSeconds = 0, width = 1600 } = options;
+  // `width` defaults to 1600 for full-bleed backgrounds; card callers pass a
+  // smaller one (VideoCard uses 1080 for its max-w-[380px] box).
+  //
+  // quality 70, down from 80: a poster is a still frame shown behind a play
+  // button for the moment before playback starts, and at 1:1 the two are
+  // indistinguishable — verified on the busiest frame (Sherell: faces, hair
+  // detail, embroidered logo, door numerals) — for ~27% fewer bytes.
+  const { timecodeSeconds = 0, width = 1600, quality = 70 } = options;
 
   const videoPath = resolveVideoPath(videoSrc);
   if (!fs.existsSync(videoPath)) {
@@ -90,7 +97,7 @@ export async function generateVideoPoster(
   if (!fs.existsSync(posterFile)) {
     await sharp(rawFrame)
       .resize(width, posterHeight, { fit: "cover" })
-      .webp({ quality: 80 })
+      .webp({ quality })
       .toFile(posterFile);
   }
 

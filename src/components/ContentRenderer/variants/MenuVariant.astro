@@ -14,6 +14,9 @@ import ContentRenderer from '@/components/ContentRenderer/ContentRenderer.astro'
 import { query as buildQuery } from '@/utils/query';
 import { buildMenuTree } from '@/utils/menuQueries';
 import { isTopLevelPlacement } from '@/utils/navigation/topLevelCheck';
+import { getImage } from 'astro:assets';
+import drawerBgSrc from '@/assets/koi/roofingandsolarvid-poster.jpg';
+import drawerLogoSrc from '@/assets/koi/logowwords.png';
 
 type MenuMode = 'responsive' | 'flat-only' | 'hamburger-only';
 
@@ -39,6 +42,21 @@ const {
 
 // Build hierarchical tree from flat items
 const menuTree = buildMenuTree(items);
+
+// Drawer artwork, optimized HERE because getImage() only runs on the server —
+// calling it inside the React island (or any module the island imports) throws
+// "`getImage()` should only be used on the server" and kills hydration, so the
+// whole menu stops opening. Rendering the URLs here and passing them down is
+// the pattern that error message prescribes.
+//
+// The background sits under a 90%-opacity navy tint, so it reads as texture
+// rather than a photograph: 1280px at q55 is indistinguishable through that
+// overlay, against a 4,768 KB source. The logo draws at h-32 (128px), so 256px
+// covers retina against a 1024x1024 512 KB PNG.
+const [drawerBgImage, drawerLogoImage] = await Promise.all([
+  getImage({ src: drawerBgSrc, format: 'webp', quality: 55, width: 1280 }),
+  getImage({ src: drawerLogoSrc, format: 'webp', quality: 80, width: 256, height: 256 }),
+]);
 
 // Determine which versions to show based on mode
 const showDesktop = mode === 'responsive' || mode === 'flat-only';
@@ -84,6 +102,8 @@ const mobileHydrationStrategy =
           items={menuTree}
           closeButton={closeButton}
           hamburgerTransform={hamburgerTransform}
+          bgUrl={drawerBgImage.src}
+          logoUrl={drawerLogoImage.src}
           client:load
         >
           <ContentRenderer
@@ -103,6 +123,8 @@ const mobileHydrationStrategy =
           items={menuTree}
           closeButton={closeButton}
           hamburgerTransform={hamburgerTransform}
+          bgUrl={drawerBgImage.src}
+          logoUrl={drawerLogoImage.src}
           client:visible
         >
           <ContentRenderer
@@ -122,6 +144,8 @@ const mobileHydrationStrategy =
           items={menuTree}
           closeButton={closeButton}
           hamburgerTransform={hamburgerTransform}
+          bgUrl={drawerBgImage.src}
+          logoUrl={drawerLogoImage.src}
           client:media="(max-width: 768px)"
         >
           <ContentRenderer

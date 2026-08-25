@@ -15,6 +15,7 @@ import type { BaseVariantProps } from "../ContentRenderer.types";
 import SectionHeading from "@/components/SectionHeading.astro";
 import SectionButtons from "../SectionButtons.astro";
 import Icon from "@/components/Icon";
+import { Image } from "astro:assets";
 
 interface Props extends BaseVariantProps {
   columns?: 1 | 2 | 3;
@@ -103,9 +104,26 @@ const isSingleColumn = layout === "stacked" || columns === 1;
               layout === "stacked" ? "md:flex-row-reverse md:text-right" : "",
             ]}
           >
+            {/* Image icons go through <Image>, not <Icon> — the same split
+                GridCard makes. renderIcon() emits a plain <img src> at the raw
+                source resolution (insurance.png alone is 776 KB at 1024²) for
+                an 80px box. <Image> emits an optimized, correctly-sized WebP. */}
             {item.icon && (
               <span class="shrink-0 text-accent [&_img]:w-[80px] [&_img]:h-auto [&_svg]:w-[80px] [&_svg]:h-auto">
-                <Icon icon={item.icon} size="3xl" className="text-accent" />
+                {typeof item.icon === "object" && "src" in item.icon ? (
+                  <Image
+                    src={item.icon}
+                    alt=""
+                    width={80}
+                    height={80}
+                    densities={[1, 2]}
+                    class="w-[80px] h-auto object-contain"
+                    loading="lazy"
+                    aria-hidden="true"
+                  />
+                ) : (
+                  <Icon icon={item.icon} size="3xl" className="text-accent" />
+                )}
               </span>
             )}
             <div>

@@ -1,0 +1,20 @@
+import { chromium } from '/Users/griffinsurett/coding/2025-Website-Projects/2026/griffinswebservices/node_modules/playwright-core/index.mjs';
+const b = await chromium.launch({ executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', headless:true,
+  args:['--host-resolver-rules=MAP api.leadconnectorhq.com 104.18.34.38'] });
+const p = await b.newPage({ viewport:{width:1280,height:900} });
+const csp=[], resp=[];
+p.on('console', m=>{ const t=m.text(); if(/Content Security Policy|violates|Refused to/i.test(t)) csp.push(t.slice(0,240)); });
+p.on('response', r=>{ if(/leadconnector|msgsndr|clarity|cloudflare|googleapis/.test(r.url())) resp.push(`${r.status()} ${r.url().slice(0,95)}`); });
+await p.goto('http://localhost:4322/roofing/', { waitUntil:'domcontentloaded', timeout:60000 });
+await p.waitForTimeout(4000);
+const cnt = await p.evaluate(()=>document.querySelectorAll('iframe').length);
+console.log('iframes on page:', cnt);
+const f=p.locator('iframe[src*="leadconnector"]').first();
+await f.scrollIntoViewIfNeeded().catch(()=>{});
+await p.waitForTimeout(11000);
+console.log('IFRAME BOX:', await p.evaluate(()=>{const x=document.querySelector('iframe[src*="leadconnector"]');if(!x)return'none';const r=x.getBoundingClientRect();return `${Math.round(r.width)}x${Math.round(r.height)}`;}));
+console.log('FIELDS INSIDE:', await p.evaluate(async()=>{const x=document.querySelector('iframe[src*="leadconnector"]');try{return x.contentDocument?x.contentDocument.querySelectorAll('input').length:'cross-origin(ok)';}catch{return 'cross-origin(ok)';}}));
+console.log('CSP VIOLATIONS:', csp.length?[...new Set(csp)].join('\n'):'(none)');
+console.log('KEY RESPONSES:'); console.log([...new Set(resp)].slice(0,14).join('\n')||'(none)');
+await p.screenshot({ path:'csp-form.png', fullPage:false });
+await b.close();
